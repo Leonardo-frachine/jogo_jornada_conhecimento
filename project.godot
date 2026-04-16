@@ -10,17 +10,14 @@ config_version=5
 
 [application]
 
-config/name="jornada do conhecimento"
-run/main_scene="uid://quqe7b4ktvgh"
-config/features=PackedStringArray("4.6", "Mobile")
+config/name="Jornada do Conhecimento"
+run/main_scene="uid://coka583o41kjk"
+config/features=PackedStringArray("4.6", "Forward Plus")
 config/icon="res://icon.svg"
 
-[display]
+[editor]
 
-window/size/viewport_width=1380
-window/size/viewport_height=752
-window/size/mode=2
-window/stretch/mode="canvas_items"
+version_control/autoload_on_startup=true
 
 [physics]
 
@@ -28,6 +25,4 @@ window/stretch/mode="canvas_items"
 
 [rendering]
 
-textures/canvas_textures/default_texture_filter=0
 rendering_device/driver.windows="d3d12"
-renderer/rendering_method="mobile"
