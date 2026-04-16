@@ -10,14 +10,10 @@ config_version=5
 
 [application]
 
-config/name="Jornada do Conhecimento"
-run/main_scene="uid://coka583o41kjk"
-config/features=PackedStringArray("4.6", "Forward Plus")
+config/name="Jornada do conhecimento"
+run/main_scene="uid://2d1p6sk4f2lp"
+config/features=PackedStringArray("4.6", "GL Compatibility")
 config/icon="res://icon.svg"
-
-[editor]
-
-version_control/autoload_on_startup=true
 
 [physics]
 
@@ -26,3 +22,5 @@ version_control/autoload_on_startup=true
 [rendering]
 
 rendering_device/driver.windows="d3d12"
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
