@@ -1,9 +1,9 @@
-[gd_scene format=3 uid="uid://2d1p6sk4f2lp"]
+[gd_scene format=3 uid="uid://2uol8j735lpf"]
 
-[ext_resource type="Texture2D" uid="uid://3ljo201dpbbx" path="res://fundo_embacado.png" id="1_8bm7t"]
-[ext_resource type="Script" uid="uid://y7et67s3t0hk" path="res://tela_inicial.gd" id="1_w63eu"]
-[ext_resource type="Texture2D" uid="uid://bv2xmb27g64al" path="res://logo_jogo.png" id="2_w63eu"]
-[ext_resource type="Texture2D" uid="uid://ctyknso0bfdn6" path="res://personagem_logo.png" id="3_cswq0"]
+[ext_resource type="Texture2D" path="res://fundo_embacado.png" id="1_8bm7t"]
+[ext_resource type="Script" path="res://tela_inicial.gd" id="1_w63eu"]
+[ext_resource type="Texture2D" path="res://logo_jogo.png" id="2_w63eu"]
+[ext_resource type="Texture2D" path="res://personagem_logo.png" id="3_cswq0"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ek0m7"]
 bg_color = Color(1, 0.64705884, 0, 1)
