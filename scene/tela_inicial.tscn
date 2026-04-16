@@ -1,9 +1,8 @@
 [gd_scene format=3 uid="uid://2uol8j735lpf"]
 
-[ext_resource type="Texture2D" path="res://fundo_embacado.png" id="1_8bm7t"]
-[ext_resource type="Script" path="res://tela_inicial.gd" id="1_w63eu"]
-[ext_resource type="Texture2D" path="res://logo_jogo.png" id="2_w63eu"]
-[ext_resource type="Texture2D" path="res://personagem_logo.png" id="3_cswq0"]
+[ext_resource type="Texture2D" uid="uid://3ljo201dpbbx" path="res://imagens/fundo_tabuleiro/fundo_embacado.png" id="1_ixqfg"]
+[ext_resource type="Texture2D" uid="uid://bv2xmb27g64al" path="res://imagens/logo_jogo/logo_jogo.png" id="2_eym2y"]
+[ext_resource type="Texture2D" uid="uid://ctyknso0bfdn6" path="res://imagens/personagem/personagem_logo.png" id="3_djjjm"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ek0m7"]
 bg_color = Color(1, 0.64705884, 0, 1)
@@ -39,21 +38,20 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_w63eu")
 
 [node name="Background" type="TextureRect" parent="." unique_id=913652169]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -192.0
-offset_top = -188.0
-offset_right = 192.0
-offset_bottom = 188.0
+offset_left = -247.0
+offset_top = -180.0
+offset_right = 137.0
+offset_bottom = 196.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-texture = ExtResource("1_8bm7t")
+texture = ExtResource("1_ixqfg")
 stretch_mode = 6
 
 [node name="PainelCentral" type="Panel" parent="." unique_id=1104645252]
@@ -122,7 +120,7 @@ offset_top = -381.0
 offset_right = 795.0
 offset_bottom = 619.0
 mouse_filter = 2
-texture = ExtResource("2_w63eu")
+texture = ExtResource("2_eym2y")
 expand_mode = 1
 stretch_mode = 5
 
@@ -134,7 +132,7 @@ offset_top = 166.0
 offset_right = 701.03
 offset_bottom = 496.0
 mouse_filter = 2
-texture = ExtResource("3_cswq0")
+texture = ExtResource("3_djjjm")
 expand_mode = 1
 stretch_mode = 5
 flip_h = true
