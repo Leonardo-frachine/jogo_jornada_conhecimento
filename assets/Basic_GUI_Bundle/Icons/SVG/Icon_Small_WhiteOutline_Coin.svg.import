@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://mxg0f005ttdx"
-path="res://.godot/imported/Icon_Small_WhiteOutline_Coin.svg-506577edd5dc2ab2071cc92fa480e85f.ctex"
+path="res://.godot/imported/Icon_Small_WhiteOutline_Coin.svg-279e96ac42943b96c85f1bf56944cfd8.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Basic_GUI_Bundle/Icons/SVG/Icon_Small_WhiteOutline_Coin.svg"
-dest_files=["res://.godot/imported/Icon_Small_WhiteOutline_Coin.svg-506577edd5dc2ab2071cc92fa480e85f.ctex"]
+source_file="res://assets/Basic_GUI_Bundle/Icons/SVG/Icon_Small_WhiteOutline_Coin.svg"
+dest_files=["res://.godot/imported/Icon_Small_WhiteOutline_Coin.svg-279e96ac42943b96c85f1bf56944cfd8.ctex"]
 
 [params]
 

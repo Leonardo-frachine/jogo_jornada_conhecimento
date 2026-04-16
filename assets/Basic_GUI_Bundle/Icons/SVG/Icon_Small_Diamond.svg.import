@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://tk1fw1vmctr0"
-path="res://.godot/imported/Icon_Small_Diamond.svg-7e1185345934d5206be11fbb229452c3.ctex"
+path="res://.godot/imported/Icon_Small_Diamond.svg-8e95f91175fdf3786f1aee7cc180b1d4.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Basic_GUI_Bundle/Icons/SVG/Icon_Small_Diamond.svg"
-dest_files=["res://.godot/imported/Icon_Small_Diamond.svg-7e1185345934d5206be11fbb229452c3.ctex"]
+source_file="res://assets/Basic_GUI_Bundle/Icons/SVG/Icon_Small_Diamond.svg"
+dest_files=["res://.godot/imported/Icon_Small_Diamond.svg-8e95f91175fdf3786f1aee7cc180b1d4.ctex"]
 
 [params]
 

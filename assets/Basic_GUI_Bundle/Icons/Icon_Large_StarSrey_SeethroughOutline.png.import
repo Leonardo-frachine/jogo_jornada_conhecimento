@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bbeprwnjd1ity"
-path="res://.godot/imported/Icon_Large_StarSrey_SeethroughOutline.png-9ec35cfd9b0dec106e77fb253c230774.ctex"
+path="res://.godot/imported/Icon_Large_StarSrey_SeethroughOutline.png-e665c956c92d88967c7a440e5ef0ea0d.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Basic_GUI_Bundle/Icons/Icon_Large_StarSrey_SeethroughOutline.png"
-dest_files=["res://.godot/imported/Icon_Large_StarSrey_SeethroughOutline.png-9ec35cfd9b0dec106e77fb253c230774.ctex"]
+source_file="res://assets/Basic_GUI_Bundle/Icons/Icon_Large_StarSrey_SeethroughOutline.png"
+dest_files=["res://.godot/imported/Icon_Large_StarSrey_SeethroughOutline.png-e665c956c92d88967c7a440e5ef0ea0d.ctex"]
 
 [params]
 

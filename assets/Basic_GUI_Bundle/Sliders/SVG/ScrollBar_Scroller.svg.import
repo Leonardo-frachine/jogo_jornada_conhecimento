@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dudb78j53dfgd"
-path="res://.godot/imported/ScrollBar_Scroller.svg-02d5c3be14011dbc0185a3b271106a51.ctex"
+path="res://.godot/imported/ScrollBar_Scroller.svg-854467dd4043f8f95adf9ceb549d4bd5.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Basic_GUI_Bundle/Sliders/SVG/ScrollBar_Scroller.svg"
-dest_files=["res://.godot/imported/ScrollBar_Scroller.svg-02d5c3be14011dbc0185a3b271106a51.ctex"]
+source_file="res://assets/Basic_GUI_Bundle/Sliders/SVG/ScrollBar_Scroller.svg"
+dest_files=["res://.godot/imported/ScrollBar_Scroller.svg-854467dd4043f8f95adf9ceb549d4bd5.ctex"]
 
 [params]
 

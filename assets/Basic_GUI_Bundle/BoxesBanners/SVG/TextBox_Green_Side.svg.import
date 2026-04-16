@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c6cnlvq0nfbj5"
-path="res://.godot/imported/TextBox_Green_Side.svg-5c11aa4ceb1421eb37c29ad83bd60ba6.ctex"
+path="res://.godot/imported/TextBox_Green_Side.svg-5c926d7c1a63dc400169d5c8ae8ce51b.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Basic_GUI_Bundle/BoxesBanners/SVG/TextBox_Green_Side.svg"
-dest_files=["res://.godot/imported/TextBox_Green_Side.svg-5c11aa4ceb1421eb37c29ad83bd60ba6.ctex"]
+source_file="res://assets/Basic_GUI_Bundle/BoxesBanners/SVG/TextBox_Green_Side.svg"
+dest_files=["res://.godot/imported/TextBox_Green_Side.svg-5c926d7c1a63dc400169d5c8ae8ce51b.ctex"]
 
 [params]
 

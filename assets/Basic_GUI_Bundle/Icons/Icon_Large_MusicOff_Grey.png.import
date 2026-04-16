@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dd5kl2cff7ili"
-path="res://.godot/imported/Icon_Large_MusicOff_Grey.png-c9d36c642f674628ed9140da5b841886.ctex"
+path="res://.godot/imported/Icon_Large_MusicOff_Grey.png-35c949e1b3dae6e3c4086c159a649ca7.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Basic_GUI_Bundle/Icons/Icon_Large_MusicOff_Grey.png"
-dest_files=["res://.godot/imported/Icon_Large_MusicOff_Grey.png-c9d36c642f674628ed9140da5b841886.ctex"]
+source_file="res://assets/Basic_GUI_Bundle/Icons/Icon_Large_MusicOff_Grey.png"
+dest_files=["res://.godot/imported/Icon_Large_MusicOff_Grey.png-35c949e1b3dae6e3c4086c159a649ca7.ctex"]
 
 [params]
 

@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://da2wsid5na18p"
-path="res://.godot/imported/IconButton_Small_Green_Square.png-8b373e134a87ccbdffcdde76f48b8dbd.ctex"
+path="res://.godot/imported/IconButton_Small_Green_Square.png-9ac98b92ff8fbb193202b2ab364dd72c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Basic_GUI_Bundle/ButtonsIcons/IconButton_Small_Green_Square.png"
-dest_files=["res://.godot/imported/IconButton_Small_Green_Square.png-8b373e134a87ccbdffcdde76f48b8dbd.ctex"]
+source_file="res://assets/Basic_GUI_Bundle/ButtonsIcons/IconButton_Small_Green_Square.png"
+dest_files=["res://.godot/imported/IconButton_Small_Green_Square.png-9ac98b92ff8fbb193202b2ab364dd72c.ctex"]
 
 [params]
 

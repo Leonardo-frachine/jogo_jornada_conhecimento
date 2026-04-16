@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://d077gpcnvh5da"
-path="res://.godot/imported/Icon_Small_WhiteOutline_Arrow.svg-e03941c1d9bb30f2e23f150906ad2910.ctex"
+path="res://.godot/imported/Icon_Small_WhiteOutline_Arrow.svg-cd492650221b51f04cb82a106850003d.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Basic_GUI_Bundle/Icons/SVG/Icon_Small_WhiteOutline_Arrow.svg"
-dest_files=["res://.godot/imported/Icon_Small_WhiteOutline_Arrow.svg-e03941c1d9bb30f2e23f150906ad2910.ctex"]
+source_file="res://assets/Basic_GUI_Bundle/Icons/SVG/Icon_Small_WhiteOutline_Arrow.svg"
+dest_files=["res://.godot/imported/Icon_Small_WhiteOutline_Arrow.svg-cd492650221b51f04cb82a106850003d.ctex"]
 
 [params]
 

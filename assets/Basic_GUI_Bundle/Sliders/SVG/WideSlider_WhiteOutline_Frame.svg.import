@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c8pmuf6nuhyxl"
-path="res://.godot/imported/WideSlider_WhiteOutline_Frame.svg-804b81d303545bd5f0ee1c83c5c93015.ctex"
+path="res://.godot/imported/WideSlider_WhiteOutline_Frame.svg-6541da2ad4be499dd79a2a00fa3ad694.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Basic_GUI_Bundle/Sliders/SVG/WideSlider_WhiteOutline_Frame.svg"
-dest_files=["res://.godot/imported/WideSlider_WhiteOutline_Frame.svg-804b81d303545bd5f0ee1c83c5c93015.ctex"]
+source_file="res://assets/Basic_GUI_Bundle/Sliders/SVG/WideSlider_WhiteOutline_Frame.svg"
+dest_files=["res://.godot/imported/WideSlider_WhiteOutline_Frame.svg-6541da2ad4be499dd79a2a00fa3ad694.ctex"]
 
 [params]
 

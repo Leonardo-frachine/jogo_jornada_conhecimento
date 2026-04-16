@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://i1i11gonbtyv"
-path="res://.godot/imported/Banner_WhiteOutine.svg-92772d777d48d2f96fe408e18776e243.ctex"
+path="res://.godot/imported/Banner_WhiteOutine.svg-0b190a8b904cd1ffbfbf1fe7ee7937d3.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Basic_GUI_Bundle/BoxesBanners/SVG/Banner_WhiteOutine.svg"
-dest_files=["res://.godot/imported/Banner_WhiteOutine.svg-92772d777d48d2f96fe408e18776e243.ctex"]
+source_file="res://assets/Basic_GUI_Bundle/BoxesBanners/SVG/Banner_WhiteOutine.svg"
+dest_files=["res://.godot/imported/Banner_WhiteOutine.svg-0b190a8b904cd1ffbfbf1fe7ee7937d3.ctex"]
 
 [params]
 

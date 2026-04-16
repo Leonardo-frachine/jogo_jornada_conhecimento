@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b1dk10pm05hnx"
-path="res://.godot/imported/ScrollBar_Blue_Base.svg-474bd4fc2695e0e01a2085f620f57967.ctex"
+path="res://.godot/imported/ScrollBar_Blue_Base.svg-59f0aebf655f3dc4ef4a0f218a35f630.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Basic_GUI_Bundle/Sliders/SVG/ScrollBar_Blue_Base.svg"
-dest_files=["res://.godot/imported/ScrollBar_Blue_Base.svg-474bd4fc2695e0e01a2085f620f57967.ctex"]
+source_file="res://assets/Basic_GUI_Bundle/Sliders/SVG/ScrollBar_Blue_Base.svg"
+dest_files=["res://.godot/imported/ScrollBar_Blue_Base.svg-59f0aebf655f3dc4ef4a0f218a35f630.ctex"]
 
 [params]
 

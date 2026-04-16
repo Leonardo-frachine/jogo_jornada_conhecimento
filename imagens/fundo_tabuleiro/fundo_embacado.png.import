@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://3ljo201dpbbx"
-path="res://.godot/imported/fundo_embacado.png-fd45a9eb137cc68eae72a3c94724da43.ctex"
+path="res://.godot/imported/fundo_embacado.png-575fb00b1af0e40c54ed01c95fe70e5e.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://fundo_embacado.png"
-dest_files=["res://.godot/imported/fundo_embacado.png-fd45a9eb137cc68eae72a3c94724da43.ctex"]
+source_file="res://imagens/fundo_tabuleiro/fundo_embacado.png"
+dest_files=["res://.godot/imported/fundo_embacado.png-575fb00b1af0e40c54ed01c95fe70e5e.ctex"]
 
 [params]
 

@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bee75sbssu82u"
-path="res://.godot/imported/Icon_Large_HeartEmpty_SeethroughOutline.png-f183dda3a39b66c9f9f7bd20ce7ec57c.ctex"
+path="res://.godot/imported/Icon_Large_HeartEmpty_SeethroughOutline.png-46e3adad190c8911648faa1dea4cca72.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Basic_GUI_Bundle/Icons/Icon_Large_HeartEmpty_SeethroughOutline.png"
-dest_files=["res://.godot/imported/Icon_Large_HeartEmpty_SeethroughOutline.png-f183dda3a39b66c9f9f7bd20ce7ec57c.ctex"]
+source_file="res://assets/Basic_GUI_Bundle/Icons/Icon_Large_HeartEmpty_SeethroughOutline.png"
+dest_files=["res://.godot/imported/Icon_Large_HeartEmpty_SeethroughOutline.png-46e3adad190c8911648faa1dea4cca72.ctex"]
 
 [params]
 

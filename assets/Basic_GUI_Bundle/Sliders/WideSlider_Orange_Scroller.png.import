@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cd4ere17kmqak"
-path="res://.godot/imported/WideSlider_Orange_Scroller.png-776c0e42caaaf60b03e5c503b4115003.ctex"
+path="res://.godot/imported/WideSlider_Orange_Scroller.png-1dc9a37b4361d6ae6d0d5e3e75a236e4.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Basic_GUI_Bundle/Sliders/WideSlider_Orange_Scroller.png"
-dest_files=["res://.godot/imported/WideSlider_Orange_Scroller.png-776c0e42caaaf60b03e5c503b4115003.ctex"]
+source_file="res://assets/Basic_GUI_Bundle/Sliders/WideSlider_Orange_Scroller.png"
+dest_files=["res://.godot/imported/WideSlider_Orange_Scroller.png-1dc9a37b4361d6ae6d0d5e3e75a236e4.ctex"]
 
 [params]
 

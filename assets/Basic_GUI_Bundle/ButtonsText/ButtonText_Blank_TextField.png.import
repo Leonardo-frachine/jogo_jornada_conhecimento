@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dd5dislxmdryx"
-path="res://.godot/imported/ButtonText_Blank_TextField.png-d60a656e00af633402445eda93006470.ctex"
+path="res://.godot/imported/ButtonText_Blank_TextField.png-1e2fa99a61168d72268bc120982a83e5.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Basic_GUI_Bundle/ButtonsText/ButtonText_Blank_TextField.png"
-dest_files=["res://.godot/imported/ButtonText_Blank_TextField.png-d60a656e00af633402445eda93006470.ctex"]
+source_file="res://assets/Basic_GUI_Bundle/ButtonsText/ButtonText_Blank_TextField.png"
+dest_files=["res://.godot/imported/ButtonText_Blank_TextField.png-1e2fa99a61168d72268bc120982a83e5.ctex"]
 
 [params]
 

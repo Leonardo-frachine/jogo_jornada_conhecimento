@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://diq1xmjken840"
-path="res://.godot/imported/Icon_Small_Blank_Yen.png-a31c4ca1d7e8587924e44efcef0d0b59.ctex"
+path="res://.godot/imported/Icon_Small_Blank_Yen.png-1467a6980c3ac910d06e945c4cee6ef7.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Basic_GUI_Bundle/Icons/Icon_Small_Blank_Yen.png"
-dest_files=["res://.godot/imported/Icon_Small_Blank_Yen.png-a31c4ca1d7e8587924e44efcef0d0b59.ctex"]
+source_file="res://assets/Basic_GUI_Bundle/Icons/Icon_Small_Blank_Yen.png"
+dest_files=["res://.godot/imported/Icon_Small_Blank_Yen.png-1467a6980c3ac910d06e945c4cee6ef7.ctex"]
 
 [params]
 

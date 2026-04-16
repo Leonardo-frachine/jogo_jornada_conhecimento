@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://blbx5pebymuik"
-path="res://.godot/imported/PremadeButtons_Options.svg-4ca1b297e32fb9660dd5179bada4334f.ctex"
+path="res://.godot/imported/PremadeButtons_Options.svg-7886f8ba7f0b08d01850e3ca8932fc5f.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Basic_GUI_Bundle/ButtonsText/SVG/PremadeButtons_Options.svg"
-dest_files=["res://.godot/imported/PremadeButtons_Options.svg-4ca1b297e32fb9660dd5179bada4334f.ctex"]
+source_file="res://assets/Basic_GUI_Bundle/ButtonsText/SVG/PremadeButtons_Options.svg"
+dest_files=["res://.godot/imported/PremadeButtons_Options.svg-7886f8ba7f0b08d01850e3ca8932fc5f.ctex"]
 
 [params]
 

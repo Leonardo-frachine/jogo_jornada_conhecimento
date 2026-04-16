@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bwk2ajgnyaf8t"
-path="res://.godot/imported/Icon_Small_Blank_Help.svg-7ffda5f87ef7825f8630ba8857efd2ab.ctex"
+path="res://.godot/imported/Icon_Small_Blank_Help.svg-62dcb1e3a5dd01a79dc4c96c41c4e44f.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Basic_GUI_Bundle/Icons/SVG/Icon_Small_Blank_Help.svg"
-dest_files=["res://.godot/imported/Icon_Small_Blank_Help.svg-7ffda5f87ef7825f8630ba8857efd2ab.ctex"]
+source_file="res://assets/Basic_GUI_Bundle/Icons/SVG/Icon_Small_Blank_Help.svg"
+dest_files=["res://.godot/imported/Icon_Small_Blank_Help.svg-62dcb1e3a5dd01a79dc4c96c41c4e44f.ctex"]
 
 [params]
 

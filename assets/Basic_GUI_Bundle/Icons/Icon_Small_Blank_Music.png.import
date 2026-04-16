@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://crfse35bsdu6w"
-path="res://.godot/imported/Icon_Small_Blank_Music.png-91db2dfa6d715c366a1320b48541ec76.ctex"
+path="res://.godot/imported/Icon_Small_Blank_Music.png-8792741883a7664a0113c70e9549c34b.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Basic_GUI_Bundle/Icons/Icon_Small_Blank_Music.png"
-dest_files=["res://.godot/imported/Icon_Small_Blank_Music.png-91db2dfa6d715c366a1320b48541ec76.ctex"]
+source_file="res://assets/Basic_GUI_Bundle/Icons/Icon_Small_Blank_Music.png"
+dest_files=["res://.godot/imported/Icon_Small_Blank_Music.png-8792741883a7664a0113c70e9549c34b.ctex"]
 
 [params]
 

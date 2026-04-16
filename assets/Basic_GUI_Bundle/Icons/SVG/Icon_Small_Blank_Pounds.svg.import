@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b8e8gi5jbjv4"
-path="res://.godot/imported/Icon_Small_Blank_Pounds.svg-0237e4e0fdc978d1963f003910756195.ctex"
+path="res://.godot/imported/Icon_Small_Blank_Pounds.svg-097ab06a31981955525d662610ce644f.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Basic_GUI_Bundle/Icons/SVG/Icon_Small_Blank_Pounds.svg"
-dest_files=["res://.godot/imported/Icon_Small_Blank_Pounds.svg-0237e4e0fdc978d1963f003910756195.ctex"]
+source_file="res://assets/Basic_GUI_Bundle/Icons/SVG/Icon_Small_Blank_Pounds.svg"
+dest_files=["res://.godot/imported/Icon_Small_Blank_Pounds.svg-097ab06a31981955525d662610ce644f.ctex"]
 
 [params]
 

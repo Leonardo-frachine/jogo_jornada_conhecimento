@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://qqy6k2fnq64h"
-path="res://.godot/imported/Icon_Small_Blank_Shop.svg-a7bb98255618b9f75f14d26a2e9d612d.ctex"
+path="res://.godot/imported/Icon_Small_Blank_Shop.svg-4c5f663fcc694e2c56170fd6a2424e53.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Basic_GUI_Bundle/Icons/SVG/Icon_Small_Blank_Shop.svg"
-dest_files=["res://.godot/imported/Icon_Small_Blank_Shop.svg-a7bb98255618b9f75f14d26a2e9d612d.ctex"]
+source_file="res://assets/Basic_GUI_Bundle/Icons/SVG/Icon_Small_Blank_Shop.svg"
+dest_files=["res://.godot/imported/Icon_Small_Blank_Shop.svg-4c5f663fcc694e2c56170fd6a2424e53.ctex"]
 
 [params]
 

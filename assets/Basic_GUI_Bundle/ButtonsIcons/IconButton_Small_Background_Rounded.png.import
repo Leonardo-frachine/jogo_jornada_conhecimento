@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://d3455xb7tutlt"
-path="res://.godot/imported/IconButton_Small_Background_Rounded.png-ad7ccbf44fb0079ea0ef65f3fa49ddc7.ctex"
+path="res://.godot/imported/IconButton_Small_Background_Rounded.png-ee5fa714816384b4f777e2fc7558182c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Basic_GUI_Bundle/ButtonsIcons/IconButton_Small_Background_Rounded.png"
-dest_files=["res://.godot/imported/IconButton_Small_Background_Rounded.png-ad7ccbf44fb0079ea0ef65f3fa49ddc7.ctex"]
+source_file="res://assets/Basic_GUI_Bundle/ButtonsIcons/IconButton_Small_Background_Rounded.png"
+dest_files=["res://.godot/imported/IconButton_Small_Background_Rounded.png-ee5fa714816384b4f777e2fc7558182c.ctex"]
 
 [params]
 

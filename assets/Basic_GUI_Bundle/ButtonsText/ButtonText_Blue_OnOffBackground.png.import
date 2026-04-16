@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bn2kfm1xjg12h"
-path="res://.godot/imported/ButtonText_Blue_OnOffBackground.png-8d3e31db3218152207be08b846c6a3be.ctex"
+path="res://.godot/imported/ButtonText_Blue_OnOffBackground.png-562e1723f0aed78ebd277e06b08bd171.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Basic_GUI_Bundle/ButtonsText/ButtonText_Blue_OnOffBackground.png"
-dest_files=["res://.godot/imported/ButtonText_Blue_OnOffBackground.png-8d3e31db3218152207be08b846c6a3be.ctex"]
+source_file="res://assets/Basic_GUI_Bundle/ButtonsText/ButtonText_Blue_OnOffBackground.png"
+dest_files=["res://.godot/imported/ButtonText_Blue_OnOffBackground.png-562e1723f0aed78ebd277e06b08bd171.ctex"]
 
 [params]
 
