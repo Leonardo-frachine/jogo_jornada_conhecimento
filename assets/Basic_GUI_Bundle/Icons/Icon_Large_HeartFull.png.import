@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://kcmone2lr6di"
-path="res://.godot/imported/Icon_Large_HeartFull.png-9bb6183cfba5d410e506e9d06d2cc1a3.ctex"
+path="res://.godot/imported/Icon_Large_HeartFull.png-9c577b39d3f8a40be76b009471d1811c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Basic_GUI_Bundle/Icons/Icon_Large_HeartFull.png"
-dest_files=["res://.godot/imported/Icon_Large_HeartFull.png-9bb6183cfba5d410e506e9d06d2cc1a3.ctex"]
+source_file="res://assets/Basic_GUI_Bundle/Icons/Icon_Large_HeartFull.png"
+dest_files=["res://.godot/imported/Icon_Large_HeartFull.png-9c577b39d3f8a40be76b009471d1811c.ctex"]
 
 [params]
 

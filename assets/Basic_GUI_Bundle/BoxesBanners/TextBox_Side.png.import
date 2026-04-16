@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b12grm7cwy6x0"
-path="res://.godot/imported/TextBox_Side.png-c8b816edd5139ce2741f46b00858148e.ctex"
+path="res://.godot/imported/TextBox_Side.png-7f232bd8df259489ba4872b6caf6021d.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Basic_GUI_Bundle/BoxesBanners/TextBox_Side.png"
-dest_files=["res://.godot/imported/TextBox_Side.png-c8b816edd5139ce2741f46b00858148e.ctex"]
+source_file="res://assets/Basic_GUI_Bundle/BoxesBanners/TextBox_Side.png"
+dest_files=["res://.godot/imported/TextBox_Side.png-7f232bd8df259489ba4872b6caf6021d.ctex"]
 
 [params]
 

@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bp2ktmlci78y8"
-path="res://.godot/imported/Icon_Small_Blank_Dollar.svg-39da71923d94e9d4133dcb50138e9f31.ctex"
+path="res://.godot/imported/Icon_Small_Blank_Dollar.svg-c3dbd8ad3364f8c225ab0d86d56af8db.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Basic_GUI_Bundle/Icons/SVG/Icon_Small_Blank_Dollar.svg"
-dest_files=["res://.godot/imported/Icon_Small_Blank_Dollar.svg-39da71923d94e9d4133dcb50138e9f31.ctex"]
+source_file="res://assets/Basic_GUI_Bundle/Icons/SVG/Icon_Small_Blank_Dollar.svg"
+dest_files=["res://.godot/imported/Icon_Small_Blank_Dollar.svg-c3dbd8ad3364f8c225ab0d86d56af8db.ctex"]
 
 [params]
 

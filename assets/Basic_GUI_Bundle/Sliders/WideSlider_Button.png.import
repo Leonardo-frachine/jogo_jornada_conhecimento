@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://8rja31rl2qdw"
-path="res://.godot/imported/WideSlider_Button.png-60a01c5caf80dd4a8ee95d3663a4b675.ctex"
+path="res://.godot/imported/WideSlider_Button.png-cc705c5d1a1a85cd52e15b1bf27ec73d.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Basic_GUI_Bundle/Sliders/WideSlider_Button.png"
-dest_files=["res://.godot/imported/WideSlider_Button.png-60a01c5caf80dd4a8ee95d3663a4b675.ctex"]
+source_file="res://assets/Basic_GUI_Bundle/Sliders/WideSlider_Button.png"
+dest_files=["res://.godot/imported/WideSlider_Button.png-cc705c5d1a1a85cd52e15b1bf27ec73d.ctex"]
 
 [params]
 

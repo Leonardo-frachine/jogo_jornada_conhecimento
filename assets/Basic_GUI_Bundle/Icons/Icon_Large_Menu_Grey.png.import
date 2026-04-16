@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dsxhm6dc5fa30"
-path="res://.godot/imported/Icon_Large_Menu_Grey.png-747efc7bee8b5df4abf8efd4dececff0.ctex"
+path="res://.godot/imported/Icon_Large_Menu_Grey.png-9fa2743f5718c9e5167e831d174cb574.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Basic_GUI_Bundle/Icons/Icon_Large_Menu_Grey.png"
-dest_files=["res://.godot/imported/Icon_Large_Menu_Grey.png-747efc7bee8b5df4abf8efd4dececff0.ctex"]
+source_file="res://assets/Basic_GUI_Bundle/Icons/Icon_Large_Menu_Grey.png"
+dest_files=["res://.godot/imported/Icon_Large_Menu_Grey.png-9fa2743f5718c9e5167e831d174cb574.ctex"]
 
 [params]
 

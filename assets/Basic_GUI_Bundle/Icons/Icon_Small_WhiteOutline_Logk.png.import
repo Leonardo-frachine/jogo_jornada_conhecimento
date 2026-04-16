@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dilngak6owxhq"
-path="res://.godot/imported/Icon_Small_WhiteOutline_Logk.png-924b143e0091ffefc046d59ae505c0d9.ctex"
+path="res://.godot/imported/Icon_Small_WhiteOutline_Logk.png-e80c56939b8d43d166b95cf1bae86918.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Basic_GUI_Bundle/Icons/Icon_Small_WhiteOutline_Logk.png"
-dest_files=["res://.godot/imported/Icon_Small_WhiteOutline_Logk.png-924b143e0091ffefc046d59ae505c0d9.ctex"]
+source_file="res://assets/Basic_GUI_Bundle/Icons/Icon_Small_WhiteOutline_Logk.png"
+dest_files=["res://.godot/imported/Icon_Small_WhiteOutline_Logk.png-e80c56939b8d43d166b95cf1bae86918.ctex"]
 
 [params]
 

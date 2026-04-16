@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://1vwfd4bioxcv"
-path="res://.godot/imported/PremadeButtons_YesOrange.png-e570242ad825f7b73d92bf8dd24cfb21.ctex"
+path="res://.godot/imported/PremadeButtons_YesOrange.png-0eaf0ccbc4303288066592b633d314e3.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Basic_GUI_Bundle/ButtonsText/PremadeButtons_YesOrange.png"
-dest_files=["res://.godot/imported/PremadeButtons_YesOrange.png-e570242ad825f7b73d92bf8dd24cfb21.ctex"]
+source_file="res://assets/Basic_GUI_Bundle/ButtonsText/PremadeButtons_YesOrange.png"
+dest_files=["res://.godot/imported/PremadeButtons_YesOrange.png-0eaf0ccbc4303288066592b633d314e3.ctex"]
 
 [params]
 

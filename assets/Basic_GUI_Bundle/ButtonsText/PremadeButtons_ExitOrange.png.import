@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dbfan441p1m50"
-path="res://.godot/imported/PremadeButtons_ExitOrange.png-8c044c61877a91d21880d55b94a1abd3.ctex"
+path="res://.godot/imported/PremadeButtons_ExitOrange.png-2b2ca30267ebd0dc0ef00b0e090346b2.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Basic_GUI_Bundle/ButtonsText/PremadeButtons_ExitOrange.png"
-dest_files=["res://.godot/imported/PremadeButtons_ExitOrange.png-8c044c61877a91d21880d55b94a1abd3.ctex"]
+source_file="res://assets/Basic_GUI_Bundle/ButtonsText/PremadeButtons_ExitOrange.png"
+dest_files=["res://.godot/imported/PremadeButtons_ExitOrange.png-2b2ca30267ebd0dc0ef00b0e090346b2.ctex"]
 
 [params]
 

@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://fkd6p8i7y3j0"
-path="res://.godot/imported/IconButton_Large_GreyOutline_Rounded.svg-f3f927bf9c16c92176153e9d3eff530c.ctex"
+path="res://.godot/imported/IconButton_Large_GreyOutline_Rounded.svg-e908a282a890e7ac8b2c2c7018bd6243.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Basic_GUI_Bundle/ButtonsIcons/SVG/IconButton_Large_GreyOutline_Rounded.svg"
-dest_files=["res://.godot/imported/IconButton_Large_GreyOutline_Rounded.svg-f3f927bf9c16c92176153e9d3eff530c.ctex"]
+source_file="res://assets/Basic_GUI_Bundle/ButtonsIcons/SVG/IconButton_Large_GreyOutline_Rounded.svg"
+dest_files=["res://.godot/imported/IconButton_Large_GreyOutline_Rounded.svg-e908a282a890e7ac8b2c2c7018bd6243.ctex"]
 
 [params]
 

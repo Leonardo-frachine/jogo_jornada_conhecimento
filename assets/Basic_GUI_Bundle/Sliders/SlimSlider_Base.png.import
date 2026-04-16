@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dn6heiywiuvj1"
-path="res://.godot/imported/SlimSlider_Base.png-203dcc07abb6116e421b94321f7ddc7e.ctex"
+path="res://.godot/imported/SlimSlider_Base.png-55d5d21315c18114ac9988e84c70e65a.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Basic_GUI_Bundle/Sliders/SlimSlider_Base.png"
-dest_files=["res://.godot/imported/SlimSlider_Base.png-203dcc07abb6116e421b94321f7ddc7e.ctex"]
+source_file="res://assets/Basic_GUI_Bundle/Sliders/SlimSlider_Base.png"
+dest_files=["res://.godot/imported/SlimSlider_Base.png-55d5d21315c18114ac9988e84c70e65a.ctex"]
 
 [params]
 

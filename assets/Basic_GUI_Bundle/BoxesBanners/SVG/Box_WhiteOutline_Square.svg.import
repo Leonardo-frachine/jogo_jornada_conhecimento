@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cvwcu8ag8qicn"
-path="res://.godot/imported/Box_WhiteOutline_Square.svg-e22b5d09fe37cf49722bceb205f9f2bf.ctex"
+path="res://.godot/imported/Box_WhiteOutline_Square.svg-a110e88b4f1197927c07ff362ffa147b.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Basic_GUI_Bundle/BoxesBanners/SVG/Box_WhiteOutline_Square.svg"
-dest_files=["res://.godot/imported/Box_WhiteOutline_Square.svg-e22b5d09fe37cf49722bceb205f9f2bf.ctex"]
+source_file="res://assets/Basic_GUI_Bundle/BoxesBanners/SVG/Box_WhiteOutline_Square.svg"
+dest_files=["res://.godot/imported/Box_WhiteOutline_Square.svg-a110e88b4f1197927c07ff362ffa147b.ctex"]
 
 [params]
 

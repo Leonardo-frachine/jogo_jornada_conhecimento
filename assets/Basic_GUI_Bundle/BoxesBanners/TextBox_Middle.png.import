@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cfr5ysim1ca5w"
-path="res://.godot/imported/TextBox_Middle.png-863b1af544739150ec838fb361edf6b0.ctex"
+path="res://.godot/imported/TextBox_Middle.png-54e72112209bdf39aad0f45eb993afaa.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Basic_GUI_Bundle/BoxesBanners/TextBox_Middle.png"
-dest_files=["res://.godot/imported/TextBox_Middle.png-863b1af544739150ec838fb361edf6b0.ctex"]
+source_file="res://assets/Basic_GUI_Bundle/BoxesBanners/TextBox_Middle.png"
+dest_files=["res://.godot/imported/TextBox_Middle.png-54e72112209bdf39aad0f45eb993afaa.ctex"]
 
 [params]
 

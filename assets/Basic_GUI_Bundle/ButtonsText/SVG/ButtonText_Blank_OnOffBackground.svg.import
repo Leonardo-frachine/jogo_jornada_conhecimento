@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://svwmcham5hq2"
-path="res://.godot/imported/ButtonText_Blank_OnOffBackground.svg-cd48081f078dffb4704d204ac10bd854.ctex"
+path="res://.godot/imported/ButtonText_Blank_OnOffBackground.svg-59e3da479f273cd9b18bd464458bccf1.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Basic_GUI_Bundle/ButtonsText/SVG/ButtonText_Blank_OnOffBackground.svg"
-dest_files=["res://.godot/imported/ButtonText_Blank_OnOffBackground.svg-cd48081f078dffb4704d204ac10bd854.ctex"]
+source_file="res://assets/Basic_GUI_Bundle/ButtonsText/SVG/ButtonText_Blank_OnOffBackground.svg"
+dest_files=["res://.godot/imported/ButtonText_Blank_OnOffBackground.svg-59e3da479f273cd9b18bd464458bccf1.ctex"]
 
 [params]
 

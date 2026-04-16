@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b4qpvibro1p3g"
-path="res://.godot/imported/ButtonText_Orange_TextInput.png-f7d1f89ee65077b74635005edb113dfd.ctex"
+path="res://.godot/imported/ButtonText_Orange_TextInput.png-409dc0ff5aa7fabb0798aa991a69296e.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Basic_GUI_Bundle/ButtonsText/ButtonText_Orange_TextInput.png"
-dest_files=["res://.godot/imported/ButtonText_Orange_TextInput.png-f7d1f89ee65077b74635005edb113dfd.ctex"]
+source_file="res://assets/Basic_GUI_Bundle/ButtonsText/ButtonText_Orange_TextInput.png"
+dest_files=["res://.godot/imported/ButtonText_Orange_TextInput.png-409dc0ff5aa7fabb0798aa991a69296e.ctex"]
 
 [params]
 

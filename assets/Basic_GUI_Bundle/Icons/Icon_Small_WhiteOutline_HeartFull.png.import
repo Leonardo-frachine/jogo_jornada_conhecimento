@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bhx2bdq5yvcgm"
-path="res://.godot/imported/Icon_Small_WhiteOutline_HeartFull.png-b7411afb673823ca53145dc1229e5e3b.ctex"
+path="res://.godot/imported/Icon_Small_WhiteOutline_HeartFull.png-2050a863ade97dc129169d55950304e6.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Basic_GUI_Bundle/Icons/Icon_Small_WhiteOutline_HeartFull.png"
-dest_files=["res://.godot/imported/Icon_Small_WhiteOutline_HeartFull.png-b7411afb673823ca53145dc1229e5e3b.ctex"]
+source_file="res://assets/Basic_GUI_Bundle/Icons/Icon_Small_WhiteOutline_HeartFull.png"
+dest_files=["res://.godot/imported/Icon_Small_WhiteOutline_HeartFull.png-2050a863ade97dc129169d55950304e6.ctex"]
 
 [params]
 

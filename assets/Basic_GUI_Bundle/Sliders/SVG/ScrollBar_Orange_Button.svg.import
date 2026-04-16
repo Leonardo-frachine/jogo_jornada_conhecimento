@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://67xckg8pn860"
-path="res://.godot/imported/ScrollBar_Orange_Button.svg-6c30771766d0e04216c5c8bc24125d85.ctex"
+path="res://.godot/imported/ScrollBar_Orange_Button.svg-f2778e471cb1a6c36a8f62047c33efdc.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Basic_GUI_Bundle/Sliders/SVG/ScrollBar_Orange_Button.svg"
-dest_files=["res://.godot/imported/ScrollBar_Orange_Button.svg-6c30771766d0e04216c5c8bc24125d85.ctex"]
+source_file="res://assets/Basic_GUI_Bundle/Sliders/SVG/ScrollBar_Orange_Button.svg"
+dest_files=["res://.godot/imported/ScrollBar_Orange_Button.svg-f2778e471cb1a6c36a8f62047c33efdc.ctex"]
 
 [params]
 

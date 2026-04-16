@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cgfs3o3bqhuav"
-path="res://.godot/imported/Icon_Large_HeartHalf.png-184ac12dc314d0f2cd5c276c7ef1a649.ctex"
+path="res://.godot/imported/Icon_Large_HeartHalf.png-1b7fdcd3d5eb306248efe53b63b24da2.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Basic_GUI_Bundle/Icons/Icon_Large_HeartHalf.png"
-dest_files=["res://.godot/imported/Icon_Large_HeartHalf.png-184ac12dc314d0f2cd5c276c7ef1a649.ctex"]
+source_file="res://assets/Basic_GUI_Bundle/Icons/Icon_Large_HeartHalf.png"
+dest_files=["res://.godot/imported/Icon_Large_HeartHalf.png-1b7fdcd3d5eb306248efe53b63b24da2.ctex"]
 
 [params]
 

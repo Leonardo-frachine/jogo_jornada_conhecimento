@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b76cegap6w6ba"
-path="res://.godot/imported/WideSlider_Blank_Background.svg-b4b733a682bfe1850208759c1504a97d.ctex"
+path="res://.godot/imported/WideSlider_Blank_Background.svg-52257470d0441126fb68154433d1f334.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Basic_GUI_Bundle/Sliders/SVG/WideSlider_Blank_Background.svg"
-dest_files=["res://.godot/imported/WideSlider_Blank_Background.svg-b4b733a682bfe1850208759c1504a97d.ctex"]
+source_file="res://assets/Basic_GUI_Bundle/Sliders/SVG/WideSlider_Blank_Background.svg"
+dest_files=["res://.godot/imported/WideSlider_Blank_Background.svg-52257470d0441126fb68154433d1f334.ctex"]
 
 [params]
 

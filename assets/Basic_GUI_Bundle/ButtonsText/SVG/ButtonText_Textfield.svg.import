@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://byjfrc3quoli"
-path="res://.godot/imported/ButtonText_Textfield.svg-359da7594b57f3c135248fbc1f23f372.ctex"
+path="res://.godot/imported/ButtonText_Textfield.svg-d93ec2b24c147a665cc721487999b7fd.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Basic_GUI_Bundle/ButtonsText/SVG/ButtonText_Textfield.svg"
-dest_files=["res://.godot/imported/ButtonText_Textfield.svg-359da7594b57f3c135248fbc1f23f372.ctex"]
+source_file="res://assets/Basic_GUI_Bundle/ButtonsText/SVG/ButtonText_Textfield.svg"
+dest_files=["res://.godot/imported/ButtonText_Textfield.svg-d93ec2b24c147a665cc721487999b7fd.ctex"]
 
 [params]
 

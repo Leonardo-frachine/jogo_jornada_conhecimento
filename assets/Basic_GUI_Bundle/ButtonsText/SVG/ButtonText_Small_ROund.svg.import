@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://d3m7hkiwearpp"
-path="res://.godot/imported/ButtonText_Small_ROund.svg-8c741f970a388ee6d7da62812e2aafe6.ctex"
+path="res://.godot/imported/ButtonText_Small_ROund.svg-91b7b12b91c37f76168b6c910eaa5759.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Basic_GUI_Bundle/ButtonsText/SVG/ButtonText_Small_ROund.svg"
-dest_files=["res://.godot/imported/ButtonText_Small_ROund.svg-8c741f970a388ee6d7da62812e2aafe6.ctex"]
+source_file="res://assets/Basic_GUI_Bundle/ButtonsText/SVG/ButtonText_Small_ROund.svg"
+dest_files=["res://.godot/imported/ButtonText_Small_ROund.svg-91b7b12b91c37f76168b6c910eaa5759.ctex"]
 
 [params]
 

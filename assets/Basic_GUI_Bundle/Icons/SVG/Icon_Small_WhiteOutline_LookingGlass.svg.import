@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://qh2jbw0p5ni8"
-path="res://.godot/imported/Icon_Small_WhiteOutline_LookingGlass.svg-01421722b89217947b896e3c846aec66.ctex"
+path="res://.godot/imported/Icon_Small_WhiteOutline_LookingGlass.svg-1ec1800b101b278e32761523803d9682.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Basic_GUI_Bundle/Icons/SVG/Icon_Small_WhiteOutline_LookingGlass.svg"
-dest_files=["res://.godot/imported/Icon_Small_WhiteOutline_LookingGlass.svg-01421722b89217947b896e3c846aec66.ctex"]
+source_file="res://assets/Basic_GUI_Bundle/Icons/SVG/Icon_Small_WhiteOutline_LookingGlass.svg"
+dest_files=["res://.godot/imported/Icon_Small_WhiteOutline_LookingGlass.svg-1ec1800b101b278e32761523803d9682.ctex"]
 
 [params]
 

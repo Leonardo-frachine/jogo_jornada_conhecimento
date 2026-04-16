@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://qlwttd3qkt4j"
-path="res://.godot/imported/WideSlider_Orange_Frame.svg-01118cec18cfb512aacd3437467311ae.ctex"
+path="res://.godot/imported/WideSlider_Orange_Frame.svg-090e8f5befc5bb7a87da7e7c43876d78.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Basic_GUI_Bundle/Sliders/SVG/WideSlider_Orange_Frame.svg"
-dest_files=["res://.godot/imported/WideSlider_Orange_Frame.svg-01118cec18cfb512aacd3437467311ae.ctex"]
+source_file="res://assets/Basic_GUI_Bundle/Sliders/SVG/WideSlider_Orange_Frame.svg"
+dest_files=["res://.godot/imported/WideSlider_Orange_Frame.svg-090e8f5befc5bb7a87da7e7c43876d78.ctex"]
 
 [params]
 

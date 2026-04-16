@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dtv3d1tuqinqf"
-path="res://.godot/imported/IconButton_Large_Circle.png-1de93e451f55db20e2bedb842ac5a57b.ctex"
+path="res://.godot/imported/IconButton_Large_Circle.png-9455dbe24561ee613354630922ee289d.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Basic_GUI_Bundle/ButtonsIcons/IconButton_Large_Circle.png"
-dest_files=["res://.godot/imported/IconButton_Large_Circle.png-1de93e451f55db20e2bedb842ac5a57b.ctex"]
+source_file="res://assets/Basic_GUI_Bundle/ButtonsIcons/IconButton_Large_Circle.png"
+dest_files=["res://.godot/imported/IconButton_Large_Circle.png-9455dbe24561ee613354630922ee289d.ctex"]
 
 [params]
 

@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://lggk486cvgvj"
-path="res://.godot/imported/ScrollSlider_WhiteOutline_Arrow.png-f4fcdbc537b6cc98de60e449d92d6e2d.ctex"
+path="res://.godot/imported/ScrollSlider_WhiteOutline_Arrow.png-0e84a43138b54a83a64167a175f1aa64.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Basic_GUI_Bundle/Sliders/ScrollSlider_WhiteOutline_Arrow.png"
-dest_files=["res://.godot/imported/ScrollSlider_WhiteOutline_Arrow.png-f4fcdbc537b6cc98de60e449d92d6e2d.ctex"]
+source_file="res://assets/Basic_GUI_Bundle/Sliders/ScrollSlider_WhiteOutline_Arrow.png"
+dest_files=["res://.godot/imported/ScrollSlider_WhiteOutline_Arrow.png-0e84a43138b54a83a64167a175f1aa64.ctex"]
 
 [params]
 

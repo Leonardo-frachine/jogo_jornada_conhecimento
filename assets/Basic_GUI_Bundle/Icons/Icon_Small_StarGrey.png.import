@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dhb6luymnf8bn"
-path="res://.godot/imported/Icon_Small_StarGrey.png-95c4ab342a43bb3d2a8017fcbb0994c1.ctex"
+path="res://.godot/imported/Icon_Small_StarGrey.png-1da0a2fb86a7f806ef62ee7e62c6c3a0.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Basic_GUI_Bundle/Icons/Icon_Small_StarGrey.png"
-dest_files=["res://.godot/imported/Icon_Small_StarGrey.png-95c4ab342a43bb3d2a8017fcbb0994c1.ctex"]
+source_file="res://assets/Basic_GUI_Bundle/Icons/Icon_Small_StarGrey.png"
+dest_files=["res://.godot/imported/Icon_Small_StarGrey.png-1da0a2fb86a7f806ef62ee7e62c6c3a0.ctex"]
 
 [params]
 
