@@ -1,0 +1,50 @@
+[gd_scene format=3 uid="uid://5sq6j4ai2c6g"]
+
+[ext_resource type="Script" uid="uid://rg6mejut2hkx" path="res://scripts/player.gd" id="1_qea4p"]
+[ext_resource type="Texture2D" uid="uid://ch4osjo2w08ar" path="res://imagens/8 - Chi Chi the Bird/Flapping_Wings (16 x 16).png" id="2_ufba5"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_vsl6l"]
+radius = 4.0
+height = 8.0
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ufba5"]
+atlas = ExtResource("2_ufba5")
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_s3l42"]
+atlas = ExtResource("2_ufba5")
+region = Rect2(16, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ojwa0"]
+atlas = ExtResource("2_ufba5")
+region = Rect2(32, 0, 16, 16)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_u2ggt"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ufba5")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_s3l42")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ojwa0")
+}],
+"loop": true,
+"name": &"parado",
+"speed": 5.0
+}]
+
+[node name="Player" type="CharacterBody2D" unique_id=676253778]
+script = ExtResource("1_qea4p")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=74158705]
+shape = SubResource("CapsuleShape2D_vsl6l")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=184071206]
+position = Vector2(1, 0)
+sprite_frames = SubResource("SpriteFrames_u2ggt")
+animation = &"parado"
+autoplay = "parado"
+frame_progress = 0.29503617
