@@ -1,5 +1,6 @@
 [gd_scene format=3 uid="uid://2uol8j735lpf"]
 
+[ext_resource type="Script" uid="uid://y7et67s3t0hk" path="res://scripts/tela_inicial.gd" id="1_eym2y"]
 [ext_resource type="Texture2D" uid="uid://3ljo201dpbbx" path="res://imagens/fundo_tabuleiro/fundo_embacado.png" id="1_ixqfg"]
 [ext_resource type="Texture2D" uid="uid://bv2xmb27g64al" path="res://imagens/logo_jogo/logo_jogo.png" id="2_eym2y"]
 [ext_resource type="Texture2D" uid="uid://ctyknso0bfdn6" path="res://imagens/personagem/personagem_logo.png" id="3_djjjm"]
@@ -38,6 +39,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("1_eym2y")
 
 [node name="Background" type="TextureRect" parent="." unique_id=913652169]
 layout_mode = 1
