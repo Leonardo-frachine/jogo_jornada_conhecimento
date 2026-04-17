@@ -25,7 +25,7 @@ func _on_input_codigo_submitted(_texto: String) -> void:
 
 func _on_botao_configuracao_pressed() -> void:
 	# Anexar a rota da tela de configuração aqui
-	# get_tree().change_scene_to_file("res://caminho/da/tela_configuracao.tscn")
+	get_tree().change_scene_to_file("res://scene/settings/root.tscn")
 	print("Botão de configuração clicado.")
 
 func _on_botao_jogar_pressed() -> void:
