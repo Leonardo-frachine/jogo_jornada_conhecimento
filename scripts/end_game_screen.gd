@@ -28,4 +28,4 @@ func animate_character() -> void:
 
 
 func _on_main_menu_pressed() -> void:
-	get_tree().change_scene_to_file("res://scenes/loading_screen.tscn")
+	get_tree().change_scene_to_file("res://scene/tela_inicial.tscn")
