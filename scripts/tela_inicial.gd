@@ -36,7 +36,7 @@ func _on_botao_jogar_pressed() -> void:
 	print("Código da sala: ", codigo_sala)
 
 	# Anexar a rota da tela de carregamento aqui
-	# get_tree().change_scene_to_file("res://caminho/da/tela_carregando.tscn")
+	get_tree().change_scene_to_file("res://scene/loading_screen.tscn")
 	print("Botão jogar clicado.")
 
 func validar_campos() -> bool:
