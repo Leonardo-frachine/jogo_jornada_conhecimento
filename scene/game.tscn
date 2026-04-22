@@ -354,7 +354,7 @@ shape = SubResource("RectangleShape2D_33cqm")
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=954870309]
 
 [node name="SpriteDado" type="Sprite2D" parent="CanvasLayer" unique_id=1110844941]
-position = Vector2(111.00001, 50.000015)
+position = Vector2(664, 42.000004)
 scale = Vector2(0.9044119, 0.80147064)
 texture = ExtResource("2_dbls1")
 

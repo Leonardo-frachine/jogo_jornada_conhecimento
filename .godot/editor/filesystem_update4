@@ -1,1 +1,3 @@
-res://scripts/tela_inicial.gd
+res://scene/settings/root.tscn
+res://scripts/SettingsManager.gd
+res://scene/game.tscn

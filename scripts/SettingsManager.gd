@@ -4,7 +4,7 @@ signal settings_loaded
 signal settings_changed
 
 const CONFIG_PATH := "user://settings.cfg"
-const OVERLAY_SCENE := preload("res://ui/settings/SettingsOverlay.tscn")
+const OVERLAY_SCENE := preload("res://scene/settings/SettingsOverlay.tscn")
 
 const DEFAULT_MASTER_VOLUME := 0.85
 const DEFAULT_SFX_VOLUME := 0.80
