@@ -141,6 +141,24 @@ A estrutura do projeto segue a organização do Godot, podendo incluir:
 
 ---
 
+## 📊 Apresentação do Projeto
+
+Você pode visualizar a apresentação completa do projeto no link abaixo:
+
+👉 https://docs.google.com/presentation/d/1prNslQZFVxaU26V2HwXLBW-e2A2WvyqLVdEKv4Kgrfg/edit?usp=sharing
+
+A apresentação aborda:
+
+- Contexto e problema educacional  
+- Proposta da solução  
+- Estrutura do jogo  
+- Metodologia de desenvolvimento  
+- Tecnologias utilizadas  
+- Resultados da pesquisa com professores  
+- Conclusões e próximos passos  
+
+---
+
 ## 🚀 Objetivo do Projeto
 
 O projeto busca:
