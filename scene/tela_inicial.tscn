@@ -1,0 +1,154 @@
+[gd_scene format=3 uid="uid://2uol8j735lpf"]
+
+[ext_resource type="Script" uid="uid://y7et67s3t0hk" path="res://scripts/tela_inicial.gd" id="1_eym2y"]
+[ext_resource type="Texture2D" uid="uid://3ljo201dpbbx" path="res://imagens/fundo_tabuleiro/fundo_embacado.png" id="1_ixqfg"]
+[ext_resource type="Texture2D" uid="uid://bv2xmb27g64al" path="res://imagens/logo_jogo/logo_jogo.png" id="2_eym2y"]
+[ext_resource type="Texture2D" uid="uid://ctyknso0bfdn6" path="res://imagens/personagem/personagem_logo.png" id="3_djjjm"]
+[ext_resource type="Texture2D" uid="uid://cbpn68ac6bol8" path="res://imagens/configuracoes/configuracoes.png" id="5_djjjm"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ek0m7"]
+bg_color = Color(1, 0.64705884, 0, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0, 0, 0, 1)
+corner_radius_top_left = 30
+corner_radius_top_right = 30
+corner_radius_bottom_right = 30
+corner_radius_bottom_left = 30
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hftsj"]
+bg_color = Color(1, 1, 1, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0, 0, 0, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[node name="TelaInicial" type="Control" unique_id=1382460529]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_eym2y")
+
+[node name="Background" type="TextureRect" parent="." unique_id=913652169]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -84.0
+offset_top = -161.0
+offset_right = 86.0
+offset_bottom = 143.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("1_ixqfg")
+stretch_mode = 6
+
+[node name="PainelCentral" type="Panel" parent="." unique_id=1104645252]
+custom_minimum_size = Vector2(360, 110)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -148.0
+offset_top = -180.0
+offset_right = 212.0
+offset_bottom = 180.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_ek0m7")
+
+[node name="MarginContainer" type="MarginContainer" parent="PainelCentral" unique_id=426933393]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 35
+theme_override_constants/margin_top = 70
+theme_override_constants/margin_right = 35
+theme_override_constants/margin_bottom = 40
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PainelCentral/MarginContainer" unique_id=421605669]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="LabelNome" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer" unique_id=78163084]
+layout_mode = 2
+text = "Nome do Aluno"
+
+[node name="InputNome" type="LineEdit" parent="PainelCentral/MarginContainer/VBoxContainer" unique_id=350951176]
+custom_minimum_size = Vector2(0, 60)
+layout_mode = 2
+placeholder_text = "Insira seu nome"
+
+[node name="LabelCodigo" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer" unique_id=270972181]
+layout_mode = 2
+text = "Código da Sala"
+
+[node name="InputCodigo" type="LineEdit" parent="PainelCentral/MarginContainer/VBoxContainer" unique_id=16596764]
+custom_minimum_size = Vector2(0, 60)
+layout_mode = 2
+placeholder_text = "Digite o código"
+
+[node name="BotaoJogar" type="Button" parent="PainelCentral/MarginContainer/VBoxContainer" unique_id=1962306214]
+custom_minimum_size = Vector2(0, 55)
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_hftsj")
+text = "JOGAR"
+
+[node name="Logo" type="TextureRect" parent="." unique_id=1532002673]
+custom_minimum_size = Vector2(285, 35)
+layout_mode = 0
+offset_left = 533.0
+offset_top = -395.0
+offset_right = 908.0
+offset_bottom = 605.0
+mouse_filter = 2
+texture = ExtResource("2_eym2y")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Personagem" type="TextureRect" parent="." unique_id=207310344]
+custom_minimum_size = Vector2(280, 320)
+layout_mode = 0
+offset_left = 65.0
+offset_top = 216.0
+offset_right = 800.03
+offset_bottom = 546.0
+mouse_filter = 2
+texture = ExtResource("3_djjjm")
+expand_mode = 1
+stretch_mode = 5
+flip_h = true
+
+[node name="BotaoConfiguracao" type="TextureButton" parent="." unique_id=887239123]
+custom_minimum_size = Vector2(128, 128)
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.80700004
+anchor_right = 0.113000005
+anchor_bottom = 1.0
+offset_left = 1216.0
+offset_top = -7.040039
+offset_right = 1213.824
+offset_bottom = -4.104004
+grow_vertical = 0
+texture_normal = ExtResource("5_djjjm")
+ignore_texture_size = true
+stretch_mode = 6
