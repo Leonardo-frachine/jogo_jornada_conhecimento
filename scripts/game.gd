@@ -7,7 +7,7 @@ const FEEDBACK_OK := Color(0.29, 0.85, 0.45, 0.95)
 const FEEDBACK_FAIL := Color(0.93, 0.33, 0.33, 0.95)
 const HUD_LAYER := 20
 const DIALOG_LAYER := 40
-const CAMERA_MARGIN := .0
+const CAMERA_PADDING := 1.02
 const DIALOG_MAX_WIDTH := 760.0
 const DIALOG_MAX_HEIGHT := 460.0
 
@@ -17,13 +17,14 @@ enum TurnState {
 	MOVING_PLAYER
 }
 
-@onready var casas_root: Node = $Casas
-@onready var player = $Player
-@onready var canvas_layer: CanvasLayer = $CanvasLayer
-@onready var sprite_dado: Sprite2D = $CanvasLayer/SpriteDado
-@onready var dialog_panel: Panel = $CanvasLayer/JanelaPergunta
-@onready var board_background: Sprite2D = $BoardBackground
-@onready var board_camera: Camera2D = $BoardCamera
+@onready var casas_root: Node = get_node_or_null("Casas")
+@onready var player = get_node_or_null("Player")
+@onready var canvas_layer: CanvasLayer = get_node_or_null("CanvasLayer") as CanvasLayer
+@onready var sprite_dado: Sprite2D = get_node_or_null("CanvasLayer/SpriteDado") as Sprite2D
+@onready var dialog_panel: Control = get_node_or_null("CanvasLayer/JanelaPergunta") as Control
+@onready var board_background: Sprite2D = get_node_or_null("BoardBackground") as Sprite2D
+@onready var board_camera: Camera2D = get_node_or_null("BoardCamera") as Camera2D
+@onready var settings_button: TextureButton = get_node_or_null("CanvasLayer/BotaoConfiguracao") as TextureButton
 
 var dice_textures := [
 	preload("res://imagens/Dado/Dado/dieWhite_border1.png"),
@@ -45,7 +46,6 @@ var answering_locked := false
 var hud_canvas: CanvasLayer
 var hud_root: Control
 var roll_button: Button
-@onready var settings_button: TextureButton = $CanvasLayer/BotaoConfiguracao
 var feedback_label: Label
 var score_label: Label
 var level_label: Label
@@ -68,13 +68,27 @@ var sfx_player: AudioStreamPlayer
 
 func _ready() -> void:
 	randomize()
+
+	if canvas_layer == null:
+		canvas_layer = CanvasLayer.new()
+		canvas_layer.name = "CanvasLayer"
+		add_child(canvas_layer)
+
 	SettingsManager.pause_tree_when_open = true
 	SettingsManager.close_menu()
+
 	canvas_layer.layer = DIALOG_LAYER
+
+	_ensure_dialog_panel()
 	_build_board_positions()
-	player.setup(board_positions)
-	player.step_reached.connect(_on_step_reached)
-	player.movement_finished.connect(_on_movement_finished)
+
+	if player != null:
+		if player.has_method("setup"):
+			player.setup(board_positions)
+		if player.has_signal("step_reached") and not player.step_reached.is_connected(_on_step_reached):
+			player.step_reached.connect(_on_step_reached)
+		if player.has_signal("movement_finished") and not player.movement_finished.is_connected(_on_movement_finished):
+			player.movement_finished.connect(_on_movement_finished)
 
 	_create_audio_players()
 	_build_hud()
@@ -89,20 +103,36 @@ func _ready() -> void:
 
 	if not get_viewport().size_changed.is_connected(_on_viewport_size_changed):
 		get_viewport().size_changed.connect(_on_viewport_size_changed)
-		
+
 func _apply_initial_layout() -> void:
 	await get_tree().process_frame
 	_update_viewport_layout()
-	
+
+func _ensure_dialog_panel() -> void:
+	if canvas_layer == null:
+		return
+
+	if dialog_panel == null:
+		dialog_panel = Panel.new()
+		dialog_panel.name = "JanelaPergunta"
+		dialog_panel.visible = false
+		canvas_layer.add_child(dialog_panel)
+
 func _unhandled_input(event: InputEvent) -> void:
 	if get_tree().paused:
 		return
-	if event.is_action_pressed("ui_accept") and accepting_roll and not dialog_panel.visible:
+
+	var dialog_open := dialog_panel != null and dialog_panel.visible
+	if event.is_action_pressed("ui_accept") and accepting_roll and not dialog_open:
 		roll_dice()
 		get_viewport().set_input_as_handled()
 
 func _build_board_positions() -> void:
 	board_positions.clear()
+
+	if casas_root == null:
+		return
+
 	for i in range(1, TOTAL_CASAS + 1):
 		var casa := casas_root.get_node_or_null("StaticBody2D_P%d" % i)
 		if casa:
@@ -127,9 +157,11 @@ func _play_music() -> void:
 func _play_sfx(path: String) -> void:
 	if sfx_player == null:
 		return
+
 	var stream := load(path)
 	if stream == null:
 		return
+
 	sfx_player.stream = stream
 	sfx_player.play()
 
@@ -150,6 +182,7 @@ func _build_hud() -> void:
 	top_panel.custom_minimum_size = Vector2(520, 88)
 	top_panel.size = Vector2(540, 96)
 	top_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
 	var panel_style := StyleBoxFlat.new()
 	panel_style.bg_color = HUD_BG
 	panel_style.corner_radius_top_left = 20
@@ -219,8 +252,8 @@ func _build_hud() -> void:
 	hud_root.add_child(roll_button)
 
 	if settings_button and not settings_button.pressed.is_connected(_on_settings_pressed):
-		settings_button.pressed.connect(_on_settings_pressed)	
-	
+		settings_button.pressed.connect(_on_settings_pressed)
+
 func _on_settings_pressed() -> void:
 	SettingsManager.open_menu()
 
@@ -231,6 +264,7 @@ func _create_action_button(text_value: String, callback: Callable) -> Button:
 	button.focus_mode = Control.FOCUS_NONE
 	button.add_theme_font_size_override("font_size", 21)
 	button.add_theme_color_override("font_color", Color(0.08, 0.10, 0.18, 1.0))
+
 	var normal := StyleBoxFlat.new()
 	normal.bg_color = Color(1.0, 0.78, 0.22, 1.0)
 	normal.corner_radius_top_left = 18
@@ -242,8 +276,10 @@ func _create_action_button(text_value: String, callback: Callable) -> Button:
 	normal.border_width_right = 2
 	normal.border_width_bottom = 2
 	normal.border_color = Color(0.12, 0.08, 0.03, 0.95)
+
 	var hover := normal.duplicate()
 	hover.bg_color = Color(1.0, 0.85, 0.36, 1.0)
+
 	button.add_theme_stylebox_override("normal", normal)
 	button.add_theme_stylebox_override("hover", hover)
 	button.add_theme_stylebox_override("pressed", hover)
@@ -254,18 +290,27 @@ func _make_label(size: int, bold := false) -> Label:
 	var label := Label.new()
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	label.add_theme_font_size_override("font_size", size)
-	label.add_theme_color_override("font_color", Color(1, 1, 1, 1))
+	label.add_theme_color_override("font_color", Color.WHITE)
+
 	if bold:
 		label.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.25))
+
 	return label
 
 func _build_question_ui() -> void:
+	_ensure_dialog_panel()
+
+	if dialog_panel == null:
+		push_error("JanelaPergunta nao foi encontrada nem criada.")
+		return
+
 	for child in dialog_panel.get_children():
 		child.queue_free()
 
 	dialog_panel.mouse_filter = Control.MOUSE_FILTER_STOP
 	dialog_panel.focus_mode = Control.FOCUS_ALL
 	dialog_panel.visible = false
+
 	var panel_style := StyleBoxFlat.new()
 	panel_style.bg_color = Color(0.09, 0.12, 0.21, 0.97)
 	panel_style.corner_radius_top_left = 28
@@ -281,13 +326,18 @@ func _build_question_ui() -> void:
 	panel_style.shadow_size = 14
 	dialog_panel.add_theme_stylebox_override("panel", panel_style)
 
-	dialog_backdrop = ColorRect.new()
-	dialog_backdrop.name = "DialogBackdrop"
-	dialog_backdrop.visible = false
-	dialog_backdrop.set_anchors_preset(Control.PRESET_FULL_RECT)
-	dialog_backdrop.mouse_filter = Control.MOUSE_FILTER_STOP
-	dialog_backdrop.color = Color(0.02, 0.02, 0.05, 0.58)
-	canvas_layer.add_child(dialog_backdrop)
+	var existing_backdrop := canvas_layer.get_node_or_null("DialogBackdrop") as ColorRect
+	if existing_backdrop != null:
+		dialog_backdrop = existing_backdrop
+	else:
+		dialog_backdrop = ColorRect.new()
+		dialog_backdrop.name = "DialogBackdrop"
+		dialog_backdrop.visible = false
+		dialog_backdrop.set_anchors_preset(Control.PRESET_FULL_RECT)
+		dialog_backdrop.mouse_filter = Control.MOUSE_FILTER_STOP
+		dialog_backdrop.color = Color(0.02, 0.02, 0.05, 0.58)
+		canvas_layer.add_child(dialog_backdrop)
+
 	canvas_layer.move_child(dialog_backdrop, 0)
 
 	var margin := MarginContainer.new()
@@ -316,7 +366,7 @@ func _build_question_ui() -> void:
 	question_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	question_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	question_label.add_theme_font_size_override("font_size", 28)
-	question_label.add_theme_color_override("font_color", Color(1, 1, 1, 1))
+	question_label.add_theme_color_override("font_color", Color.WHITE)
 	vbox.add_child(question_label)
 
 	question_hint_label = Label.new()
@@ -340,11 +390,11 @@ func _build_question_ui() -> void:
 
 func _create_answer_button(answer_slot: int) -> Button:
 	var button := Button.new()
-	button.custom_minimum_size = Vector2(0, 56) # antes 72
-	button.focus_mode = Control.FOCUS_NONE
-	button.add_theme_font_size_override("font_size", 18) # antes 22
+	button.custom_minimum_size = Vector2(0, 56)
+	button.focus_mode = Control.FOCUS_ALL
+	button.add_theme_font_size_override("font_size", 18)
 	button.add_theme_constant_override("h_separation", 8)
-	button.add_theme_color_override("font_color", Color(1, 1, 1, 1))
+	button.add_theme_color_override("font_color", Color.WHITE)
 	button.add_theme_stylebox_override("normal", _make_answer_style(Color(0.17, 0.25, 0.42, 1.0)))
 	button.add_theme_stylebox_override("hover", _make_answer_style(Color(0.22, 0.32, 0.53, 1.0)))
 	button.add_theme_stylebox_override("pressed", _make_answer_style(Color(0.28, 0.40, 0.60, 1.0)))
@@ -374,6 +424,7 @@ func _make_answer_style(color_value: Color) -> StyleBoxFlat:
 func _configure_camera() -> void:
 	if board_camera == null:
 		return
+
 	board_camera.enabled = true
 	board_camera.position_smoothing_enabled = false
 	board_camera.make_current()
@@ -389,29 +440,40 @@ func _update_viewport_layout() -> void:
 func _layout_hud() -> void:
 	if hud_root == null:
 		return
+
 	var viewport_size := get_viewport_rect().size
-	var top_panel: PanelContainer = hud_root.get_node_or_null("TopPanel")
+	var top_panel: PanelContainer = hud_root.get_node_or_null("TopPanel") as PanelContainer
+
 	if top_panel:
 		top_panel.position = Vector2(16, 16)
-		top_panel.size = Vector2( maxf(320.0, minf(540.0, viewport_size.x - 32.0)),96.0)
-	feedback_label.position = Vector2(18, 156)
-	feedback_label.size.x = maxf(320.0, minf(560.0, viewport_size.x - 36.0))
-	var bottom_margin := 24.0
-	var action_y := viewport_size.y - roll_button.size.y - bottom_margin
+		top_panel.size = Vector2(
+			maxf(320.0, minf(540.0, viewport_size.x - 32.0)),
+			96.0
+		)
 
-	roll_button.position = Vector2(
-		(viewport_size.x - roll_button.size.x) * 0.5,
-		action_y
-	)
+	if feedback_label != null:
+		feedback_label.position = Vector2(18, 156)
+		feedback_label.size.x = maxf(320.0, minf(560.0, viewport_size.x - 36.0))
 
-	sprite_dado.position = Vector2(viewport_size.x - 86.0, 82.0)
+	if roll_button != null:
+		var bottom_margin := 24.0
+		var action_y := viewport_size.y - roll_button.size.y - bottom_margin
+		roll_button.position = Vector2(
+			(viewport_size.x - roll_button.size.x) * 0.5,
+			action_y
+		)
+
+	if sprite_dado != null:
+		sprite_dado.position = Vector2(viewport_size.x - 86.0, 82.0)
 
 func _layout_dialog() -> void:
 	if dialog_panel == null:
 		return
+
 	var viewport_size := get_viewport_rect().size
 	var dialog_width := maxf(360.0, minf(DIALOG_MAX_WIDTH, viewport_size.x - 72.0))
 	var dialog_height := maxf(320.0, minf(DIALOG_MAX_HEIGHT, viewport_size.y - 72.0))
+
 	dialog_panel.anchor_left = 0.5
 	dialog_panel.anchor_top = 0.5
 	dialog_panel.anchor_right = 0.5
@@ -422,91 +484,54 @@ func _layout_dialog() -> void:
 	dialog_panel.offset_bottom = dialog_height * 0.5
 
 func _fit_board_to_view() -> void:
-	if board_camera == null:
-		return
-
-	var bounds := _get_board_bounds()
-	if bounds.size == Vector2.ZERO:
+	if board_camera == null or board_background == null or board_background.texture == null:
 		return
 
 	var viewport_size := get_viewport_rect().size
 	if viewport_size.x <= 0.0 or viewport_size.y <= 0.0:
 		return
 
-	var usable_view := viewport_size - Vector2(CAMERA_MARGIN * 2.0, CAMERA_MARGIN * 2.0)
-	usable_view.x = maxf(usable_view.x, 1.0)
-	usable_view.y = maxf(usable_view.y, 1.0)
+	var texture_size := board_background.texture.get_size()
+	var scale_abs := Vector2(absf(board_background.scale.x), absf(board_background.scale.y))
+	var board_size := texture_size * scale_abs
 
-	var zoom_x := bounds.size.x / usable_view.x
-	var zoom_y := bounds.size.y / usable_view.y
-	var zoom_factor := maxf(zoom_x, zoom_y)
+	if board_size.x <= 0.0 or board_size.y <= 0.0:
+		return
 
-	if zoom_factor < 1.0:
-		zoom_factor = 1.0
+	var zoom_x := board_size.x / viewport_size.x
+	var zoom_y := board_size.y / viewport_size.y
+	var zoom_factor := maxf(zoom_x, zoom_y) * CAMERA_PADDING
 
 	board_camera.zoom = Vector2(zoom_factor, zoom_factor)
-	board_camera.global_position = bounds.get_center()
 
-func _get_board_bounds() -> Rect2:
-	var points: Array[Vector2] = []
-
-	if board_background != null and board_background.texture != null:
-		var texture_size := board_background.texture.get_size()
-		var scale_abs := Vector2(absf(board_background.scale.x), absf(board_background.scale.y))
-		var background_size := texture_size * scale_abs
-
-		var top_left := board_background.global_position - (background_size * 0.5)
-
-		if not board_background.centered:
-			top_left = board_background.global_position
-
-		top_left += board_background.offset * scale_abs
-
-		points.append(top_left)
-		points.append(top_left + Vector2(background_size.x, 0))
-		points.append(top_left + Vector2(0, background_size.y))
-		points.append(top_left + background_size)
-
-	for position in board_positions:
-		points.append(position)
-
-	if player != null:
-		points.append(player.global_position)
-
-	if points.is_empty():
-		return Rect2()
-
-	var min_x := points[0].x
-	var min_y := points[0].y
-	var max_x := points[0].x
-	var max_y := points[0].y
-
-	for p in points:
-		min_x = minf(min_x, p.x)
-		min_y = minf(min_y, p.y)
-		max_x = maxf(max_x, p.x)
-		max_y = maxf(max_y, p.y)
-
-	return Rect2(
-		Vector2(min_x, min_y),
-		Vector2(max_x - min_x, max_y - min_y)
-	).grow(CAMERA_MARGIN)
-
+	if board_background.centered:
+		board_camera.global_position = board_background.global_position
+	else:
+		board_camera.global_position = board_background.global_position + (board_size * 0.5)
 func _hide_dialog() -> void:
-	dialog_panel.hide()
-	if dialog_backdrop:
+	if dialog_panel != null:
+		dialog_panel.hide()
+
+	if dialog_backdrop != null:
 		dialog_backdrop.hide()
+
 	_set_question_buttons_enabled(false)
 	answering_locked = false
 
 func _show_dialog() -> void:
-	if dialog_backdrop:
+	if dialog_panel == null:
+		return
+
+	if dialog_backdrop != null:
 		dialog_backdrop.show()
+
 	dialog_panel.show()
 	canvas_layer.move_child(dialog_panel, canvas_layer.get_child_count() - 1)
 	_set_question_buttons_enabled(true)
 	answering_locked = false
-	button_a.grab_focus()
+
+	if button_a != null:
+		button_a.grab_focus()
 
 func _set_question_buttons_enabled(enabled: bool) -> void:
 	for button in [button_a, button_b, button_c]:
@@ -516,25 +541,37 @@ func _set_question_buttons_enabled(enabled: bool) -> void:
 func _set_turn_state(new_state: int) -> void:
 	turn_state = new_state
 	accepting_roll = new_state == TurnState.WAITING_ROLL
+
 	if roll_button != null:
 		roll_button.disabled = not accepting_roll
+
 	if settings_button != null:
 		settings_button.disabled = new_state != TurnState.WAITING_ROLL
 
 func roll_dice() -> void:
 	if turn_state != TurnState.WAITING_ROLL:
 		return
-	if dialog_panel.visible or get_tree().paused:
+
+	if player == null:
+		return
+
+	if (dialog_panel != null and dialog_panel.visible) or get_tree().paused:
 		return
 
 	_set_turn_state(TurnState.SHOWING_QUESTION)
 	current_roll = randi_range(1, 6)
 	pending_target_house = mini(player.current_house + current_roll, TOTAL_CASAS)
-	sprite_dado.texture = dice_textures[current_roll - 1]
+
+	if sprite_dado != null:
+		sprite_dado.texture = dice_textures[current_roll - 1]
+
 	_play_sfx("res://assets/audio/dice.wav")
 	_present_question(pending_target_house)
 
 func _present_question(house_index: int) -> void:
+	if dialog_panel == null:
+		return
+
 	var question := GameState.get_question_for_house(house_index)
 	var order := [0, 1, 2]
 	order.shuffle()
@@ -553,11 +590,13 @@ func _present_question(house_index: int) -> void:
 func _on_answer_button_pressed(answer_slot: int) -> void:
 	if turn_state != TurnState.SHOWING_QUESTION:
 		return
-	if not dialog_panel.visible or answering_locked:
+
+	if dialog_panel == null or not dialog_panel.visible or answering_locked:
 		return
 
 	answering_locked = true
 	_set_question_buttons_enabled(false)
+
 	var correct := answer_slot == pending_correct_index
 	_hide_dialog()
 	GameState.register_answer(correct, pending_target_house)
@@ -566,9 +605,12 @@ func _on_answer_button_pressed(answer_slot: int) -> void:
 		_set_turn_state(TurnState.MOVING_PLAYER)
 		_show_feedback(GameState.last_feedback, FEEDBACK_OK)
 		_play_sfx("res://assets/audio/correct.wav")
+
 		if SettingsManager.vfx_enabled:
 			_pulse_feedback()
-		await player.move_to_house(pending_target_house)
+
+		if player != null:
+			await player.move_to_house(pending_target_house)
 	else:
 		_show_feedback(GameState.last_feedback, FEEDBACK_FAIL)
 		_play_sfx("res://assets/audio/wrong.wav")
@@ -577,6 +619,9 @@ func _on_answer_button_pressed(answer_slot: int) -> void:
 	_refresh_hud()
 
 func _pulse_feedback() -> void:
+	if feedback_label == null:
+		return
+
 	var tween := create_tween()
 	tween.tween_property(feedback_label, "scale", Vector2(1.08, 1.08), 0.08)
 	tween.tween_property(feedback_label, "scale", Vector2.ONE, 0.12)
@@ -593,28 +638,45 @@ func _on_movement_finished() -> void:
 func _finalize_turn() -> void:
 	current_roll = 0
 	answering_locked = false
+
 	if GameState.current_house >= TOTAL_CASAS:
 		GameState.finish_session(true)
 		get_tree().change_scene_to_file("res://scene/end_game_screen.tscn")
 		return
+
 	_set_turn_state(TurnState.WAITING_ROLL)
 
 func _show_feedback(text_value: String, color_value: Color) -> void:
-	feedback_label.text = text_value
-	feedback_label.add_theme_color_override("font_color", color_value)
-	if SettingsManager.subtitles_enabled:
-		subtitle_label.text = GameState.last_feedback
-	else:
-		subtitle_label.text = ""
+	if feedback_label != null:
+		feedback_label.text = text_value
+		feedback_label.add_theme_color_override("font_color", color_value)
+
+	if subtitle_label != null:
+		if SettingsManager.subtitles_enabled:
+			subtitle_label.text = GameState.last_feedback
+		else:
+			subtitle_label.text = ""
 
 func _refresh_hud() -> void:
-	player_label.text = "Jogador: %s" % (GameState.player_name if not GameState.player_name.is_empty() else "Aluno")
-	room_label.text = "Sala: %s" % (GameState.room_code if not GameState.room_code.is_empty() else "Sem codigo")
-	score_label.text = "Score: %d" % GameState.score
-	level_label.text = "Nível: %d" % GameState.level
-	progress_label.text = "Casa: %d/%d" % [GameState.current_house, TOTAL_CASAS]
-	accuracy_label.text = "Acertos: %d%%" % GameState.get_accuracy_percent()
-	if not SettingsManager.subtitles_enabled:
+	if player_label != null:
+		player_label.text = "Jogador: %s" % (GameState.player_name if not GameState.player_name.is_empty() else "Aluno")
+
+	if room_label != null:
+		room_label.text = "Sala: %s" % (GameState.room_code if not GameState.room_code.is_empty() else "Sem codigo")
+
+	if score_label != null:
+		score_label.text = "Score: %d" % GameState.score
+
+	if level_label != null:
+		level_label.text = "Nível: %d" % GameState.level
+
+	if progress_label != null:
+		progress_label.text = "Casa: %d/%d" % [GameState.current_house, TOTAL_CASAS]
+
+	if accuracy_label != null:
+		accuracy_label.text = "Acertos: %d%%" % GameState.get_accuracy_percent()
+
+	if subtitle_label != null and not SettingsManager.subtitles_enabled:
 		subtitle_label.text = ""
 
 func _notification(what: int) -> void:
