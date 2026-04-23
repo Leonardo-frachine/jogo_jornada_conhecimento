@@ -142,7 +142,7 @@ func _create_audio_players() -> void:
 	music_player = AudioStreamPlayer.new()
 	music_player.name = "GameMusic"
 	music_player.bus = "Music"
-	music_player.stream = load("res://assets/audio/menu_theme.wav")
+	music_player.stream = load("res://assets/audio/fundo.mp3")
 	add_child(music_player)
 
 	sfx_player = AudioStreamPlayer.new()
@@ -565,7 +565,7 @@ func roll_dice() -> void:
 	if sprite_dado != null:
 		sprite_dado.texture = dice_textures[current_roll - 1]
 
-	_play_sfx("res://assets/audio/dice.wav")
+	_play_sfx("res://assets/audio/dice.mp3")
 	_present_question(pending_target_house)
 
 func _present_question(house_index: int) -> void:
@@ -604,7 +604,7 @@ func _on_answer_button_pressed(answer_slot: int) -> void:
 	if correct:
 		_set_turn_state(TurnState.MOVING_PLAYER)
 		_show_feedback(GameState.last_feedback, FEEDBACK_OK)
-		_play_sfx("res://assets/audio/correct.wav")
+		_play_sfx("res://assets/audio/correct.mp3")
 
 		if SettingsManager.vfx_enabled:
 			_pulse_feedback()
