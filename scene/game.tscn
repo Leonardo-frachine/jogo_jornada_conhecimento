@@ -11,11 +11,8 @@
 [ext_resource type="Texture2D" uid="uid://c456bwc5yj2r1" path="res://imagens/chao/token_hexagon_3d_blue.png" id="6_5g16k"]
 [ext_resource type="Texture2D" uid="uid://cqw2od8y8ev4" path="res://imagens/chao/token_hexagon_3d_white.png" id="7_ym5sv"]
 [ext_resource type="Texture2D" uid="uid://c3esur46a71up" path="res://imagens/chao/token_hexagon_3d_red.png" id="8_sng2h"]
-[ext_resource type="Texture2D" uid="uid://dbnvbk48p11wk" path="res://imagens/perguntas/boxLaranja.png" id="10_sng2h"]
-[ext_resource type="Texture2D" uid="uid://0v0ilra3sfwp" path="res://imagens/perguntas/logo_jogo.png" id="11_0lu6w"]
-[ext_resource type="Texture2D" uid="uid://d1jjvry1f0uag" path="res://imagens/perguntas/boxpergunta.png" id="11_5g16k"]
-[ext_resource type="FontFile" uid="uid://dffxt3vwl71a7" path="res://fonts/Fredoka-Regular.ttf" id="12_81276"]
-[ext_resource type="Texture2D" uid="uid://bjik58jai1er3" path="res://imagens/perguntas/boxresposta.png" id="13_ve786"]
+[ext_resource type="Texture2D" uid="uid://cbpn68ac6bol8" path="res://imagens/configuracoes/configuracoes.png" id="18_ux4dc"]
+[ext_resource type="Script" uid="uid://crxkgvki2ihn4" path="res://scripts/game.gd" id="19_game"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_33cqm"]
 size = Vector2(65, 55)
@@ -26,28 +23,8 @@ load_path = "res://.godot/imported/token_hexagon_3d_white.png-66aa395056ec9830a7
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_ve786"]
 load_path = "res://.godot/imported/token_hexagon_3d_red.png-70216fab1efe07dba5224a97e01f2af0.ctex"
 
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_0lu6w"]
-texture = ExtResource("13_ve786")
-expand_margin_left = 4.0
-expand_margin_top = 4.0
-expand_margin_right = 4.0
-expand_margin_bottom = 4.0
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_ve786"]
-texture = ExtResource("13_ve786")
-expand_margin_left = 4.0
-expand_margin_top = 4.0
-expand_margin_right = 4.0
-expand_margin_bottom = 4.0
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_ux4dc"]
-texture = ExtResource("13_ve786")
-expand_margin_left = 4.0
-expand_margin_top = 4.0
-expand_margin_right = 4.0
-expand_margin_bottom = 4.0
-
 [node name="Game" type="Node2D" unique_id=664323155]
+script = ExtResource("19_game")
 metadata/_edit_group_ = true
 
 [node name="Casas" type="Node2D" parent="." unique_id=982721774]
@@ -136,7 +113,7 @@ scale = Vector2(0.2, 0.15)
 texture = ExtResource("6_5g16k")
 
 [node name="StaticBody2D_P9" type="StaticBody2D" parent="Casas" unique_id=1894378153]
-position = Vector2(88, 251)
+position = Vector2(125, 251)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Casas/StaticBody2D_P9" unique_id=2145562563]
 position = Vector2(-1.25, -1.5)
@@ -147,7 +124,7 @@ scale = Vector2(0.2, 0.15)
 texture = ExtResource("1_xwcet")
 
 [node name="StaticBody2D_P10" type="StaticBody2D" parent="Casas" unique_id=970524243]
-position = Vector2(111, 138)
+position = Vector2(229, 225)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Casas/StaticBody2D_P10" unique_id=49975323]
 position = Vector2(-1.25, -1.5)
@@ -158,7 +135,7 @@ scale = Vector2(0.2, 0.15)
 texture = ExtResource("2_p1ry8")
 
 [node name="StaticBody2D_P11" type="StaticBody2D" parent="Casas" unique_id=635483920]
-position = Vector2(157, 62)
+position = Vector2(352, 216)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Casas/StaticBody2D_P11" unique_id=158772871]
 position = Vector2(-1.25, -1.5)
@@ -169,7 +146,7 @@ scale = Vector2(0.2, 0.15)
 texture = ExtResource("3_17rxn")
 
 [node name="StaticBody2D_P12" type="StaticBody2D" parent="Casas" unique_id=586803281]
-position = Vector2(319, 47)
+position = Vector2(461, 201)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Casas/StaticBody2D_P12" unique_id=368350435]
 position = Vector2(-1.25, -1.5)
@@ -180,7 +157,7 @@ scale = Vector2(0.2, 0.15)
 texture = ExtResource("4_yq8tf")
 
 [node name="StaticBody2D_P13" type="StaticBody2D" parent="Casas" unique_id=1143936197]
-position = Vector2(465, 92)
+position = Vector2(580, 180)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Casas/StaticBody2D_P13" unique_id=833637766]
 position = Vector2(-1.25, -1.5)
@@ -191,7 +168,7 @@ scale = Vector2(0.2, 0.15)
 texture = ExtResource("7_ym5sv")
 
 [node name="StaticBody2D_P14" type="StaticBody2D" parent="Casas" unique_id=1868927955]
-position = Vector2(570, 200)
+position = Vector2(582, 263)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Casas/StaticBody2D_P14" unique_id=953292171]
 position = Vector2(-1.25, -1.5)
@@ -202,7 +179,7 @@ scale = Vector2(0.2, 0.15)
 texture = ExtResource("8_sng2h")
 
 [node name="StaticBody2D_P15" type="StaticBody2D" parent="Casas" unique_id=1555704523]
-position = Vector2(642, 276)
+position = Vector2(668, 302)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Casas/StaticBody2D_P15" unique_id=383391197]
 position = Vector2(-1.25, -1.5)
@@ -354,132 +331,34 @@ shape = SubResource("RectangleShape2D_33cqm")
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=954870309]
 
 [node name="SpriteDado" type="Sprite2D" parent="CanvasLayer" unique_id=1110844941]
-position = Vector2(664, 42.000004)
-scale = Vector2(0.9044119, 0.80147064)
+position = Vector2(678, 72.99999)
+scale = Vector2(1.2169124, 1.0919118)
 texture = ExtResource("2_dbls1")
 
-[node name="JanelaPergunta" type="Panel" parent="CanvasLayer" unique_id=319156719]
-visible = false
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -292.0
-offset_top = -48.0
-offset_right = 272.0
-offset_bottom = 335.0
-grow_horizontal = 2
-grow_vertical = 2
-size_flags_horizontal = 6
-size_flags_vertical = 6
-
-[node name="Fundo" type="TextureRect" parent="CanvasLayer/JanelaPergunta" unique_id=1353816752]
-layout_mode = 0
-offset_right = 1523.0
-offset_bottom = 1522.0
-scale = Vector2(0.4, 0.25)
-texture = ExtResource("10_sng2h")
-expand_mode = 1
-stretch_mode = 4
-
-[node name="TextureRect" type="TextureRect" parent="CanvasLayer/JanelaPergunta" unique_id=635674990]
-layout_mode = 0
-offset_left = -138.0
-offset_top = -350.0
-offset_right = 733.0
-offset_bottom = 351.0
-texture = ExtResource("11_0lu6w")
-expand_mode = 1
-stretch_mode = 4
-
-[node name="Balao" type="TextureRect" parent="CanvasLayer/JanelaPergunta" unique_id=238807777]
-layout_mode = 0
-offset_left = 47.0
-offset_top = 38.0
-offset_right = 552.0
-offset_bottom = 210.0
-texture = ExtResource("11_5g16k")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="PerguntaLabel" type="Label" parent="CanvasLayer/JanelaPergunta" unique_id=671541615]
-layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-offset_left = 181.0
-offset_top = 102.0
-offset_right = -141.0
-offset_bottom = 125.0
-grow_horizontal = 2
-theme_override_colors/font_color = Color(0, 0, 0, 1)
-theme_override_constants/shadow_offset_x = 2
-theme_override_constants/shadow_offset_y = 2
-theme_override_fonts/font = ExtResource("12_81276")
-theme_override_font_sizes/font_size = 20
-horizontal_alignment = 1
-vertical_alignment = 1
-autowrap_mode = 2
-
-[node name="BotaoA" type="Button" parent="CanvasLayer/JanelaPergunta" unique_id=1380829116]
-layout_mode = 1
-anchors_preset = 2
-anchor_top = 1.0
+[node name="BotaoConfiguracao" type="TextureButton" parent="CanvasLayer" unique_id=1188683254]
+custom_minimum_size = Vector2(128, 128)
+anchors_preset = -1
+anchor_top = 0.80700004
+anchor_right = 0.113000005
 anchor_bottom = 1.0
-offset_left = 63.0
-offset_top = -42.0
-offset_right = 71.0
-offset_bottom = -34.0
+offset_left = 1248.0
+offset_top = 20.95996
+offset_right = 1221.642
+offset_bottom = 10.0
 grow_vertical = 0
-theme_override_colors/font_color = Color(0, 0, 0, 1)
-theme_override_fonts/font = ExtResource("12_81276")
-theme_override_styles/normal = SubResource("StyleBoxTexture_0lu6w")
+texture_normal = ExtResource("18_ux4dc")
+ignore_texture_size = true
+stretch_mode = 6
 
-[node name="BotaoB" type="Button" parent="CanvasLayer/JanelaPergunta" unique_id=119622870]
-layout_mode = 1
-anchors_preset = 7
-anchor_left = 0.5
-anchor_top = 1.0
-anchor_right = 0.5
-anchor_bottom = 1.0
-offset_left = -7.0
-offset_top = -41.0
-offset_right = 1.0
-offset_bottom = -33.0
-grow_horizontal = 2
-grow_vertical = 0
-theme_override_colors/font_color = Color(0, 0, 0, 1)
-theme_override_fonts/font = ExtResource("12_81276")
-theme_override_styles/normal = SubResource("StyleBoxTexture_ve786")
-
-[node name="BotaoC" type="Button" parent="CanvasLayer/JanelaPergunta" unique_id=1144401764]
-layout_mode = 1
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -37.0
-offset_top = -35.0
-offset_right = -29.0
-offset_bottom = -27.0
-grow_horizontal = 0
-grow_vertical = 0
-theme_override_colors/font_color = Color(0, 0, 0, 1)
-theme_override_fonts/font = ExtResource("12_81276")
-theme_override_styles/normal = SubResource("StyleBoxTexture_ux4dc")
-
-[node name="ParallaxBackground" type="ParallaxBackground" parent="." unique_id=992534238]
-
-[node name="ParallaxLayerFundo" type="ParallaxLayer" parent="ParallaxBackground" unique_id=865309381]
-
-[node name="Sprite2D" type="Sprite2D" parent="ParallaxBackground/ParallaxLayerFundo" unique_id=1929210026]
+[node name="BoardBackground" type="Sprite2D" parent="." unique_id=1929210026]
+z_index = -50
+position = Vector2(0, 7.999999)
+scale = Vector2(0.9905797, 0.9601064)
 texture = ExtResource("3_33cqm")
 centered = false
 
+[node name="BoardCamera" type="Camera2D" parent="." unique_id=992534238]
+position = Vector2(685, 371)
+
 [node name="Player" parent="." unique_id=676253778 instance=ExtResource("1_5kiuu")]
 position = Vector2(173, 569)
-
-[connection signal="pressed" from="CanvasLayer/JanelaPergunta/BotaoA" to="Player" method="_on_botao_a_pressed"]
-[connection signal="pressed" from="CanvasLayer/JanelaPergunta/BotaoB" to="Player" method="_on_botao_b_pressed"]
-[connection signal="pressed" from="CanvasLayer/JanelaPergunta/BotaoC" to="Player" method="_on_botao_c_pressed"]

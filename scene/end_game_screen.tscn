@@ -306,7 +306,7 @@ theme_override_font_sizes/font_size = 22
 theme_override_styles/normal = SubResource("StyleBoxFlat_button_blue")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_button_blue")
 theme_override_styles/hover = SubResource("StyleBoxFlat_button_blue")
-text = "MENU PRINCIPAL"
+text = "VOLTAR AO INÍCIO"
 
 [node name="Character" type="TextureRect" parent="." unique_id=462759124]
 custom_minimum_size = Vector2(210, 210)
@@ -326,4 +326,4 @@ texture = ExtResource("4_char")
 expand_mode = 1
 stretch_mode = 5
 
-[connection signal="pressed" from="Content/Center/MainPanel/Inner/VBox/ButtonsRow/MainMenu" to="." method="_on_main_menu_pressed"]
+[connection signal="pressed" from="Content/Center/MainPanel/Inner/VBox/ButtonsRow/MainMenu" to="." method="_on_restart_pressed"]

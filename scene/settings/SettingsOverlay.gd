@@ -85,7 +85,7 @@ func _connect_signals() -> void:
 
 func is_open() -> bool:
 	return opened
-settings_overlay.open(self, "res://scene/settings/SettingsOverlay.tscn")
+settings_overlay.open(self, "res://scene/settings/SettingsOverlay.gd")
 func open(from_screen: Control = null, from_scene_path: String = "") -> void:
 	if opened or animating:
 		return

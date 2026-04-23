@@ -11,9 +11,23 @@ config_version=5
 [application]
 
 config/name="Jornada do conhecimento"
-run/main_scene="uid://2uol8j735lpf"
+run/main_scene="res://scene/tela_inicial.tscn"
 config/features=PackedStringArray("4.6", "GL Compatibility")
 config/icon="res://icon.svg"
+
+[audio]
+
+default_bus_layout="res://default_bus_layout.tres"
+
+[autoload]
+
+SettingsManager="*res://scripts/SettingsManager.gd"
+GameState="*res://scripts/GameState.gd"
+
+[display]
+
+window/size/viewport_width=1366
+window/size/viewport_height=720
 
 [physics]
 

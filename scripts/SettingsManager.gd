@@ -4,7 +4,11 @@ signal settings_loaded
 signal settings_changed
 
 const CONFIG_PATH := "user://settings.cfg"
-const OVERLAY_SCENE := preload("res://scene/settings/SettingsOverlay.tscn")
+const OVERLAY_SCENE := preload("res://ui/settings/SettingsOverlay.tscn")
+const ALLOWED_OVERLAY_SCENES := {
+	"res://scene/tela_inicial.tscn": true,
+	"res://scene/game.tscn": true,
+}
 
 const DEFAULT_MASTER_VOLUME := 0.85
 const DEFAULT_SFX_VOLUME := 0.80
@@ -27,19 +31,39 @@ func _ready() -> void:
 	_spawn_overlay()
 
 func _input(event: InputEvent) -> void:
-	if event.is_action_pressed("ui_cancel"):
-		toggle_menu()
+	if not event.is_action_pressed("ui_cancel"):
+		return
+
+	if overlay != null and overlay.is_open():
+		close_menu()
+		get_viewport().set_input_as_handled()
+		return
+
+	if _can_open_in_current_scene():
+		open_menu()
 		get_viewport().set_input_as_handled()
 
+func _can_open_in_current_scene() -> bool:
+	var current_scene := get_tree().current_scene
+	if current_scene == null:
+		return false
+	return ALLOWED_OVERLAY_SCENES.has(current_scene.scene_file_path)
+
 func _spawn_overlay() -> void:
+	if overlay != null and is_instance_valid(overlay):
+		return
+
 	overlay = OVERLAY_SCENE.instantiate()
 	get_tree().root.call_deferred("add_child", overlay)
 	await get_tree().process_frame
 
-	if overlay.has_signal("menu_opened"):
+	if overlay == null:
+		return
+
+	if overlay.has_signal("menu_opened") and not overlay.menu_opened.is_connected(_on_menu_opened):
 		overlay.menu_opened.connect(_on_menu_opened)
 
-	if overlay.has_signal("menu_closed"):
+	if overlay.has_signal("menu_closed") and not overlay.menu_closed.is_connected(_on_menu_closed):
 		overlay.menu_closed.connect(_on_menu_closed)
 
 func _on_menu_opened() -> void:
@@ -51,17 +75,21 @@ func _on_menu_closed() -> void:
 		get_tree().paused = false
 
 func open_menu() -> void:
+	if not _can_open_in_current_scene():
+		return
+	if overlay == null or not is_instance_valid(overlay):
+		await _spawn_overlay()
 	if overlay == null:
 		return
 	overlay.open()
 
 func close_menu() -> void:
-	if overlay == null:
+	if overlay == null or not is_instance_valid(overlay):
 		return
 	overlay.close()
 
 func toggle_menu() -> void:
-	if overlay == null:
+	if overlay == null or not is_instance_valid(overlay):
 		return
 
 	if overlay.is_open():

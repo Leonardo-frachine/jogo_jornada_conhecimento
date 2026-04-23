@@ -4,6 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://3ljo201dpbbx" path="res://imagens/fundo_tabuleiro/fundo_embacado.png" id="1_ixqfg"]
 [ext_resource type="Texture2D" uid="uid://bv2xmb27g64al" path="res://imagens/logo_jogo/logo_jogo.png" id="2_eym2y"]
 [ext_resource type="Texture2D" uid="uid://ctyknso0bfdn6" path="res://imagens/personagem/personagem_logo.png" id="3_djjjm"]
+[ext_resource type="Texture2D" uid="uid://cbpn68ac6bol8" path="res://imagens/configuracoes/configuracoes.png" id="5_djjjm"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ek0m7"]
 bg_color = Color(1, 0.64705884, 0, 1)
@@ -29,9 +30,6 @@ corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
 
-[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_8bm7t"]
-load_path = "res://.godot/imported/configuracoes.png-b35f259781daf000f22e743b8a4d0b0b.ctex"
-
 [node name="TelaInicial" type="Control" unique_id=1382460529]
 layout_mode = 3
 anchors_preset = 15
@@ -46,10 +44,10 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -247.0
-offset_top = -180.0
-offset_right = 137.0
-offset_bottom = 196.0
+offset_left = -84.0
+offset_top = -161.0
+offset_right = 86.0
+offset_bottom = 143.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
@@ -117,10 +115,10 @@ text = "JOGAR"
 [node name="Logo" type="TextureRect" parent="." unique_id=1532002673]
 custom_minimum_size = Vector2(285, 35)
 layout_mode = 0
-offset_left = 420.0
-offset_top = -381.0
-offset_right = 795.0
-offset_bottom = 619.0
+offset_left = 533.0
+offset_top = -395.0
+offset_right = 908.0
+offset_bottom = 605.0
 mouse_filter = 2
 texture = ExtResource("2_eym2y")
 expand_mode = 1
@@ -129,10 +127,10 @@ stretch_mode = 5
 [node name="Personagem" type="TextureRect" parent="." unique_id=207310344]
 custom_minimum_size = Vector2(280, 320)
 layout_mode = 0
-offset_left = -34.0
-offset_top = 166.0
-offset_right = 701.03
-offset_bottom = 496.0
+offset_left = 65.0
+offset_top = 216.0
+offset_right = 800.03
+offset_bottom = 546.0
 mouse_filter = 2
 texture = ExtResource("3_djjjm")
 expand_mode = 1
@@ -146,11 +144,11 @@ anchors_preset = -1
 anchor_top = 0.80700004
 anchor_right = 0.113000005
 anchor_bottom = 1.0
-offset_left = 2.0
-offset_top = 0.063964844
-offset_right = -0.17601013
-offset_bottom = 3.0
+offset_left = 1216.0
+offset_top = -7.040039
+offset_right = 1213.824
+offset_bottom = -4.104004
 grow_vertical = 0
-texture_normal = SubResource("CompressedTexture2D_8bm7t")
+texture_normal = ExtResource("5_djjjm")
 ignore_texture_size = true
 stretch_mode = 6
