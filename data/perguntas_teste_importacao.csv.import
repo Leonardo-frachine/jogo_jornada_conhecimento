@@ -1,0 +1,19 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://de2pdmo762dts"
+
+[deps]
+
+files=["res://data/perguntas_teste_importacao.enunciado.translation", "res://data/perguntas_teste_importacao.alternativaA.translation", "res://data/perguntas_teste_importacao.alternativaB.translation", "res://data/perguntas_teste_importacao.alternativaC.translation", "res://data/perguntas_teste_importacao.alternativaD.translation", "res://data/perguntas_teste_importacao.respostaCorreta.translation", "res://data/perguntas_teste_importacao.materia.translation", "res://data/perguntas_teste_importacao.dificuldade.translation", "res://data/perguntas_teste_importacao.titulo.translation", "res://data/perguntas_teste_importacao.pontuacao.translation", "res://data/perguntas_teste_importacao.tempoLimite.translation"]
+
+source_file="res://data/perguntas_teste_importacao.csv"
+dest_files=["res://data/perguntas_teste_importacao.enunciado.translation", "res://data/perguntas_teste_importacao.alternativaA.translation", "res://data/perguntas_teste_importacao.alternativaB.translation", "res://data/perguntas_teste_importacao.alternativaC.translation", "res://data/perguntas_teste_importacao.alternativaD.translation", "res://data/perguntas_teste_importacao.respostaCorreta.translation", "res://data/perguntas_teste_importacao.materia.translation", "res://data/perguntas_teste_importacao.dificuldade.translation", "res://data/perguntas_teste_importacao.titulo.translation", "res://data/perguntas_teste_importacao.pontuacao.translation", "res://data/perguntas_teste_importacao.tempoLimite.translation"]
+
+[params]
+
+compress=1
+delimiter=0
+unescape_keys=false
+unescape_translations=true

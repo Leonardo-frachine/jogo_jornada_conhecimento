@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { App } from 'supertest/types';
+import * as XLSX from 'xlsx';
 import { configureApp } from '../src/app.config';
 import { AppModule } from '../src/app.module';
 
@@ -145,6 +146,88 @@ describe('AppController (e2e)', () => {
 
     expect(exportacaoResponse.text).toContain('Correta (A-D)');
     expect(exportacaoResponse.text).toContain('Quanto e 2 + 2?');
+  });
+
+  it('importa perguntas por planilha CSV e XLSX', async () => {
+    const csv = [
+      'id,enunciado,alternativaA,alternativaB,alternativaC,alternativaD,respostaCorreta,materia,dificuldade,titulo,pontuacao,tempoLimite',
+      '999,Qual numero vem antes do 11?,10,11,12,13,A,Matematica,1,Sequencia numerica,120,25',
+    ].join('\n');
+
+    const importacaoCsvResponse = await request(app.getHttpServer())
+      .post('/perguntas/importar-planilha')
+      .send({
+        fileName: 'perguntas-importacao.csv',
+        contentBase64: Buffer.from(csv, 'utf-8').toString('base64'),
+      })
+      .expect(201);
+
+    expect(importacaoCsvResponse.body).toMatchObject({
+      total: 1,
+      formato: 'csv',
+    });
+    expect(importacaoCsvResponse.body.perguntas[0]).toMatchObject({
+      respostaCorreta: 'A',
+      materia: 'Matematica',
+      pontuacao: 120,
+    });
+    expect(importacaoCsvResponse.body.perguntas[0].id).not.toBe(999);
+
+    const workbook = XLSX.utils.book_new();
+    const worksheet = XLSX.utils.aoa_to_sheet([
+      [
+        'id',
+        'enunciado',
+        'alternativaA',
+        'alternativaB',
+        'alternativaC',
+        'alternativaD',
+        'respostaCorreta',
+        'materia',
+        'dificuldade',
+        'titulo',
+        'pontuacao',
+        'tempoLimite',
+      ],
+      [
+        500,
+        'Qual planeta habitamos?',
+        'Terra',
+        'Marte',
+        'Venus',
+        'Jupiter',
+        'A',
+        'Ciencias',
+        '2',
+        'Planeta Terra',
+        220,
+        30,
+      ],
+    ]);
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Perguntas');
+    const xlsxBase64 = XLSX.write(workbook, {
+      type: 'base64',
+      bookType: 'xlsx',
+    });
+
+    const importacaoXlsxResponse = await request(app.getHttpServer())
+      .post('/perguntas/importar-planilha')
+      .send({
+        fileName: 'perguntas-importacao.xlsx',
+        contentBase64: xlsxBase64,
+      })
+      .expect(201);
+
+    expect(importacaoXlsxResponse.body).toMatchObject({
+      total: 1,
+      formato: 'xlsx',
+    });
+    expect(importacaoXlsxResponse.body.perguntas[0]).toMatchObject({
+      respostaCorreta: 'A',
+      materia: 'Ciencias',
+      pontuacao: 220,
+    });
+    expect(importacaoXlsxResponse.body.perguntas[0].id).not.toBe(500);
   });
 
   afterAll(async () => {

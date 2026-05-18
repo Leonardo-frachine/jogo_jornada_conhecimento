@@ -139,114 +139,125 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 
 [node name="Panel" type="PanelContainer" parent="CenterContainer" unique_id=57714302]
-custom_minimum_size = Vector2(760, 560)
+custom_minimum_size = Vector2(720, 620)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
 
 [node name="Margin" type="MarginContainer" parent="CenterContainer/Panel" unique_id=939622693]
 layout_mode = 2
-theme_override_constants/margin_left = 24
-theme_override_constants/margin_top = 24
-theme_override_constants/margin_right = 24
-theme_override_constants/margin_bottom = 24
+theme_override_constants/margin_left = 22
+theme_override_constants/margin_top = 22
+theme_override_constants/margin_right = 22
+theme_override_constants/margin_bottom = 22
 
 [node name="VBox" type="VBoxContainer" parent="CenterContainer/Panel/Margin" unique_id=1411966395]
 layout_mode = 2
-theme_override_constants/separation = 18
+theme_override_constants/separation = 14
 
 [node name="Header" type="PanelContainer" parent="CenterContainer/Panel/Margin/VBox" unique_id=369937480]
-custom_minimum_size = Vector2(0, 90)
+custom_minimum_size = Vector2(0, 78)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_header")
 
 [node name="Title" type="Label" parent="CenterContainer/Panel/Margin/VBox/Header" unique_id=233419829]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.960784, 0.968627, 0.980392, 1)
-theme_override_font_sizes/font_size = 34
-text = "CONFIGURAÇÕES"
+theme_override_font_sizes/font_size = 30
+text = "CONFIGURACOES"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="AudioSection" type="PanelContainer" parent="CenterContainer/Panel/Margin/VBox" unique_id=228042657]
+[node name="Scroll" type="ScrollContainer" parent="CenterContainer/Panel/Margin/VBox" unique_id=114719006]
+custom_minimum_size = Vector2(0, 420)
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="Content" type="VBoxContainer" parent="CenterContainer/Panel/Margin/VBox/Scroll" unique_id=509556801]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 14
+
+[node name="AudioSection" type="PanelContainer" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content" unique_id=228042657]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
 
-[node name="Margin" type="MarginContainer" parent="CenterContainer/Panel/Margin/VBox/AudioSection" unique_id=887843559]
+[node name="Margin" type="MarginContainer" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content/AudioSection" unique_id=887843559]
 layout_mode = 2
-theme_override_constants/margin_left = 18
-theme_override_constants/margin_top = 18
-theme_override_constants/margin_right = 18
-theme_override_constants/margin_bottom = 18
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
 
-[node name="Rows" type="VBoxContainer" parent="CenterContainer/Panel/Margin/VBox/AudioSection/Margin" unique_id=1373927662]
+[node name="Rows" type="VBoxContainer" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content/AudioSection/Margin" unique_id=1373927662]
 layout_mode = 2
-theme_override_constants/separation = 16
+theme_override_constants/separation = 12
 
-[node name="MasterRow" type="HBoxContainer" parent="CenterContainer/Panel/Margin/VBox/AudioSection/Margin/Rows" unique_id=738812033]
+[node name="MasterRow" type="HBoxContainer" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content/AudioSection/Margin/Rows" unique_id=738812033]
 layout_mode = 2
 theme_override_constants/separation = 12
 alignment = 1
 
-[node name="MasterText" type="Label" parent="CenterContainer/Panel/Margin/VBox/AudioSection/Margin/Rows/MasterRow" unique_id=746705144]
-custom_minimum_size = Vector2(165, 0)
+[node name="MasterText" type="Label" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content/AudioSection/Margin/Rows/MasterRow" unique_id=746705144]
+custom_minimum_size = Vector2(150, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.960784, 0.968627, 0.980392, 1)
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 18
 text = "Volume Geral"
 vertical_alignment = 1
 
-[node name="MasterSlider" type="HSlider" parent="CenterContainer/Panel/Margin/VBox/AudioSection/Margin/Rows/MasterRow" unique_id=1661062921]
+[node name="MasterSlider" type="HSlider" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content/AudioSection/Margin/Rows/MasterRow" unique_id=1661062921]
 clip_contents = true
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="SfxRow" type="HBoxContainer" parent="CenterContainer/Panel/Margin/VBox/AudioSection/Margin/Rows" unique_id=505098558]
+[node name="SfxRow" type="HBoxContainer" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content/AudioSection/Margin/Rows" unique_id=505098558]
 layout_mode = 2
 theme_override_constants/separation = 12
 alignment = 1
 
-[node name="SfxText" type="Label" parent="CenterContainer/Panel/Margin/VBox/AudioSection/Margin/Rows/SfxRow" unique_id=114896001]
-custom_minimum_size = Vector2(165, 0)
+[node name="SfxText" type="Label" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content/AudioSection/Margin/Rows/SfxRow" unique_id=114896001]
+custom_minimum_size = Vector2(150, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.960784, 0.968627, 0.980392, 1)
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 18
 text = "Efeitos Sonoros"
 vertical_alignment = 1
 
-[node name="SfxSlider" type="HSlider" parent="CenterContainer/Panel/Margin/VBox/AudioSection/Margin/Rows/SfxRow" unique_id=1129085844]
+[node name="SfxSlider" type="HSlider" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content/AudioSection/Margin/Rows/SfxRow" unique_id=1129085844]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="TogglesSection" type="PanelContainer" parent="CenterContainer/Panel/Margin/VBox" unique_id=1255557144]
+[node name="TogglesSection" type="PanelContainer" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content" unique_id=1255557144]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
 
-[node name="Margin" type="MarginContainer" parent="CenterContainer/Panel/Margin/VBox/TogglesSection" unique_id=187843125]
+[node name="Margin" type="MarginContainer" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content/TogglesSection" unique_id=187843125]
 layout_mode = 2
-theme_override_constants/margin_left = 18
-theme_override_constants/margin_top = 18
-theme_override_constants/margin_right = 18
-theme_override_constants/margin_bottom = 18
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
 
-[node name="Rows" type="VBoxContainer" parent="CenterContainer/Panel/Margin/VBox/TogglesSection/Margin" unique_id=1734538203]
+[node name="Rows" type="VBoxContainer" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content/TogglesSection/Margin" unique_id=1734538203]
 layout_mode = 2
-theme_override_constants/separation = 14
+theme_override_constants/separation = 10
 
-[node name="MusicRow" type="HBoxContainer" parent="CenterContainer/Panel/Margin/VBox/TogglesSection/Margin/Rows" unique_id=149029081]
+[node name="MusicRow" type="HBoxContainer" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content/TogglesSection/Margin/Rows" unique_id=149029081]
 layout_mode = 2
 theme_override_constants/separation = 12
 alignment = 1
 
-[node name="MusicText" type="Label" parent="CenterContainer/Panel/Margin/VBox/TogglesSection/Margin/Rows/MusicRow" unique_id=976196941]
+[node name="MusicText" type="Label" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content/TogglesSection/Margin/Rows/MusicRow" unique_id=976196941]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.960784, 0.968627, 0.980392, 1)
-theme_override_font_sizes/font_size = 20
-text = "Música"
+theme_override_font_sizes/font_size = 18
+text = "Musica"
 vertical_alignment = 1
 
-[node name="MusicToggle" type="Button" parent="CenterContainer/Panel/Margin/VBox/TogglesSection/Margin/Rows/MusicRow" unique_id=1591569159]
-custom_minimum_size = Vector2(112, 42)
+[node name="MusicToggle" type="Button" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content/TogglesSection/Margin/Rows/MusicRow" unique_id=1591569159]
+custom_minimum_size = Vector2(96, 38)
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_pressed_color = Color(0.0470588, 0.0627451, 0.0901961, 1)
@@ -258,26 +269,26 @@ theme_override_styles/hover_pressed = SubResource("StyleBoxFlat_toggle_on")
 toggle_mode = true
 text = "ON"
 
-[node name="VfxRow" type="HBoxContainer" parent="CenterContainer/Panel/Margin/VBox/TogglesSection/Margin/Rows" unique_id=338287510]
+[node name="VfxRow" type="HBoxContainer" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content/TogglesSection/Margin/Rows" unique_id=338287510]
 layout_mode = 2
 theme_override_constants/separation = 12
 alignment = 1
 
-[node name="SubtitleRow" type="HBoxContainer" parent="CenterContainer/Panel/Margin/VBox/TogglesSection/Margin/Rows" unique_id=666025600]
+[node name="SubtitleRow" type="HBoxContainer" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content/TogglesSection/Margin/Rows" unique_id=666025600]
 layout_mode = 2
 theme_override_constants/separation = 12
 alignment = 1
 
-[node name="SubtitleText" type="Label" parent="CenterContainer/Panel/Margin/VBox/TogglesSection/Margin/Rows/SubtitleRow" unique_id=2088956902]
+[node name="SubtitleText" type="Label" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content/TogglesSection/Margin/Rows/SubtitleRow" unique_id=2088956902]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.960784, 0.968627, 0.980392, 1)
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 18
 text = "Legendas"
 vertical_alignment = 1
 
-[node name="SubtitleToggle" type="Button" parent="CenterContainer/Panel/Margin/VBox/TogglesSection/Margin/Rows/SubtitleRow" unique_id=417545568]
-custom_minimum_size = Vector2(112, 42)
+[node name="SubtitleToggle" type="Button" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content/TogglesSection/Margin/Rows/SubtitleRow" unique_id=417545568]
+custom_minimum_size = Vector2(96, 38)
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_pressed_color = Color(0.0470588, 0.0627451, 0.0901961, 1)
@@ -288,6 +299,55 @@ theme_override_styles/hover = SubResource("StyleBoxFlat_toggle_off")
 theme_override_styles/hover_pressed = SubResource("StyleBoxFlat_toggle_on")
 toggle_mode = true
 text = "ON"
+
+[node name="ImportSection" type="PanelContainer" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content" unique_id=136724571]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_card")
+
+[node name="Margin" type="MarginContainer" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content/ImportSection" unique_id=187120330]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="VBox" type="VBoxContainer" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content/ImportSection/Margin" unique_id=562244131]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="ImportTitle" type="Label" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content/ImportSection/Margin/VBox" unique_id=1034679689]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.960784, 0.968627, 0.980392, 1)
+theme_override_font_sizes/font_size = 18
+text = "Importacao de Perguntas"
+
+[node name="ImportHint" type="Label" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content/ImportSection/Margin/VBox" unique_id=626147523]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.9, 0.98, 0.88)
+theme_override_font_sizes/font_size = 14
+text = "CSV ou XLSX com colunas da tabela perguntas."
+autowrap_mode = 3
+
+[node name="ImportButtonRow" type="HBoxContainer" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content/ImportSection/Margin/VBox" unique_id=1951838257]
+layout_mode = 2
+alignment = 2
+
+[node name="ImportButton" type="Button" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content/ImportSection/Margin/VBox/ImportButtonRow" unique_id=882495997]
+custom_minimum_size = Vector2(190, 42)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.0470588, 0.0627451, 0.0901961, 1)
+theme_override_colors/font_hover_color = Color(0.0470588, 0.0627451, 0.0901961, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_button_close")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button_close")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button_close_hover")
+text = "Importar Planilha"
+
+[node name="ImportStatus" type="Label" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content/ImportSection/Margin/VBox" unique_id=1379682351]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.9, 0.98, 0.88)
+theme_override_font_sizes/font_size = 14
+autowrap_mode = 3
+text = " "
 
 [node name="Footer" type="HBoxContainer" parent="CenterContainer/Panel/Margin/VBox" unique_id=1267021719]
 layout_mode = 2
@@ -295,7 +355,7 @@ theme_override_constants/separation = 12
 alignment = 2
 
 [node name="ResetButton" type="Button" parent="CenterContainer/Panel/Margin/VBox/Footer" unique_id=1263426442]
-custom_minimum_size = Vector2(190, 48)
+custom_minimum_size = Vector2(170, 44)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.960784, 0.968627, 0.980392, 1)
 theme_override_colors/font_hover_color = Color(0.960784, 0.968627, 0.980392, 1)
@@ -305,7 +365,7 @@ theme_override_styles/hover = SubResource("StyleBoxFlat_button_reset_hover")
 text = "Resetar"
 
 [node name="CloseButton" type="Button" parent="CenterContainer/Panel/Margin/VBox/Footer" unique_id=1464780783]
-custom_minimum_size = Vector2(190, 48)
+custom_minimum_size = Vector2(170, 44)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.0470588, 0.0627451, 0.0901961, 1)
 theme_override_colors/font_hover_color = Color(0.0470588, 0.0627451, 0.0901961, 1)

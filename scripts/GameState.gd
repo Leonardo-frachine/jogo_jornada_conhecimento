@@ -195,6 +195,27 @@ func get_question_for_house(house_index: int) -> Dictionary:
 	current_question = _select_question_for_house(house_index)
 	return current_question.duplicate(true)
 
+func register_imported_questions(payload: Variant) -> int:
+	var normalized_questions: Array[Dictionary] = _normalize_questions(payload)
+	var imported_count := 0
+
+	for question in normalized_questions:
+		var question_id := int(question.get("id", 0))
+		var replaced := false
+
+		if question_id > 0:
+			for index in range(loaded_questions.size()):
+				if int(loaded_questions[index].get("id", 0)) == question_id:
+					loaded_questions[index] = question
+					replaced = true
+					break
+
+		if not replaced:
+			loaded_questions.append(question)
+			imported_count += 1
+
+	return imported_count
+
 func _select_question_for_house(house_index: int) -> Dictionary:
 	if loaded_questions.is_empty():
 		return _build_fallback_question(house_index)

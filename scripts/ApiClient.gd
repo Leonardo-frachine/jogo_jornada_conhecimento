@@ -3,6 +3,7 @@ extends Node
 const DEFAULT_BASE_URL := "http://127.0.0.1:3000"
 const BASE_URL_SETTING := "application/config/api_base_url"
 const REQUEST_TIMEOUT_SECONDS := 10.0
+const IMPORT_REQUEST_TIMEOUT_SECONDS := 30.0
 
 var base_url: String = DEFAULT_BASE_URL
 
@@ -20,6 +21,26 @@ func create_player(name: String) -> Dictionary:
 func fetch_questions() -> Dictionary:
 	return await _request_json(HTTPClient.METHOD_GET, "/perguntas")
 
+func import_questions_spreadsheet(file_path: String) -> Dictionary:
+	var extension: String = file_path.get_extension().to_lower()
+	if extension != "csv" and extension != "xlsx":
+		return _error_response(0, "Selecione um arquivo .csv ou .xlsx.")
+
+	var file := FileAccess.open(file_path, FileAccess.READ)
+	if file == null:
+		return _error_response(0, "Nao foi possivel abrir o arquivo selecionado.")
+
+	var content: PackedByteArray = file.get_buffer(file.get_length())
+	file.close()
+
+	if content.is_empty():
+		return _error_response(0, "O arquivo selecionado esta vazio.")
+
+	return await _request_json(HTTPClient.METHOD_POST, "/perguntas/importar-planilha", {
+		"fileName": file_path.get_file(),
+		"contentBase64": Marshalls.raw_to_base64(content),
+	}, IMPORT_REQUEST_TIMEOUT_SECONDS)
+
 func create_progress(jogador_id: int, pergunta_id: int, acertou: bool, fase: int) -> Dictionary:
 	return await _request_json(HTTPClient.METHOD_POST, "/progresso", {
 		"jogadorId": jogador_id,
@@ -33,9 +54,9 @@ func update_player_phase(jogador_id: int, fase_atual: int) -> Dictionary:
 		"faseAtual": fase_atual,
 	})
 
-func _request_json(method: HTTPClient.Method, path: String, payload: Variant = null) -> Dictionary:
+func _request_json(method: HTTPClient.Method, path: String, payload: Variant = null, timeout_seconds: float = REQUEST_TIMEOUT_SECONDS) -> Dictionary:
 	var request: HTTPRequest = HTTPRequest.new()
-	request.timeout = REQUEST_TIMEOUT_SECONDS
+	request.timeout = timeout_seconds
 	add_child(request)
 
 	var headers: PackedStringArray = PackedStringArray([

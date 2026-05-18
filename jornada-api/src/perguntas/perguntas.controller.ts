@@ -13,6 +13,7 @@ import { PerguntasService } from './perguntas.service';
 import { AtualizarPerguntaDto } from './dto/atualizar-pergunta.dto';
 import { CriarPerguntaDto } from './dto/criar-pergunta.dto';
 import { ImportarPerguntasCsvDto } from './dto/importar-perguntas-csv.dto';
+import { ImportarPerguntasPlanilhaDto } from './dto/importar-perguntas-planilha.dto';
 
 @Controller('perguntas')
 export class PerguntasController {
@@ -26,6 +27,16 @@ export class PerguntasController {
   @Post('importar-csv')
   importarCsv(@Body() importarPerguntasCsvDto: ImportarPerguntasCsvDto) {
     return this.perguntasService.importarCsv(importarPerguntasCsvDto.csv);
+  }
+
+  @Post('importar-planilha')
+  importarPlanilha(
+    @Body() importarPerguntasPlanilhaDto: ImportarPerguntasPlanilhaDto,
+  ) {
+    return this.perguntasService.importarPlanilha(
+      importarPerguntasPlanilhaDto.fileName,
+      importarPerguntasPlanilhaDto.contentBase64,
+    );
   }
 
   @Get()

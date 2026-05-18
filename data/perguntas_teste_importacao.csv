@@ -1,0 +1,26 @@
+id,enunciado,alternativaA,alternativaB,alternativaC,alternativaD,respostaCorreta,materia,dificuldade,titulo,pontuacao,tempoLimite
+1,Quanto e 5 + 3?,8,7,9,6,A,Matematica,1,Soma simples,100,20
+2,Qual e a capital do Brasil?,Brasilia,Rio de Janeiro,Salvador,Curitiba,A,Geografia,1,Capital do Brasil,120,20
+3,Qual planeta habitamos?,Terra,Marte,Venus,Jupiter,A,Ciencias,1,Planeta Terra,130,25
+4,Qual e a primeira letra do alfabeto?,A,B,C,D,A,Portugues,1,Alfabeto,90,15
+5,Quanto e 10 - 4?,6,5,7,8,A,Matematica,1,Subtracao simples,110,20
+6,Qual animal mia?,Gato,Cachorro,Cavalo,Vaca,A,Ciencias,2,Animais,180,25
+7,Qual cor aparece no ceu em um dia limpo?,Azul,Verde,Vermelho,Roxo,A,Ciencias,2,Cores da natureza,170,25
+8,Qual e o maior oceano do mundo?,Pacifico,Atlantico,Indico,Artico,A,Geografia,2,Oceano,220,30
+9,Qual e o resultado de 6 x 7?,42,36,48,40,A,Matematica,2,Multiplicacao,210,30
+10,Quem escreveu Dom Casmurro?,Machado de Assis,Carlos Drummond,Cecilia Meireles,Monteiro Lobato,A,Portugues,2,Literatura,230,30
+11,Qual gas as plantas absorvem na fotossintese?,Dioxido de carbono,Oxygenio,Nitrogenio,Helio,A,Ciencias,2,Plantas,200,30
+12,Em que continente fica o Egito?,Africa,Europa,Asia,Oceania,A,Geografia,2,Continentes,190,25
+13,Qual e o resultado de 15 / 3?,5,4,6,3,A,Matematica,3,Divisao,260,35
+14,Qual e o sinonimo de rapido?,Veloz,Lento,Pesado,Parado,A,Portugues,3,Vocabulario,250,35
+15,Qual orgao bombeia sangue pelo corpo?,Coracao,Pulmao,Figado,Rim,A,Ciencias,3,Corpo humano,280,35
+16,Qual linha imaginaria divide a Terra em hemisferios norte e sul?,Equador,Greenwich,Capricornio,Artico,A,Geografia,3,Linhas imaginarias,270,35
+17,Qual e o valor de pi aproximado com duas casas decimais?,3.14,2.71,1.62,4.20,A,Matematica,3,Constante pi,290,40
+18,Qual figura de linguagem compara usando como ou tal qual?,Comparacao,Metafora,Hiperbole,Ironia,A,Portugues,3,Figura de linguagem,300,40
+19,Qual particula possui carga negativa?,Eletron,Proton,Neutron,Foton,A,Ciencias,3,Atomo,310,40
+20,Qual pais tem formato aproximado de bota?,Italia,Espanha,Portugal,Grecia,A,Geografia,3,Paises,320,40
+21,Qual e a derivada de x^2?,2x,x,x^3,1,A,Matematica,4,Derivada basica,380,45
+22,Qual periodo historico veio apos a Idade Media?,Idade Moderna,Idade Antiga,Pre Historia,Idade do Bronze,A,Historia,4,Periodos historicos,360,45
+23,Qual e a funcao da mitocondria?,Produzir energia,Fazer digestao,Controlar audicao,Colorir a celula,A,Ciencias,4,Mitocondria,390,45
+24,Qual e o pais mais populoso da America do Sul?,Brasil,Argentina,Colombia,Chile,A,Geografia,4,Populacao,370,45
+25,Qual oracao esta na voz ativa?,O aluno resolveu o problema.,O problema foi resolvido pelo aluno.,O problema estava resolvido.,Havia sido resolvido o problema.,A,Portugues,4,Voz verbal,400,50

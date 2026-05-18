@@ -15,11 +15,16 @@ var sfx_value: Label
 var music_toggle: Button
 var vfx_toggle: Button
 var subtitle_toggle: Button
+var import_button: Button
+var import_status: Label
 var reset_button: Button
 var close_button: Button
+var import_dialog: FileDialog
 var settings_manager: Node = null
 var opened := false
 var animating := false
+var import_in_progress := false
+var panel_base_size := Vector2(720, 620)
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -42,6 +47,7 @@ func _ready() -> void:
 	_bind_feedback(music_toggle)
 	_bind_feedback(vfx_toggle)
 	_bind_feedback(subtitle_toggle)
+	_bind_feedback(import_button)
 
 	if not settings_manager.settings_loaded.is_connected(_refresh_ui):
 		settings_manager.settings_loaded.connect(_refresh_ui)
@@ -49,23 +55,30 @@ func _ready() -> void:
 		settings_manager.settings_changed.connect(_refresh_ui)
 
 	_refresh_ui()
+	if not get_viewport().size_changed.is_connected(_update_panel_bounds):
+		get_viewport().size_changed.connect(_update_panel_bounds)
+	call_deferred("_update_panel_bounds")
 
 func _cache_controls() -> void:
-	master_slider = get_node_or_null("Root/CenterContainer/Panel/Margin/VBox/AudioSection/Margin/Rows/MasterRow/MasterSlider")
-	master_value = get_node_or_null("Root/CenterContainer/Panel/Margin/VBox/AudioSection/Margin/Rows/MasterRow/MasterValue")
-	sfx_slider = get_node_or_null("Root/CenterContainer/Panel/Margin/VBox/AudioSection/Margin/Rows/SfxRow/SfxSlider")
-	sfx_value = get_node_or_null("Root/CenterContainer/Panel/Margin/VBox/AudioSection/Margin/Rows/SfxRow/SfxValue")
-	music_toggle = get_node_or_null("Root/CenterContainer/Panel/Margin/VBox/TogglesSection/Margin/Rows/MusicRow/MusicToggle")
-	vfx_toggle = get_node_or_null("Root/CenterContainer/Panel/Margin/VBox/TogglesSection/Margin/Rows/VfxRow/VfxToggle")
-	subtitle_toggle = get_node_or_null("Root/CenterContainer/Panel/Margin/VBox/TogglesSection/Margin/Rows/SubtitleRow/SubtitleToggle")
+	master_slider = get_node_or_null("Root/CenterContainer/Panel/Margin/VBox/Scroll/Content/AudioSection/Margin/Rows/MasterRow/MasterSlider")
+	master_value = get_node_or_null("Root/CenterContainer/Panel/Margin/VBox/Scroll/Content/AudioSection/Margin/Rows/MasterRow/MasterValue")
+	sfx_slider = get_node_or_null("Root/CenterContainer/Panel/Margin/VBox/Scroll/Content/AudioSection/Margin/Rows/SfxRow/SfxSlider")
+	sfx_value = get_node_or_null("Root/CenterContainer/Panel/Margin/VBox/Scroll/Content/AudioSection/Margin/Rows/SfxRow/SfxValue")
+	music_toggle = get_node_or_null("Root/CenterContainer/Panel/Margin/VBox/Scroll/Content/TogglesSection/Margin/Rows/MusicRow/MusicToggle")
+	vfx_toggle = get_node_or_null("Root/CenterContainer/Panel/Margin/VBox/Scroll/Content/TogglesSection/Margin/Rows/VfxRow/VfxToggle")
+	subtitle_toggle = get_node_or_null("Root/CenterContainer/Panel/Margin/VBox/Scroll/Content/TogglesSection/Margin/Rows/SubtitleRow/SubtitleToggle")
+	import_button = get_node_or_null("Root/CenterContainer/Panel/Margin/VBox/Scroll/Content/ImportSection/Margin/VBox/ImportButtonRow/ImportButton")
+	import_status = get_node_or_null("Root/CenterContainer/Panel/Margin/VBox/Scroll/Content/ImportSection/Margin/VBox/ImportStatus")
 	reset_button = get_node_or_null("Root/CenterContainer/Panel/Margin/VBox/Footer/ResetButton")
 	close_button = get_node_or_null("Root/CenterContainer/Panel/Margin/VBox/Footer/CloseButton")
+	import_dialog = get_node_or_null("ImportDialog")
 
 func _create_missing_controls_if_needed() -> void:
-	var master_row: HBoxContainer = get_node_or_null("Root/CenterContainer/Panel/Margin/VBox/AudioSection/Margin/Rows/MasterRow")
-	var sfx_row: HBoxContainer = get_node_or_null("Root/CenterContainer/Panel/Margin/VBox/AudioSection/Margin/Rows/SfxRow")
-	var vfx_row: HBoxContainer = get_node_or_null("Root/CenterContainer/Panel/Margin/VBox/TogglesSection/Margin/Rows/VfxRow")
-	var music_text: Label = get_node_or_null("Root/CenterContainer/Panel/Margin/VBox/TogglesSection/Margin/Rows/MusicRow/MusicText")
+	var master_row: HBoxContainer = get_node_or_null("Root/CenterContainer/Panel/Margin/VBox/Scroll/Content/AudioSection/Margin/Rows/MasterRow")
+	var sfx_row: HBoxContainer = get_node_or_null("Root/CenterContainer/Panel/Margin/VBox/Scroll/Content/AudioSection/Margin/Rows/SfxRow")
+	var vfx_row: HBoxContainer = get_node_or_null("Root/CenterContainer/Panel/Margin/VBox/Scroll/Content/TogglesSection/Margin/Rows/VfxRow")
+	var music_text: Label = get_node_or_null("Root/CenterContainer/Panel/Margin/VBox/Scroll/Content/TogglesSection/Margin/Rows/MusicRow/MusicText")
+	var import_box: VBoxContainer = get_node_or_null("Root/CenterContainer/Panel/Margin/VBox/Scroll/Content/ImportSection/Margin/VBox")
 
 	if master_value == null and master_row != null:
 		master_value = _make_value_label()
@@ -92,6 +105,25 @@ func _create_missing_controls_if_needed() -> void:
 		vfx_toggle.name = "VfxToggle"
 		vfx_row.add_child(vfx_toggle)
 
+	if import_status == null and import_box != null:
+		import_status = Label.new()
+		import_status.name = "ImportStatus"
+		import_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		import_status.add_theme_font_size_override("font_size", 15)
+		import_status.add_theme_color_override("font_color", Color(0.85, 0.90, 0.98, 0.88))
+		import_box.add_child(import_status)
+
+	if import_dialog == null:
+		import_dialog = FileDialog.new()
+		import_dialog.name = "ImportDialog"
+		import_dialog.access = FileDialog.ACCESS_FILESYSTEM
+		import_dialog.file_mode = FileDialog.FILE_MODE_OPEN_FILE
+		import_dialog.use_native_dialog = true
+		import_dialog.title = "Selecionar planilha de perguntas"
+		import_dialog.add_filter("*.csv", "Arquivos CSV")
+		import_dialog.add_filter("*.xlsx", "Planilhas Excel")
+		add_child(import_dialog)
+
 func _make_value_label() -> Label:
 	var label := Label.new()
 	label.custom_minimum_size = Vector2(62, 0)
@@ -103,7 +135,7 @@ func _make_value_label() -> Label:
 
 func _make_toggle_button(reference_button: Button) -> Button:
 	var button := Button.new()
-	button.custom_minimum_size = Vector2(112, 42)
+	button.custom_minimum_size = Vector2(96, 38)
 	button.toggle_mode = true
 	button.text = "ON"
 	button.add_theme_color_override("font_color", reference_button.get_theme_color("font_color"))
@@ -143,6 +175,10 @@ func _connect_signals() -> void:
 		vfx_toggle.toggled.connect(_on_vfx_toggled)
 	if not subtitle_toggle.toggled.is_connected(_on_subtitles_toggled):
 		subtitle_toggle.toggled.connect(_on_subtitles_toggled)
+	if import_button != null and not import_button.pressed.is_connected(_on_import_button_pressed):
+		import_button.pressed.connect(_on_import_button_pressed)
+	if import_dialog != null and not import_dialog.file_selected.is_connected(_on_import_file_selected):
+		import_dialog.file_selected.connect(_on_import_file_selected)
 
 func is_open() -> bool:
 	return opened
@@ -156,7 +192,8 @@ func open() -> void:
 	root.visible = true
 	root.mouse_filter = Control.MOUSE_FILTER_STOP
 	root.modulate = Color(1, 1, 1, 0)
-	panel.scale = Vector2(0.96, 0.96)
+	_update_panel_bounds()
+	panel.scale = Vector2(0.98, 0.98)
 
 	_refresh_ui()
 	menu_opened.emit()
@@ -166,7 +203,8 @@ func open() -> void:
 	tween.parallel().tween_property(panel, "scale", Vector2.ONE, 0.18).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	tween.finished.connect(func() -> void:
 		animating = false
-		master_slider.grab_focus()
+		if master_slider != null:
+			master_slider.grab_focus()
 	)
 
 func close() -> void:
@@ -178,7 +216,7 @@ func close() -> void:
 
 	var tween := create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
 	tween.tween_property(root, "modulate", Color(1, 1, 1, 0), 0.12)
-	tween.parallel().tween_property(panel, "scale", Vector2(0.96, 0.96), 0.12).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	tween.parallel().tween_property(panel, "scale", Vector2(0.98, 0.98), 0.12).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 	tween.finished.connect(func() -> void:
 		root.visible = false
 		root.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -201,6 +239,7 @@ func _refresh_ui() -> void:
 	music_toggle.text = "ON" if settings_manager.music_enabled else "OFF"
 	vfx_toggle.text = "ON" if settings_manager.vfx_enabled else "OFF"
 	subtitle_toggle.text = "ON" if settings_manager.subtitles_enabled else "OFF"
+	_update_import_controls()
 
 func _on_master_slider_changed(value: float) -> void:
 	if settings_manager == null:
@@ -242,7 +281,65 @@ func _on_close_pressed() -> void:
 		return
 	settings_manager.close_menu()
 
+func _on_import_button_pressed() -> void:
+	if import_in_progress or import_dialog == null:
+		return
+
+	_set_import_status("Selecione uma planilha .csv ou .xlsx.", Color(0.85, 0.90, 0.98, 0.88))
+	import_dialog.popup_centered_ratio(0.75)
+
+func _on_import_file_selected(path: String) -> void:
+	if import_in_progress:
+		return
+
+	import_in_progress = true
+	_update_import_controls()
+	_set_import_status("Importando perguntas...", Color(0.96, 0.82, 0.45, 1.0))
+
+	var response: Dictionary = await ApiClient.import_questions_spreadsheet(path)
+	import_in_progress = false
+	_update_import_controls()
+
+	if not response.get("ok", false):
+		_set_import_status(response.get("error", "Falha ao importar a planilha."), Color(0.93, 0.38, 0.38, 1.0))
+		return
+
+	var payload: Dictionary = response.get("data", {})
+	var imported_count: int = int(payload.get("total", 0))
+	GameState.register_imported_questions(payload.get("perguntas", []))
+	_set_import_status("%d perguntas importadas com sucesso." % imported_count, Color(0.35, 0.86, 0.49, 1.0))
+
+func _update_import_controls() -> void:
+	if import_button == null:
+		return
+
+	import_button.disabled = import_in_progress
+	import_button.text = "Importando..." if import_in_progress else "Importar Planilha"
+
+func _set_import_status(message: String, color_value: Color) -> void:
+	if import_status == null:
+		return
+
+	import_status.text = message
+	import_status.add_theme_color_override("font_color", color_value)
+
+func _update_panel_bounds() -> void:
+	if panel == null:
+		return
+
+	var viewport_size: Vector2 = get_viewport().get_visible_rect().size
+	var target_width: float = minf(panel_base_size.x, maxf(420.0, viewport_size.x - 72.0))
+	var target_height: float = minf(panel_base_size.y, maxf(420.0, viewport_size.y - 64.0))
+	panel.custom_minimum_size = Vector2(target_width, target_height)
+	panel.pivot_offset = panel.custom_minimum_size * 0.5
+
+	if opened and not animating:
+		panel.scale = Vector2.ONE
+
 func _bind_feedback(control: Control) -> void:
+	if control == null:
+		return
+
 	control.mouse_entered.connect(func() -> void:
 		var tween := create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
 		tween.tween_property(control, "scale", Vector2(1.03, 1.03), 0.08)

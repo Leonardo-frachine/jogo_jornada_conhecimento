@@ -5,12 +5,27 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import * as XLSX from 'xlsx';
 import { Pergunta } from './pergunta.entity';
 import { AtualizarPerguntaDto } from './dto/atualizar-pergunta.dto';
 import { CriarPerguntaDto } from './dto/criar-pergunta.dto';
 
+type SpreadsheetFormat = 'csv' | 'xlsx';
+
 @Injectable()
 export class PerguntasService {
+  private readonly requiredSpreadsheetColumns = [
+    'enunciado',
+    'alternativaa',
+    'alternativab',
+    'alternativac',
+    'alternativad',
+    'respostacorreta',
+    'materia',
+    'dificuldade',
+    'pontuacao',
+  ];
+
   constructor(
     @InjectRepository(Pergunta)
     private readonly perguntaRepository: Repository<Pergunta>,
@@ -40,7 +55,7 @@ export class PerguntasService {
     });
 
     if (!pergunta) {
-      throw new NotFoundException('Pergunta não encontrada.');
+      throw new NotFoundException('Pergunta nao encontrada.');
     }
 
     return pergunta;
@@ -88,53 +103,46 @@ export class PerguntasService {
     perguntas: Pergunta[];
   }> {
     const linhas = this.parseCsv(csv);
+    return this.importarLinhasTabulares(linhas, false);
+  }
 
-    if (linhas.length < 2) {
-      throw new BadRequestException(
-        'CSV deve conter cabeçalho e ao menos uma pergunta.',
-      );
-    }
+  async importarPlanilha(
+    fileName: string,
+    contentBase64: string,
+  ): Promise<{
+    total: number;
+    perguntas: Pergunta[];
+    formato: SpreadsheetFormat;
+  }> {
+    const formato = this.identificarFormatoPlanilha(fileName);
+    const arquivo = this.decodificarBase64(contentBase64);
+    const linhas =
+      formato === 'csv'
+        ? this.parseCsv(arquivo.toString('utf-8'))
+        : this.parseXlsx(arquivo);
 
-    const cabecalho = linhas[0].map((coluna) =>
-      this.normalizarCabecalho(coluna),
-    );
-    const perguntas = linhas
-      .slice(1)
-      .filter((linha) => linha.some((celula) => celula.trim() !== ''))
-      .map((linha, indice) =>
-        this.montarPerguntaCsv(cabecalho, linha, indice + 2),
-      );
-
-    if (perguntas.length === 0) {
-      throw new BadRequestException(
-        'Nenhuma pergunta válida foi encontrada no CSV.',
-      );
-    }
-
-    const perguntasSalvas = await this.perguntaRepository.save(
-      perguntas.map((pergunta) => this.perguntaRepository.create(pergunta)),
-    );
+    const resultado = await this.importarLinhasTabulares(linhas, true);
 
     return {
-      total: perguntasSalvas.length,
-      perguntas: perguntasSalvas,
+      ...resultado,
+      formato,
     };
   }
 
   async exportarCsv(): Promise<string> {
     const perguntas = await this.listar();
     const cabecalho = [
-      'Título',
-      'Descrição',
+      'Titulo',
+      'Descricao',
       'A',
       'B',
       'C',
       'D',
       'Correta (A-D)',
       'Dificuldade (1-6)',
-      'Pontuação',
+      'Pontuacao',
       'Tempo',
-      'Matéria',
+      'Materia',
     ];
 
     const linhas = perguntas.map((pergunta) =>
@@ -171,7 +179,7 @@ export class PerguntasService {
       !dto.respostaCorreta
     ) {
       throw new BadRequestException(
-        'Todos os campos principais da pergunta são obrigatórios.',
+        'Todos os campos principais da pergunta sao obrigatorios.',
       );
     }
   }
@@ -204,50 +212,155 @@ export class PerguntasService {
     return dados;
   }
 
-  private montarPerguntaCsv(
+  private async importarLinhasTabulares(
+    linhas: string[][],
+    strictSpreadsheetValidation: boolean,
+  ): Promise<{
+    total: number;
+    perguntas: Pergunta[];
+  }> {
+    if (linhas.length < 2) {
+      throw new BadRequestException(
+        'A planilha deve conter cabecalho e ao menos uma pergunta.',
+      );
+    }
+
+    const cabecalho = linhas[0].map((coluna) =>
+      this.normalizarCabecalho(coluna),
+    );
+
+    if (strictSpreadsheetValidation) {
+      this.validarCabecalhoPlanilha(cabecalho);
+    }
+
+    const perguntas = linhas
+      .slice(1)
+      .filter((linha) => linha.some((celula) => celula.trim() !== ''))
+      .map((linha, indice) =>
+        this.montarPerguntaTabular(
+          cabecalho,
+          linha,
+          indice + 2,
+          strictSpreadsheetValidation,
+        ),
+      );
+
+    if (perguntas.length === 0) {
+      throw new BadRequestException(
+        'Nenhuma pergunta valida foi encontrada na planilha.',
+      );
+    }
+
+    const perguntasSalvas = await this.perguntaRepository.save(
+      perguntas.map((pergunta) => this.perguntaRepository.create(pergunta)),
+    );
+
+    return {
+      total: perguntasSalvas.length,
+      perguntas: perguntasSalvas,
+    };
+  }
+
+  private montarPerguntaTabular(
     cabecalho: string[],
     linha: string[],
     numeroLinha: number,
+    strictSpreadsheetValidation: boolean,
   ): Partial<Pergunta> {
-    const valor = (nome: string): string | undefined => {
-      const indice = cabecalho.indexOf(nome);
-      return indice >= 0 ? linha[indice]?.trim() : undefined;
+    const valor = (nomes: string[]): string | undefined => {
+      for (const nome of nomes) {
+        const indice = cabecalho.indexOf(nome);
+        if (indice >= 0) {
+          return linha[indice]?.trim();
+        }
+      }
+
+      return undefined;
     };
 
-    const dificuldade = valor('dificuldade16') ?? valor('dificuldade');
-    const respostaCorreta = (
-      valor('corretaad') ??
-      valor('correta') ??
-      valor('respostacorreta') ??
-      ''
-    ).toUpperCase();
+    const pontuacao = this.parseNumeroPlanilha(
+      valor(['pontuacao']),
+      'pontuacao',
+      numeroLinha,
+      strictSpreadsheetValidation,
+      0,
+    );
+    const tempoLimite = this.parseNumeroPlanilha(
+      valor(['tempolimite', 'tempo']),
+      'tempoLimite',
+      numeroLinha,
+      false,
+      1,
+    );
 
     const pergunta: CriarPerguntaDto = {
-      titulo: valor('titulo'),
+      titulo: valor(['titulo']),
       enunciado:
-        valor('descricao') ?? valor('enunciado') ?? valor('titulo') ?? '',
-      alternativaA: valor('a') ?? valor('alternativaa') ?? '',
-      alternativaB: valor('b') ?? valor('alternativab') ?? '',
-      alternativaC: valor('c') ?? valor('alternativac') ?? '',
-      alternativaD: valor('d') ?? valor('alternativad') ?? '',
-      respostaCorreta,
-      dificuldade,
-      materia: valor('materia') ?? valor('disciplina'),
-      pontuacao: this.parseNumeroOpcional(valor('pontuacao')),
-      tempoLimite: this.parseNumeroOpcional(
-        valor('tempo') ?? valor('tempolimite'),
-      ),
+        valor(['enunciado', 'descricao']) ?? valor(['titulo']) ?? '',
+      alternativaA: valor(['alternativaa', 'a']) ?? '',
+      alternativaB: valor(['alternativab', 'b']) ?? '',
+      alternativaC: valor(['alternativac', 'c']) ?? '',
+      alternativaD: valor(['alternativad', 'd']) ?? '',
+      respostaCorreta: (
+        valor(['respostacorreta', 'corretaad', 'correta']) ?? ''
+      ).toUpperCase(),
+      materia: valor(['materia', 'disciplina']) ?? '',
+      dificuldade:
+        valor(['dificuldade', 'dificuldade16'])?.trim() ?? '',
+      pontuacao,
+      tempoLimite,
     };
 
     this.validarCamposObrigatorios(pergunta);
 
+    if (strictSpreadsheetValidation) {
+      this.validarCamposObrigatoriosPlanilha(pergunta, numeroLinha);
+    }
+
     if (!['A', 'B', 'C', 'D'].includes(pergunta.respostaCorreta)) {
       throw new BadRequestException(
-        `Resposta correta inválida na linha ${numeroLinha}. Use A, B, C ou D.`,
+        `Resposta correta invalida na linha ${numeroLinha}. Use A, B, C ou D.`,
       );
     }
 
     return this.montarDadosPergunta(pergunta);
+  }
+
+  private validarCabecalhoPlanilha(cabecalho: string[]): void {
+    const colunasAusentes = this.requiredSpreadsheetColumns.filter(
+      (coluna) => !cabecalho.includes(coluna),
+    );
+
+    if (colunasAusentes.length > 0) {
+      throw new BadRequestException(
+        `Colunas obrigatorias ausentes na planilha: ${colunasAusentes.join(', ')}.`,
+      );
+    }
+  }
+
+  private validarCamposObrigatoriosPlanilha(
+    dto: CriarPerguntaDto,
+    numeroLinha: number,
+  ): void {
+    const camposAusentes: string[] = [];
+
+    if (!dto.materia) {
+      camposAusentes.push('materia');
+    }
+
+    if (!dto.dificuldade) {
+      camposAusentes.push('dificuldade');
+    }
+
+    if (dto.pontuacao === undefined || dto.pontuacao === null) {
+      camposAusentes.push('pontuacao');
+    }
+
+    if (camposAusentes.length > 0) {
+      throw new BadRequestException(
+        `Campos obrigatorios ausentes na linha ${numeroLinha}: ${camposAusentes.join(', ')}.`,
+      );
+    }
   }
 
   private calcularPontuacaoPadrao(dificuldade?: string): number {
@@ -260,14 +373,82 @@ export class PerguntasService {
     return 100;
   }
 
-  private parseNumeroOpcional(valor?: string): number | undefined {
+  private parseNumeroPlanilha(
+    valor: string | undefined,
+    campo: string,
+    numeroLinha: number,
+    obrigatorio: boolean,
+    minimo: number,
+  ): number | undefined {
     if (!valor) {
+      if (obrigatorio) {
+        throw new BadRequestException(
+          `Campo ${campo} obrigatorio na linha ${numeroLinha}.`,
+        );
+      }
+
       return undefined;
     }
 
     const numero = Number(valor);
+    if (!Number.isFinite(numero) || !Number.isInteger(numero) || numero < minimo) {
+      throw new BadRequestException(
+        `Valor invalido para ${campo} na linha ${numeroLinha}.`,
+      );
+    }
 
-    return Number.isFinite(numero) ? numero : undefined;
+    return numero;
+  }
+
+  private identificarFormatoPlanilha(fileName: string): SpreadsheetFormat {
+    const extensao = fileName.split('.').pop()?.trim().toLowerCase();
+
+    if (extensao === 'csv' || extensao === 'xlsx') {
+      return extensao;
+    }
+
+    throw new BadRequestException(
+      'Formato de arquivo invalido. Use apenas arquivos .csv ou .xlsx.',
+    );
+  }
+
+  private decodificarBase64(contentBase64: string): Buffer {
+    try {
+      const arquivo = Buffer.from(contentBase64, 'base64');
+      if (arquivo.length === 0) {
+        throw new Error('Arquivo vazio');
+      }
+
+      return arquivo;
+    } catch {
+      throw new BadRequestException(
+        'Nao foi possivel ler o arquivo enviado para importacao.',
+      );
+    }
+  }
+
+  private parseXlsx(arquivo: Buffer): string[][] {
+    const workbook = XLSX.read(arquivo, {
+      type: 'buffer',
+      cellDates: false,
+    });
+
+    const firstSheetName = workbook.SheetNames[0];
+    if (!firstSheetName) {
+      throw new BadRequestException('A planilha XLSX nao possui abas validas.');
+    }
+
+    const worksheet = workbook.Sheets[firstSheetName];
+    const rows = XLSX.utils.sheet_to_json<(string | number | boolean | null)[]>(
+      worksheet,
+      {
+        header: 1,
+        raw: false,
+        defval: '',
+      },
+    );
+
+    return rows.map((row) => row.map((cell) => String(cell ?? '')));
   }
 
   private normalizarCabecalho(cabecalho: string): string {
