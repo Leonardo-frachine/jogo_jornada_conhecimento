@@ -1,29 +1,23 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Get,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
 } from '@nestjs/common';
 import { JogadoresService } from './jogadores.service';
+import { AtualizarFaseDto } from './dto/atualizar-fase.dto';
+import { CriarJogadorDto } from './dto/criar-jogador.dto';
 
 @Controller('jogadores')
 export class JogadoresController {
   constructor(private readonly jogadoresService: JogadoresService) {}
 
   @Post()
-  criar(@Body() body: { nome?: string }) {
-    console.log('BODY RECEBIDO:', body);
-
-    const nome = body?.nome?.trim();
-
-    if (!nome) {
-      throw new BadRequestException('O campo nome é obrigatório.');
-    }
-
-    return this.jogadoresService.criar(nome);
+  criar(@Body() criarJogadorDto: CriarJogadorDto) {
+    return this.jogadoresService.criar(criarJogadorDto.nome);
   }
 
   @Get()
@@ -32,23 +26,20 @@ export class JogadoresController {
   }
 
   @Get(':id')
-  buscarPorId(@Param('id') id: string) {
-    return this.jogadoresService.buscarPorId(Number(id));
+  buscarPorId(@Param('id', ParseIntPipe) id: number) {
+    return this.jogadoresService.buscarPorId(id);
   }
 
   @Patch(':id/pontuacao')
-  atualizarPontuacao(
-    @Param('id') id: string,
-    @Body('pontuacao') pontuacao: number,
-  ) {
-    return this.jogadoresService.atualizarPontuacao(Number(id), pontuacao);
+  recalcularPontuacao(@Param('id', ParseIntPipe) id: number) {
+    return this.jogadoresService.recalcularPontuacao(id);
   }
 
   @Patch(':id/fase')
   atualizarFase(
-    @Param('id') id: string,
-    @Body('faseAtual') faseAtual: number,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() atualizarFaseDto: AtualizarFaseDto,
   ) {
-    return this.jogadoresService.atualizarFase(Number(id), faseAtual);
+    return this.jogadoresService.atualizarFase(id, atualizarFaseDto.faseAtual);
   }
 }

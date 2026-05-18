@@ -1,4 +1,11 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
+} from '@nestjs/common';
 import { ProgressoService } from './progresso.service';
 import { CriarProgressoDto } from './dto/criar-progresso.dto';
 
@@ -16,13 +23,23 @@ export class ProgressoController {
     return this.progressoService.listar();
   }
 
+  @Get('relatorios/jogadores')
+  relatorioJogadores() {
+    return this.progressoService.relatorioJogadores();
+  }
+
+  @Get('relatorios/jogador/:jogadorId')
+  relatorioPorJogador(@Param('jogadorId', ParseIntPipe) jogadorId: number) {
+    return this.progressoService.relatorioPorJogador(jogadorId);
+  }
+
   @Get('jogador/:jogadorId')
-  buscarPorJogador(@Param('jogadorId') jogadorId: string) {
-    return this.progressoService.buscarPorJogador(Number(jogadorId));
+  buscarPorJogador(@Param('jogadorId', ParseIntPipe) jogadorId: number) {
+    return this.progressoService.buscarPorJogador(jogadorId);
   }
 
   @Get(':id')
-  buscarPorId(@Param('id') id: string) {
-    return this.progressoService.buscarPorId(Number(id));
+  buscarPorId(@Param('id', ParseIntPipe) id: number) {
+    return this.progressoService.buscarPorId(id);
   }
 }

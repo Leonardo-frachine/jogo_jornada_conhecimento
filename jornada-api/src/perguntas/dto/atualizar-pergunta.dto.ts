@@ -1,15 +1,8 @@
 import { Transform, Type } from 'class-transformer';
-import {
-  IsIn,
-  IsInt,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  Min,
-} from 'class-validator';
+import { IsIn, IsInt, IsOptional, IsString, Min } from 'class-validator';
 import { trimString, trimUppercaseString } from '../../common/transformers';
 
-export class CriarPerguntaDto {
+export class AtualizarPerguntaDto {
   @Transform(trimString)
   @IsString()
   @IsOptional()
@@ -17,34 +10,34 @@ export class CriarPerguntaDto {
 
   @Transform(trimString)
   @IsString()
-  @IsNotEmpty()
-  enunciado: string;
+  @IsOptional()
+  enunciado?: string;
 
   @Transform(trimString)
   @IsString()
-  @IsNotEmpty()
-  alternativaA: string;
+  @IsOptional()
+  alternativaA?: string;
 
   @Transform(trimString)
   @IsString()
-  @IsNotEmpty()
-  alternativaB: string;
+  @IsOptional()
+  alternativaB?: string;
 
   @Transform(trimString)
   @IsString()
-  @IsNotEmpty()
-  alternativaC: string;
+  @IsOptional()
+  alternativaC?: string;
 
   @Transform(trimString)
   @IsString()
-  @IsNotEmpty()
-  alternativaD: string;
+  @IsOptional()
+  alternativaD?: string;
 
   @Transform(trimUppercaseString)
   @IsString()
-  @IsNotEmpty()
   @IsIn(['A', 'B', 'C', 'D'])
-  respostaCorreta: string;
+  @IsOptional()
+  respostaCorreta?: string;
 
   @Transform(trimString)
   @IsString()
@@ -66,5 +59,5 @@ export class CriarPerguntaDto {
   @IsInt()
   @Min(1)
   @IsOptional()
-  tempoLimite?: number;
+  tempoLimite?: number | null;
 }

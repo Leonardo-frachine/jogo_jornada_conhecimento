@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Progresso } from './progresso.entity';
@@ -14,58 +18,60 @@ export class ProgressoService {
 
     @InjectRepository(Jogador)
     private readonly jogadorRepository: Repository<Jogador>,
-
-    @InjectRepository(Pergunta)
-    private readonly perguntaRepository: Repository<Pergunta>,
   ) {}
 
   async criar(criarProgressoDto: CriarProgressoDto): Promise<Progresso> {
-    const { jogadorId, perguntaId, acertou, fase, pontuacaoGanha } =
-      criarProgressoDto;
+    const { jogadorId, perguntaId, acertou, fase } = criarProgressoDto;
 
     if (!jogadorId || !perguntaId || fase === undefined) {
       throw new BadRequestException('Dados do progresso incompletos.');
     }
 
-    const jogador = await this.jogadorRepository.findOne({
-      where: { id: jogadorId },
+    return this.progressoRepository.manager.transaction(async (manager) => {
+      const jogadorRepository = manager.getRepository(Jogador);
+      const perguntaRepository = manager.getRepository(Pergunta);
+      const progressoRepository = manager.getRepository(Progresso);
+
+      const jogador = await jogadorRepository.findOne({
+        where: { id: jogadorId },
+      });
+
+      if (!jogador) {
+        throw new NotFoundException('Jogador não encontrado.');
+      }
+
+      const pergunta = await perguntaRepository.findOne({
+        where: { id: perguntaId },
+      });
+
+      if (!pergunta) {
+        throw new NotFoundException('Pergunta não encontrada.');
+      }
+
+      const pontos = acertou ? this.calcularPontuacao(pergunta, fase) : 0;
+
+      const progresso = progressoRepository.create({
+        jogadorId,
+        perguntaId,
+        acertou,
+        fase,
+        pontuacaoGanha: pontos,
+        jogador,
+        pergunta,
+      });
+
+      const progressoSalvo = await progressoRepository.save(progresso);
+
+      jogador.pontuacao += pontos;
+
+      if (fase > jogador.faseAtual) {
+        jogador.faseAtual = fase;
+      }
+
+      await jogadorRepository.save(jogador);
+
+      return progressoSalvo;
     });
-
-    if (!jogador) {
-      throw new NotFoundException('Jogador não encontrado.');
-    }
-
-    const pergunta = await this.perguntaRepository.findOne({
-      where: { id: perguntaId },
-    });
-
-    if (!pergunta) {
-      throw new NotFoundException('Pergunta não encontrada.');
-    }
-
-    const pontos = acertou ? pontuacaoGanha : 0;
-
-    const progresso = this.progressoRepository.create({
-      jogadorId,
-      perguntaId,
-      acertou,
-      fase,
-      pontuacaoGanha: pontos,
-      jogador,
-      pergunta,
-    });
-
-    const progressoSalvo = await this.progressoRepository.save(progresso);
-
-    jogador.pontuacao += pontos;
-
-    if (fase > jogador.faseAtual) {
-      jogador.faseAtual = fase;
-    }
-
-    await this.jogadorRepository.save(jogador);
-
-    return progressoSalvo;
   }
 
   async listar(): Promise<Progresso[]> {
@@ -106,5 +112,109 @@ export class ProgressoService {
         id: 'DESC',
       },
     });
+  }
+
+  async relatorioJogadores(): Promise<
+    Array<{
+      jogadorId: number;
+      nome: string;
+      pontuacao: number;
+      faseAtual: number;
+      respostas: number;
+      acertos: number;
+      erros: number;
+      aproveitamento: number;
+    }>
+  > {
+    const jogadores = await this.jogadorRepository.find({
+      order: {
+        pontuacao: 'DESC',
+      },
+    });
+    const registros = await this.progressoRepository.find();
+
+    return jogadores.map((jogador) =>
+      this.montarResumoJogador(
+        jogador,
+        registros.filter((registro) => registro.jogadorId === jogador.id),
+      ),
+    );
+  }
+
+  async relatorioPorJogador(jogadorId: number): Promise<{
+    resumo: {
+      jogadorId: number;
+      nome: string;
+      pontuacao: number;
+      faseAtual: number;
+      respostas: number;
+      acertos: number;
+      erros: number;
+      aproveitamento: number;
+    };
+    respostas: Progresso[];
+  }> {
+    const jogador = await this.jogadorRepository.findOne({
+      where: { id: jogadorId },
+    });
+
+    if (!jogador) {
+      throw new NotFoundException('Jogador não encontrado.');
+    }
+
+    const respostas = await this.progressoRepository.find({
+      where: { jogadorId },
+      relations: ['pergunta'],
+      order: {
+        id: 'DESC',
+      },
+    });
+
+    return {
+      resumo: this.montarResumoJogador(jogador, respostas),
+      respostas,
+    };
+  }
+
+  private calcularPontuacao(pergunta: Pergunta, fase: number): number {
+    if (Number.isInteger(pergunta.pontuacao) && pergunta.pontuacao >= 0) {
+      return pergunta.pontuacao;
+    }
+
+    const dificuldade = Number(pergunta.dificuldade);
+
+    if (Number.isInteger(dificuldade) && dificuldade > 0) {
+      return dificuldade * 100;
+    }
+
+    return Math.max(1, fase) * 100;
+  }
+
+  private montarResumoJogador(
+    jogador: Jogador,
+    respostas: Progresso[],
+  ): {
+    jogadorId: number;
+    nome: string;
+    pontuacao: number;
+    faseAtual: number;
+    respostas: number;
+    acertos: number;
+    erros: number;
+    aproveitamento: number;
+  } {
+    const acertos = respostas.filter((resposta) => resposta.acertou).length;
+    const total = respostas.length;
+
+    return {
+      jogadorId: jogador.id,
+      nome: jogador.nome,
+      pontuacao: jogador.pontuacao,
+      faseAtual: jogador.faseAtual,
+      respostas: total,
+      acertos,
+      erros: total - acertos,
+      aproveitamento: total === 0 ? 0 : Math.round((acertos / total) * 100),
+    };
   }
 }

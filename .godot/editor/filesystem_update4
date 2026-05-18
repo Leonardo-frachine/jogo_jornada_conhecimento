@@ -1,0 +1,5 @@
+res://scripts/game.gd
+res://scripts/ApiClient.gd
+res://scripts/GameState.gd
+res://scene/game.tscn
+res://scripts/tela_inicial.gd

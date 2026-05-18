@@ -1,23 +1,34 @@
-import { IsBoolean, IsNotEmpty, IsNumber } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
+import { IsBoolean, IsInt, IsNotEmpty, IsOptional, Min } from 'class-validator';
+import { toBoolean } from '../../common/transformers';
 
 export class CriarProgressoDto {
-  @IsNumber()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
   @IsNotEmpty()
   jogadorId: number;
 
-  @IsNumber()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
   @IsNotEmpty()
   perguntaId: number;
 
+  @Transform(toBoolean)
   @IsBoolean()
   @IsNotEmpty()
   acertou: boolean;
 
-  @IsNumber()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
   @IsNotEmpty()
   fase: number;
 
-  @IsNumber()
-  @IsNotEmpty()
-  pontuacaoGanha: number;
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  @IsOptional()
+  pontuacaoGanha?: number;
 }

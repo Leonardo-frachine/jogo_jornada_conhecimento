@@ -1,5 +1,7 @@
 extends Node
 
+signal session_preparation_updated(message: String)
+
 const TOTAL_CASAS := 28
 
 var player_name: String = ""
@@ -14,8 +16,16 @@ var wrong_answers: int = 0
 var game_finished: bool = false
 var victory: bool = false
 var last_feedback: String = "Prepare-se para a jornada!"
+var player_id: int = 0
+var backend_ready: bool = false
+var session_prepared: bool = false
+var backend_error: String = ""
+var sync_warning: String = ""
+var loaded_questions: Array[Dictionary] = []
+var used_question_ids: Array[int] = []
+var current_question: Dictionary = {}
 
-var question_bank := {
+var fallback_question_bank: Dictionary = {
 	1: {"text": "Quanto e 2 + 2?", "options": ["3", "4", "5"], "correct": 1},
 	2: {"text": "Qual e a capital do Brasil?", "options": ["Rio de Janeiro", "Brasilia", "Salvador"], "correct": 1},
 	3: {"text": "3 x 3 e igual a?", "options": ["6", "9", "12"], "correct": 1},
@@ -49,8 +59,56 @@ var question_bank := {
 func start_session(name: String, code: String) -> void:
 	player_name = name.strip_edges()
 	room_code = code.strip_edges()
+	player_id = 0
+	backend_ready = false
+	session_prepared = false
+	backend_error = ""
+	sync_warning = ""
+	loaded_questions.clear()
+	used_question_ids.clear()
+	current_question.clear()
 	reset_run_stats()
 	last_feedback = "Preparando a partida de %s..." % player_name
+
+func prepare_session() -> Dictionary:
+	session_prepared = false
+	backend_ready = false
+	backend_error = ""
+	sync_warning = ""
+	player_id = 0
+	loaded_questions.clear()
+	used_question_ids.clear()
+	current_question.clear()
+
+	_emit_session_status("Conectando ao backend...")
+	var player_response: Dictionary = await ApiClient.create_player(player_name)
+	if not player_response.get("ok", false):
+		return _session_failure("Nao foi possivel criar o jogador na API. %s" % player_response.get("error", ""))
+
+	var created_player: Dictionary = player_response.get("data", {})
+	player_id = int(created_player.get("id", 0))
+	if player_id <= 0:
+		return _session_failure("A API nao retornou um identificador valido para o jogador.")
+
+	_emit_session_status("Carregando perguntas da API...")
+	var questions_response: Dictionary = await ApiClient.fetch_questions()
+	if not questions_response.get("ok", false):
+		return _session_failure("Nao foi possivel carregar as perguntas. %s" % questions_response.get("error", ""))
+
+	var normalized_questions: Array[Dictionary] = _normalize_questions(questions_response.get("data", []))
+	if normalized_questions.is_empty():
+		return _session_failure("A API nao retornou perguntas validas para iniciar a partida.")
+
+	loaded_questions = normalized_questions
+	backend_ready = true
+	session_prepared = true
+	last_feedback = "Sessao iniciada. Role o dado para comecar."
+	_emit_session_status("Tudo pronto. Entrando no tabuleiro...")
+
+	return {
+		"ok": true,
+		"error": "",
+	}
 
 func reset_run_stats() -> void:
 	score = 0
@@ -63,21 +121,41 @@ func reset_run_stats() -> void:
 	game_finished = false
 	victory = false
 	last_feedback = "Role o dado para iniciar a jornada."
+	sync_warning = ""
+	current_question.clear()
 
 func register_answer(correct: bool, house_index: int) -> int:
 	questions_answered += 1
-	var difficulty := get_difficulty_for_house(house_index)
+	var question: Dictionary = current_question if not current_question.is_empty() else get_question_for_house(house_index)
+	var gained_points: int = _get_points_for_question(question, house_index)
+
 	if correct:
 		correct_answers += 1
-		var gained_points := difficulty * 100
 		score += gained_points
-		xp += difficulty * 25
+		xp += max(25, int(round(float(gained_points) / 4.0)))
 		last_feedback = "Resposta correta! +%d pontos." % gained_points
 		return gained_points
 
 	wrong_answers += 1
 	last_feedback = "Resposta incorreta. Tente novamente na proxima rodada."
 	return 0
+
+func submit_answer_result(correct: bool, house_index: int) -> Dictionary:
+	sync_warning = ""
+
+	if not backend_ready or player_id <= 0:
+		return _sync_failure("Sessao da API nao esta pronta.")
+
+	var question_id := int(current_question.get("id", 0))
+	if question_id <= 0:
+		return _sync_failure("Pergunta atual sem identificador valido.")
+
+	var fase: int = get_level_for_house(house_index) if correct else level
+	var response: Dictionary = await ApiClient.create_progress(player_id, question_id, correct, fase)
+	if not response.get("ok", false):
+		return _sync_failure("Nao foi possivel registrar o progresso. %s" % response.get("error", ""))
+
+	return response
 
 func update_progress(house_index: int) -> void:
 	current_house = clampi(house_index, 1, TOTAL_CASAS)
@@ -111,13 +189,164 @@ func get_level_for_house(house_index: int) -> int:
 	return 1
 
 func get_difficulty_for_house(house_index: int) -> int:
-	if house_index >= 22:
-		return 4
-	if house_index >= 15:
-		return 3
-	if house_index >= 8:
-		return 2
-	return 1
+	return get_level_for_house(house_index)
 
 func get_question_for_house(house_index: int) -> Dictionary:
-	return question_bank.get(clampi(house_index, 1, TOTAL_CASAS), question_bank[1]).duplicate(true)
+	current_question = _select_question_for_house(house_index)
+	return current_question.duplicate(true)
+
+func _select_question_for_house(house_index: int) -> Dictionary:
+	if loaded_questions.is_empty():
+		return _build_fallback_question(house_index)
+
+	var desired_level: int = get_level_for_house(house_index)
+	var candidates: Array[Dictionary] = _collect_candidates(desired_level, false)
+	if candidates.is_empty():
+		candidates = _collect_candidates(desired_level, true)
+
+	if candidates.is_empty():
+		used_question_ids.clear()
+		candidates = _collect_candidates(desired_level, false)
+
+	if candidates.is_empty():
+		return _build_fallback_question(house_index)
+
+	var selected: Dictionary = candidates[randi_range(0, candidates.size() - 1)]
+	var selected_id := int(selected.get("id", 0))
+	if selected_id > 0 and not used_question_ids.has(selected_id):
+		used_question_ids.append(selected_id)
+
+	return selected.duplicate(true)
+
+func _collect_candidates(level_value: int, include_used: bool) -> Array[Dictionary]:
+	var exact_matches: Array[Dictionary] = []
+	var fallback_matches: Array[Dictionary] = []
+
+	for question in loaded_questions:
+		var question_id := int(question.get("id", 0))
+		if not include_used and question_id > 0 and used_question_ids.has(question_id):
+			continue
+
+		if int(question.get("difficulty", 1)) == level_value:
+			exact_matches.append(question)
+		else:
+			fallback_matches.append(question)
+
+	if not exact_matches.is_empty():
+		return exact_matches
+
+	return fallback_matches
+
+func _normalize_questions(payload: Variant) -> Array[Dictionary]:
+	var normalized: Array[Dictionary] = []
+	if payload is not Array:
+		return normalized
+
+	for item in payload:
+		if item is not Dictionary:
+			continue
+
+		var normalized_question: Dictionary = _normalize_question(item)
+		if not normalized_question.is_empty():
+			normalized.append(normalized_question)
+
+	return normalized
+
+func _normalize_question(raw_question: Dictionary) -> Dictionary:
+	var options: Array[String] = []
+	for key in ["alternativaA", "alternativaB", "alternativaC", "alternativaD"]:
+		var option_text: String = str(raw_question.get(key, "")).strip_edges()
+		if not option_text.is_empty():
+			options.append(option_text)
+
+	var correct_letter: String = str(raw_question.get("respostaCorreta", "A")).strip_edges().to_upper()
+	var correct_index: int = ["A", "B", "C", "D"].find(correct_letter)
+	if options.size() < 2 or correct_index < 0 or correct_index >= options.size():
+		return {}
+
+	var difficulty: int = _parse_difficulty(raw_question.get("dificuldade", 1))
+	var points: int = _parse_non_negative_int(raw_question.get("pontuacao", difficulty * 100), difficulty * 100)
+
+	return {
+		"id": int(raw_question.get("id", 0)),
+		"text": str(raw_question.get("enunciado", "")).strip_edges(),
+		"title": str(raw_question.get("titulo", "")).strip_edges(),
+		"options": options,
+		"correct_index": correct_index,
+		"difficulty": difficulty,
+		"points": points,
+		"subject": str(raw_question.get("materia", "")).strip_edges(),
+		"time_limit": _parse_non_negative_int(raw_question.get("tempoLimite", 0), 0),
+	}
+
+func _build_fallback_question(house_index: int) -> Dictionary:
+	var fallback: Dictionary = fallback_question_bank.get(
+		clampi(house_index, 1, TOTAL_CASAS),
+		fallback_question_bank[1],
+	)
+
+	return {
+		"id": 0,
+		"text": str(fallback.get("text", "")),
+		"title": "",
+		"options": fallback.get("options", []).duplicate(),
+		"correct_index": int(fallback.get("correct", 0)),
+		"difficulty": get_difficulty_for_house(house_index),
+		"points": get_difficulty_for_house(house_index) * 100,
+		"subject": "",
+		"time_limit": 0,
+	}
+
+func _get_points_for_question(question: Dictionary, house_index: int) -> int:
+	var default_points: int = get_difficulty_for_house(house_index) * 100
+	return _parse_non_negative_int(question.get("points", default_points), default_points)
+
+func _parse_difficulty(value: Variant) -> int:
+	var numeric_value: int = _parse_non_negative_int(value, -1)
+	if numeric_value > 0:
+		return clampi(numeric_value, 1, 4)
+
+	var text_value: String = str(value).strip_edges().to_lower()
+	if text_value.begins_with("f") or text_value.contains("basic") or text_value.contains("inic"):
+		return 1
+	if text_value.begins_with("m") or text_value.contains("inter"):
+		return 2
+	if text_value.begins_with("d") or text_value.contains("avanc"):
+		return 3
+	if text_value.begins_with("e") or text_value.contains("espec") or text_value.contains("final"):
+		return 4
+
+	return 1
+
+func _parse_non_negative_int(value: Variant, default_value: int) -> int:
+	if value is int:
+		return value if value >= 0 else default_value
+	if value is float:
+		var float_value: int = int(round(value))
+		return float_value if float_value >= 0 else default_value
+
+	var text_value: String = str(value).strip_edges()
+	if text_value.is_empty() or not text_value.is_valid_int():
+		return default_value
+
+	var parsed_value: int = text_value.to_int()
+	return parsed_value if parsed_value >= 0 else default_value
+
+func _emit_session_status(message: String) -> void:
+	last_feedback = message
+	session_preparation_updated.emit(message)
+
+func _session_failure(message: String) -> Dictionary:
+	backend_error = message
+	_emit_session_status(message)
+	return {
+		"ok": false,
+		"error": message,
+	}
+
+func _sync_failure(message: String) -> Dictionary:
+	sync_warning = message
+	return {
+		"ok": false,
+		"error": message,
+	}
