@@ -4,7 +4,9 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { JogadoresModule } from './jogadores/jogadores.module';
 import { PerguntasModule } from './perguntas/perguntas.module';
+import { ProfessoresModule } from './professores/professores.module';
 import { ProgressoModule } from './progresso/progresso.module';
+import { SalasModule } from './salas/salas.module';
 
 @Module({
   imports: [
@@ -25,6 +27,8 @@ import { ProgressoModule } from './progresso/progresso.module';
     JogadoresModule,
     PerguntasModule,
     ProgressoModule,
+    ProfessoresModule,
+    SalasModule,
   ],
   controllers: [AppController],
   providers: [AppService],

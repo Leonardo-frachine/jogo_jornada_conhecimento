@@ -18,6 +18,37 @@ func create_player(name: String) -> Dictionary:
 		"nome": name,
 	})
 
+func register_teacher(name: String, email: String, password: String) -> Dictionary:
+	return await _request_json(HTTPClient.METHOD_POST, "/professores/cadastro", {
+		"nome": name,
+		"email": email,
+		"senha": password,
+	})
+
+func login_teacher(email: String, password: String) -> Dictionary:
+	return await _request_json(HTTPClient.METHOD_POST, "/professores/login", {
+		"email": email,
+		"senha": password,
+	})
+
+func create_room(professor_id: int, room_name: String) -> Dictionary:
+	return await _request_json(HTTPClient.METHOD_POST, "/salas", {
+		"professorId": professor_id,
+		"nome": room_name,
+	})
+
+func fetch_rooms_by_teacher(professor_id: int) -> Dictionary:
+	return await _request_json(HTTPClient.METHOD_GET, "/salas/professor/%d" % professor_id)
+
+func fetch_room_by_code(room_code: String) -> Dictionary:
+	return await _request_json(HTTPClient.METHOD_GET, "/salas/codigo/%s" % room_code.strip_edges())
+
+func fetch_room_dashboard(room_id: int) -> Dictionary:
+	return await _request_json(HTTPClient.METHOD_GET, "/salas/%d/dashboard" % room_id)
+
+func fetch_room_answers(room_id: int) -> Dictionary:
+	return await _request_json(HTTPClient.METHOD_GET, "/salas/%d/respostas" % room_id)
+
 func fetch_questions() -> Dictionary:
 	return await _request_json(HTTPClient.METHOD_GET, "/perguntas")
 
@@ -41,12 +72,14 @@ func import_questions_spreadsheet(file_path: String) -> Dictionary:
 		"contentBase64": Marshalls.raw_to_base64(content),
 	}, IMPORT_REQUEST_TIMEOUT_SECONDS)
 
-func create_progress(jogador_id: int, pergunta_id: int, acertou: bool, fase: int) -> Dictionary:
+func create_progress(jogador_id: int, pergunta_id: int, acertou: bool, fase: int, sala_id: int = 0, sala_codigo: String = "") -> Dictionary:
 	return await _request_json(HTTPClient.METHOD_POST, "/progresso", {
 		"jogadorId": jogador_id,
 		"perguntaId": pergunta_id,
 		"acertou": acertou,
 		"fase": fase,
+		"salaId": sala_id if sala_id > 0 else null,
+		"salaCodigo": sala_codigo.strip_edges().to_upper() if not sala_codigo.strip_edges().is_empty() else null,
 	})
 
 func update_player_phase(jogador_id: int, fase_atual: int) -> Dictionary:

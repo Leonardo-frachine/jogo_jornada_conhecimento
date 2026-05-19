@@ -1,6 +1,13 @@
 import { Transform, Type } from 'class-transformer';
-import { IsBoolean, IsInt, IsNotEmpty, IsOptional, Min } from 'class-validator';
-import { toBoolean } from '../../common/transformers';
+import {
+  IsBoolean,
+  IsInt,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  Min,
+} from 'class-validator';
+import { toBoolean, trimUppercaseString } from '../../common/transformers';
 
 export class CriarProgressoDto {
   @Type(() => Number)
@@ -31,4 +38,16 @@ export class CriarProgressoDto {
   @Min(0)
   @IsOptional()
   pontuacaoGanha?: number;
+
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @IsOptional()
+  salaId?: number;
+
+  @Transform(trimUppercaseString)
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  salaCodigo?: string;
 }

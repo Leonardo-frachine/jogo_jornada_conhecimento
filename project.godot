@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Jornada do conhecimento"
-run/main_scene="res://scene/tela_inicial.tscn"
+run/main_scene="res://scene/selecao_perfil.tscn"
 config/features=PackedStringArray("4.6", "GL Compatibility")
 config/icon="res://icon.svg"
 config/api_base_url="http://127.0.0.1:3000"
@@ -25,6 +25,7 @@ default_bus_layout="res://default_bus_layout.tres"
 SettingsManager="*res://scripts/SettingsManager.gd"
 ApiClient="*res://scripts/ApiClient.gd"
 GameState="*res://scripts/GameState.gd"
+ProfessorSession="*res://scripts/ProfessorSession.gd"
 
 [display]
 

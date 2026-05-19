@@ -15,15 +15,12 @@ var sfx_value: Label
 var music_toggle: Button
 var vfx_toggle: Button
 var subtitle_toggle: Button
-var import_button: Button
-var import_status: Label
 var reset_button: Button
+var exit_button: Button
 var close_button: Button
-var import_dialog: FileDialog
 var settings_manager: Node = null
 var opened := false
 var animating := false
-var import_in_progress := false
 var panel_base_size := Vector2(720, 620)
 
 func _ready() -> void:
@@ -43,11 +40,11 @@ func _ready() -> void:
 	_setup_ranges()
 	_connect_signals()
 	_bind_feedback(reset_button)
+	_bind_feedback(exit_button)
 	_bind_feedback(close_button)
 	_bind_feedback(music_toggle)
 	_bind_feedback(vfx_toggle)
 	_bind_feedback(subtitle_toggle)
-	_bind_feedback(import_button)
 
 	if not settings_manager.settings_loaded.is_connected(_refresh_ui):
 		settings_manager.settings_loaded.connect(_refresh_ui)
@@ -67,18 +64,15 @@ func _cache_controls() -> void:
 	music_toggle = get_node_or_null("Root/CenterContainer/Panel/Margin/VBox/Scroll/Content/TogglesSection/Margin/Rows/MusicRow/MusicToggle")
 	vfx_toggle = get_node_or_null("Root/CenterContainer/Panel/Margin/VBox/Scroll/Content/TogglesSection/Margin/Rows/VfxRow/VfxToggle")
 	subtitle_toggle = get_node_or_null("Root/CenterContainer/Panel/Margin/VBox/Scroll/Content/TogglesSection/Margin/Rows/SubtitleRow/SubtitleToggle")
-	import_button = get_node_or_null("Root/CenterContainer/Panel/Margin/VBox/Scroll/Content/ImportSection/Margin/VBox/ImportButtonRow/ImportButton")
-	import_status = get_node_or_null("Root/CenterContainer/Panel/Margin/VBox/Scroll/Content/ImportSection/Margin/VBox/ImportStatus")
 	reset_button = get_node_or_null("Root/CenterContainer/Panel/Margin/VBox/Footer/ResetButton")
+	exit_button = get_node_or_null("Root/CenterContainer/Panel/Margin/VBox/Footer/ExitButton")
 	close_button = get_node_or_null("Root/CenterContainer/Panel/Margin/VBox/Footer/CloseButton")
-	import_dialog = get_node_or_null("ImportDialog")
 
 func _create_missing_controls_if_needed() -> void:
 	var master_row: HBoxContainer = get_node_or_null("Root/CenterContainer/Panel/Margin/VBox/Scroll/Content/AudioSection/Margin/Rows/MasterRow")
 	var sfx_row: HBoxContainer = get_node_or_null("Root/CenterContainer/Panel/Margin/VBox/Scroll/Content/AudioSection/Margin/Rows/SfxRow")
 	var vfx_row: HBoxContainer = get_node_or_null("Root/CenterContainer/Panel/Margin/VBox/Scroll/Content/TogglesSection/Margin/Rows/VfxRow")
 	var music_text: Label = get_node_or_null("Root/CenterContainer/Panel/Margin/VBox/Scroll/Content/TogglesSection/Margin/Rows/MusicRow/MusicText")
-	var import_box: VBoxContainer = get_node_or_null("Root/CenterContainer/Panel/Margin/VBox/Scroll/Content/ImportSection/Margin/VBox")
 
 	if master_value == null and master_row != null:
 		master_value = _make_value_label()
@@ -104,25 +98,6 @@ func _create_missing_controls_if_needed() -> void:
 		vfx_toggle = _make_toggle_button(music_toggle)
 		vfx_toggle.name = "VfxToggle"
 		vfx_row.add_child(vfx_toggle)
-
-	if import_status == null and import_box != null:
-		import_status = Label.new()
-		import_status.name = "ImportStatus"
-		import_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		import_status.add_theme_font_size_override("font_size", 15)
-		import_status.add_theme_color_override("font_color", Color(0.85, 0.90, 0.98, 0.88))
-		import_box.add_child(import_status)
-
-	if import_dialog == null:
-		import_dialog = FileDialog.new()
-		import_dialog.name = "ImportDialog"
-		import_dialog.access = FileDialog.ACCESS_FILESYSTEM
-		import_dialog.file_mode = FileDialog.FILE_MODE_OPEN_FILE
-		import_dialog.use_native_dialog = true
-		import_dialog.title = "Selecionar planilha de perguntas"
-		import_dialog.add_filter("*.csv", "Arquivos CSV")
-		import_dialog.add_filter("*.xlsx", "Planilhas Excel")
-		add_child(import_dialog)
 
 func _make_value_label() -> Label:
 	var label := Label.new()
@@ -163,6 +138,8 @@ func _connect_signals() -> void:
 		close_button.pressed.connect(_on_close_pressed)
 	if not reset_button.pressed.is_connected(_on_reset_pressed):
 		reset_button.pressed.connect(_on_reset_pressed)
+	if exit_button != null and not exit_button.pressed.is_connected(_on_exit_pressed):
+		exit_button.pressed.connect(_on_exit_pressed)
 
 	if not master_slider.value_changed.is_connected(_on_master_slider_changed):
 		master_slider.value_changed.connect(_on_master_slider_changed)
@@ -175,10 +152,6 @@ func _connect_signals() -> void:
 		vfx_toggle.toggled.connect(_on_vfx_toggled)
 	if not subtitle_toggle.toggled.is_connected(_on_subtitles_toggled):
 		subtitle_toggle.toggled.connect(_on_subtitles_toggled)
-	if import_button != null and not import_button.pressed.is_connected(_on_import_button_pressed):
-		import_button.pressed.connect(_on_import_button_pressed)
-	if import_dialog != null and not import_dialog.file_selected.is_connected(_on_import_file_selected):
-		import_dialog.file_selected.connect(_on_import_file_selected)
 
 func is_open() -> bool:
 	return opened
@@ -239,7 +212,6 @@ func _refresh_ui() -> void:
 	music_toggle.text = "ON" if settings_manager.music_enabled else "OFF"
 	vfx_toggle.text = "ON" if settings_manager.vfx_enabled else "OFF"
 	subtitle_toggle.text = "ON" if settings_manager.subtitles_enabled else "OFF"
-	_update_import_controls()
 
 func _on_master_slider_changed(value: float) -> void:
 	if settings_manager == null:
@@ -281,47 +253,10 @@ func _on_close_pressed() -> void:
 		return
 	settings_manager.close_menu()
 
-func _on_import_button_pressed() -> void:
-	if import_in_progress or import_dialog == null:
+func _on_exit_pressed() -> void:
+	if settings_manager == null:
 		return
-
-	_set_import_status("Selecione uma planilha .csv ou .xlsx.", Color(0.85, 0.90, 0.98, 0.88))
-	import_dialog.popup_centered_ratio(0.75)
-
-func _on_import_file_selected(path: String) -> void:
-	if import_in_progress:
-		return
-
-	import_in_progress = true
-	_update_import_controls()
-	_set_import_status("Importando perguntas...", Color(0.96, 0.82, 0.45, 1.0))
-
-	var response: Dictionary = await ApiClient.import_questions_spreadsheet(path)
-	import_in_progress = false
-	_update_import_controls()
-
-	if not response.get("ok", false):
-		_set_import_status(response.get("error", "Falha ao importar a planilha."), Color(0.93, 0.38, 0.38, 1.0))
-		return
-
-	var payload: Dictionary = response.get("data", {})
-	var imported_count: int = int(payload.get("total", 0))
-	GameState.register_imported_questions(payload.get("perguntas", []))
-	_set_import_status("%d perguntas importadas com sucesso." % imported_count, Color(0.35, 0.86, 0.49, 1.0))
-
-func _update_import_controls() -> void:
-	if import_button == null:
-		return
-
-	import_button.disabled = import_in_progress
-	import_button.text = "Importando..." if import_in_progress else "Importar Planilha"
-
-func _set_import_status(message: String, color_value: Color) -> void:
-	if import_status == null:
-		return
-
-	import_status.text = message
-	import_status.add_theme_color_override("font_color", color_value)
+	settings_manager.return_to_access_screen()
 
 func _update_panel_bounds() -> void:
 	if panel == null:

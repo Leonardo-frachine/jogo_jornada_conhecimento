@@ -17,6 +17,7 @@ var game_finished: bool = false
 var victory: bool = false
 var last_feedback: String = "Prepare-se para a jornada!"
 var player_id: int = 0
+var resolved_room_id: int = 0
 var backend_ready: bool = false
 var session_prepared: bool = false
 var backend_error: String = ""
@@ -60,6 +61,7 @@ func start_session(name: String, code: String) -> void:
 	player_name = name.strip_edges()
 	room_code = code.strip_edges()
 	player_id = 0
+	resolved_room_id = 0
 	backend_ready = false
 	session_prepared = false
 	backend_error = ""
@@ -76,6 +78,7 @@ func prepare_session() -> Dictionary:
 	backend_error = ""
 	sync_warning = ""
 	player_id = 0
+	resolved_room_id = 0
 	loaded_questions.clear()
 	used_question_ids.clear()
 	current_question.clear()
@@ -89,6 +92,16 @@ func prepare_session() -> Dictionary:
 	player_id = int(created_player.get("id", 0))
 	if player_id <= 0:
 		return _session_failure("A API nao retornou um identificador valido para o jogador.")
+
+	if not room_code.is_empty():
+		_emit_session_status("Validando sala informada...")
+		var room_response: Dictionary = await ApiClient.fetch_room_by_code(room_code)
+		if room_response.get("ok", false):
+			var room_data: Dictionary = room_response.get("data", {})
+			resolved_room_id = int(room_data.get("id", 0))
+			room_code = str(room_data.get("codigo", room_code)).strip_edges()
+		else:
+			sync_warning = "Sala nao localizada no painel do professor. O jogo seguira sem vinculo de sala."
 
 	_emit_session_status("Carregando perguntas da API...")
 	var questions_response: Dictionary = await ApiClient.fetch_questions()
@@ -151,7 +164,14 @@ func submit_answer_result(correct: bool, house_index: int) -> Dictionary:
 		return _sync_failure("Pergunta atual sem identificador valido.")
 
 	var fase: int = get_level_for_house(house_index) if correct else level
-	var response: Dictionary = await ApiClient.create_progress(player_id, question_id, correct, fase)
+	var response: Dictionary = await ApiClient.create_progress(
+		player_id,
+		question_id,
+		correct,
+		fase,
+		resolved_room_id,
+		room_code
+	)
 	if not response.get("ok", false):
 		return _sync_failure("Nao foi possivel registrar o progresso. %s" % response.get("error", ""))
 

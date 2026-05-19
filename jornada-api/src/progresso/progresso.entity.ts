@@ -8,6 +8,7 @@ import {
 } from 'typeorm';
 import { Jogador } from '../jogadores/jogador.entity';
 import { Pergunta } from '../perguntas/pergunta.entity';
+import { Sala } from '../salas/sala.entity';
 
 @Entity('progresso')
 export class Progresso {
@@ -27,6 +28,16 @@ export class Progresso {
   @ManyToOne(() => Pergunta, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'perguntaId' })
   pergunta: Pergunta;
+
+  @Column({ nullable: true })
+  salaId?: number | null;
+
+  @ManyToOne(() => Sala, (sala) => sala.progressos, {
+    onDelete: 'SET NULL',
+    nullable: true,
+  })
+  @JoinColumn({ name: 'salaId' })
+  sala?: Sala | null;
 
   @Column()
   acertou: boolean;

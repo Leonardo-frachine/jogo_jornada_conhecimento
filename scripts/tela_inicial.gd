@@ -2,7 +2,8 @@ extends Control
 
 @onready var input_nome: LineEdit = $PainelCentral/MarginContainer/VBoxContainer/InputNome
 @onready var input_codigo: LineEdit = $PainelCentral/MarginContainer/VBoxContainer/InputCodigo
-@onready var botao_jogar: Button = $PainelCentral/MarginContainer/VBoxContainer/BotaoJogar
+@onready var botao_jogar: Button = $PainelCentral/MarginContainer/VBoxContainer/BotoesAcao/BotaoJogar
+@onready var botao_voltar: Button = $PainelCentral/MarginContainer/VBoxContainer/BotoesAcao/BotaoVoltar
 @onready var botao_configuracao: TextureButton = $BotaoConfiguracao
 
 var nome_aluno: String = ""
@@ -16,6 +17,7 @@ func _ready() -> void:
 	_play_music()
 
 	botao_jogar.pressed.connect(_on_botao_jogar_pressed)
+	botao_voltar.pressed.connect(_on_botao_voltar_pressed)
 	botao_configuracao.pressed.connect(_on_botao_configuracao_pressed)
 	input_nome.text_submitted.connect(_on_input_nome_submitted)
 	input_codigo.text_submitted.connect(_on_input_codigo_submitted)
@@ -46,6 +48,9 @@ func _on_input_codigo_submitted(_texto: String) -> void:
 
 func _on_botao_configuracao_pressed() -> void:
 	SettingsManager.open_menu()
+
+func _on_botao_voltar_pressed() -> void:
+	get_tree().change_scene_to_file("res://scene/selecao_perfil.tscn")
 
 func _on_botao_jogar_pressed() -> void:
 	if not validar_campos():

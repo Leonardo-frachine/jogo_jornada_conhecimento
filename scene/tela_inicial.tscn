@@ -1,12 +1,12 @@
 [gd_scene format=3 uid="uid://2uol8j735lpf"]
 
-[ext_resource type="Script" uid="uid://y7et67s3t0hk" path="res://scripts/tela_inicial.gd" id="1_eym2y"]
-[ext_resource type="Texture2D" uid="uid://3ljo201dpbbx" path="res://imagens/fundo_tabuleiro/fundo_embacado.png" id="1_ixqfg"]
-[ext_resource type="Texture2D" uid="uid://bv2xmb27g64al" path="res://imagens/logo_jogo/logo_jogo.png" id="2_eym2y"]
-[ext_resource type="Texture2D" uid="uid://ctyknso0bfdn6" path="res://imagens/personagem/personagem_logo.png" id="3_djjjm"]
-[ext_resource type="Texture2D" uid="uid://cbpn68ac6bol8" path="res://imagens/configuracoes/configuracoes.png" id="5_djjjm"]
+[ext_resource type="Script" uid="uid://y7et67s3t0hk" path="res://scripts/tela_inicial.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://3ljo201dpbbx" path="res://imagens/fundo_tabuleiro/fundo_embacado.png" id="2"]
+[ext_resource type="Texture2D" uid="uid://bv2xmb27g64al" path="res://imagens/logo_jogo/logo_jogo.png" id="3"]
+[ext_resource type="Texture2D" uid="uid://ctyknso0bfdn6" path="res://imagens/personagem/personagem_logo.png" id="4"]
+[ext_resource type="Texture2D" uid="uid://cbpn68ac6bol8" path="res://imagens/configuracoes/configuracoes.png" id="5"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ek0m7"]
+[sub_resource type="StyleBoxFlat" id="1"]
 bg_color = Color(1, 0.64705884, 0, 1)
 border_width_left = 4
 border_width_top = 4
@@ -18,7 +18,7 @@ corner_radius_top_right = 30
 corner_radius_bottom_right = 30
 corner_radius_bottom_left = 30
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hftsj"]
+[sub_resource type="StyleBoxFlat" id="2"]
 bg_color = Color(1, 1, 1, 1)
 border_width_left = 2
 border_width_top = 2
@@ -30,47 +30,43 @@ corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
 
-[node name="TelaInicial" type="Control" unique_id=1382460529]
+[node name="TelaInicial" type="Control" unique_id=940967829]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_eym2y")
+script = ExtResource("1")
 
-[node name="Background" type="TextureRect" parent="." unique_id=913652169]
+[node name="Background" type="TextureRect" parent="." unique_id=996580370]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -84.0
-offset_top = -161.0
-offset_right = 86.0
-offset_bottom = 143.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-texture = ExtResource("1_ixqfg")
+texture = ExtResource("2")
 stretch_mode = 6
 
-[node name="PainelCentral" type="Panel" parent="." unique_id=1104645252]
-custom_minimum_size = Vector2(360, 110)
+[node name="PainelCentral" type="Panel" parent="." unique_id=1524215596]
+custom_minimum_size = Vector2(460, 420)
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -148.0
-offset_top = -180.0
-offset_right = 212.0
-offset_bottom = 180.0
+offset_left = -230.0
+offset_top = -210.0
+offset_right = 230.0
+offset_bottom = 210.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_ek0m7")
+theme_override_styles/panel = SubResource("1")
 
-[node name="MarginContainer" type="MarginContainer" parent="PainelCentral" unique_id=426933393]
+[node name="MarginContainer" type="MarginContainer" parent="PainelCentral" unique_id=362709778]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -78,41 +74,67 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/margin_left = 35
-theme_override_constants/margin_top = 70
+theme_override_constants/margin_top = 34
 theme_override_constants/margin_right = 35
-theme_override_constants/margin_bottom = 40
+theme_override_constants/margin_bottom = 34
 
-[node name="VBoxContainer" type="VBoxContainer" parent="PainelCentral/MarginContainer" unique_id=421605669]
+[node name="VBoxContainer" type="VBoxContainer" parent="PainelCentral/MarginContainer" unique_id=1258502653]
 layout_mode = 2
-theme_override_constants/separation = 16
+theme_override_constants/separation = 12
 
-[node name="LabelNome" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer" unique_id=78163084]
+[node name="Titulo" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer" unique_id=1457730692]
+layout_mode = 2
+text = "Acesso do Aluno"
+horizontal_alignment = 1
+
+[node name="Subtitulo" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer" unique_id=904372686]
+layout_mode = 2
+text = "Preencha os dados para continuar no fluxo atual do jogo."
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="Espacador" type="Control" parent="PainelCentral/MarginContainer/VBoxContainer" unique_id=1486566113]
+custom_minimum_size = Vector2(0, 8)
+layout_mode = 2
+
+[node name="LabelNome" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer" unique_id=1478898787]
 layout_mode = 2
 text = "Nome do Aluno"
 
-[node name="InputNome" type="LineEdit" parent="PainelCentral/MarginContainer/VBoxContainer" unique_id=350951176]
+[node name="InputNome" type="LineEdit" parent="PainelCentral/MarginContainer/VBoxContainer" unique_id=1832882609]
 custom_minimum_size = Vector2(0, 60)
 layout_mode = 2
 placeholder_text = "Insira seu nome"
 
-[node name="LabelCodigo" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer" unique_id=270972181]
+[node name="LabelCodigo" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer" unique_id=2011045104]
 layout_mode = 2
-text = "Código da Sala"
+text = "Codigo da Sala"
 
-[node name="InputCodigo" type="LineEdit" parent="PainelCentral/MarginContainer/VBoxContainer" unique_id=16596764]
+[node name="InputCodigo" type="LineEdit" parent="PainelCentral/MarginContainer/VBoxContainer" unique_id=1646268257]
 custom_minimum_size = Vector2(0, 60)
 layout_mode = 2
-placeholder_text = "Digite o código"
+placeholder_text = "Digite o codigo"
 
-[node name="BotaoJogar" type="Button" parent="PainelCentral/MarginContainer/VBoxContainer" unique_id=1962306214]
+[node name="BotoesAcao" type="HBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer" unique_id=598053959]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="BotaoVoltar" type="Button" parent="PainelCentral/MarginContainer/VBoxContainer/BotoesAcao" unique_id=1584766610]
 custom_minimum_size = Vector2(0, 55)
 layout_mode = 2
+size_flags_horizontal = 3
+text = "VOLTAR"
+
+[node name="BotaoJogar" type="Button" parent="PainelCentral/MarginContainer/VBoxContainer/BotoesAcao" unique_id=682062586]
+custom_minimum_size = Vector2(0, 55)
+layout_mode = 2
+size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_styles/normal = SubResource("StyleBoxFlat_hftsj")
+theme_override_styles/normal = SubResource("2")
 text = "JOGAR"
 
-[node name="Logo" type="TextureRect" parent="." unique_id=1532002673]
+[node name="Logo" type="TextureRect" parent="." unique_id=2017186406]
 custom_minimum_size = Vector2(285, 35)
 layout_mode = 0
 offset_left = 533.0
@@ -120,24 +142,24 @@ offset_top = -395.0
 offset_right = 908.0
 offset_bottom = 605.0
 mouse_filter = 2
-texture = ExtResource("2_eym2y")
+texture = ExtResource("3")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Personagem" type="TextureRect" parent="." unique_id=207310344]
+[node name="Personagem" type="TextureRect" parent="." unique_id=173901561]
 custom_minimum_size = Vector2(280, 320)
 layout_mode = 0
-offset_left = 65.0
-offset_top = 216.0
-offset_right = 800.03
-offset_bottom = 546.0
+offset_left = -16.0
+offset_top = 244.0
+offset_right = 719.03
+offset_bottom = 574.0
 mouse_filter = 2
-texture = ExtResource("3_djjjm")
+texture = ExtResource("4")
 expand_mode = 1
 stretch_mode = 5
 flip_h = true
 
-[node name="BotaoConfiguracao" type="TextureButton" parent="." unique_id=887239123]
+[node name="BotaoConfiguracao" type="TextureButton" parent="." unique_id=401731881]
 custom_minimum_size = Vector2(128, 128)
 layout_mode = 1
 anchors_preset = -1
@@ -150,6 +172,6 @@ offset_top = 0.15997314
 offset_right = -0.5501709
 offset_bottom = -4.104004
 grow_vertical = 0
-texture_normal = ExtResource("5_djjjm")
+texture_normal = ExtResource("5")
 ignore_texture_size = true
 stretch_mode = 6

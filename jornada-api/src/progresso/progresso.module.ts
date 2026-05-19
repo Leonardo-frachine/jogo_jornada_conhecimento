@@ -5,9 +5,10 @@ import { ProgressoController } from './progresso.controller';
 import { Progresso } from './progresso.entity';
 import { Jogador } from '../jogadores/jogador.entity';
 import { Pergunta } from '../perguntas/pergunta.entity';
+import { Sala } from '../salas/sala.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Progresso, Jogador, Pergunta])],
+  imports: [TypeOrmModule.forFeature([Progresso, Jogador, Pergunta, Sala])],
   controllers: [ProgressoController],
   providers: [ProgressoService],
 })

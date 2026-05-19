@@ -1,329 +1,583 @@
 [gd_scene format=3 uid="uid://cgilmstgfncsx"]
 
-[ext_resource type="Script" uid="uid://44tcukxiqfns" path="res://scripts/end_game_screen.gd" id="1_end"]
-[ext_resource type="Texture2D" uid="uid://i3nhmft4k5mv" path="res://assets/game/tabuleiro_embacado.png" id="2_bg"]
-[ext_resource type="Texture2D" uid="uid://b3rhs8wveaxya" path="res://assets/game/personagem.png" id="4_char"]
+[ext_resource type="Script" uid="uid://44tcukxiqfns" path="res://scripts/end_game_screen.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://3ljo201dpbbx" path="res://imagens/fundo_tabuleiro/fundo_embacado.png" id="2"]
+[ext_resource type="Texture2D" uid="uid://ctyknso0bfdn6" path="res://imagens/personagem/personagem_logo.png" id="4"]
+[ext_resource type="Texture2D" uid="uid://cbpn68ac6bol8" path="res://imagens/configuracoes/configuracoes.png" id="5"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
-bg_color = Color(0.988235, 0.607843, 0.266667, 0.92)
-corner_radius_top_left = 32
-corner_radius_top_right = 32
-corner_radius_bottom_right = 32
-corner_radius_bottom_left = 32
+[sub_resource type="StyleBoxFlat" id="10"]
+bg_color = Color(1, 0.647059, 0.121569, 0.16)
+corner_radius_top_left = 150
+corner_radius_top_right = 150
+corner_radius_bottom_right = 150
+corner_radius_bottom_left = 150
+
+[sub_resource type="StyleBoxFlat" id="11"]
+bg_color = Color(0.333333, 0.513726, 0.960784, 0.16)
+corner_radius_top_left = 140
+corner_radius_top_right = 140
+corner_radius_bottom_right = 140
+corner_radius_bottom_left = 140
+
+[sub_resource type="StyleBoxFlat" id="1"]
+bg_color = Color(1, 0.666667, 0.0941176, 0.98)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.0941176, 0.105882, 0.168627, 1)
+corner_radius_top_left = 34
+corner_radius_top_right = 34
+corner_radius_bottom_right = 34
+corner_radius_bottom_left = 34
+shadow_color = Color(0, 0, 0, 0.24)
+shadow_size = 22
+
+[sub_resource type="StyleBoxFlat" id="8"]
+bg_color = Color(0.145098, 0.239216, 0.431373, 0.92)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.905882, 0.576471, 0.95)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+
+[sub_resource type="StyleBoxFlat" id="2"]
+bg_color = Color(0.141176, 0.196078, 0.329412, 0.96)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.858824, 0.439216, 0.9)
+corner_radius_top_left = 28
+corner_radius_top_right = 28
+corner_radius_bottom_right = 28
+corner_radius_bottom_left = 28
+shadow_color = Color(0, 0, 0, 0.22)
+shadow_size = 12
+
+[sub_resource type="StyleBoxFlat" id="9"]
+bg_color = Color(1, 0.866667, 0.380392, 0.18)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.85098, 0.415686, 0.8)
+corner_radius_top_left = 22
+corner_radius_top_right = 22
+corner_radius_bottom_right = 22
+corner_radius_bottom_left = 22
+
+[sub_resource type="StyleBoxFlat" id="3"]
+bg_color = Color(0.972549, 0.960784, 0.917647, 0.98)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.141176, 0.196078, 0.329412, 0.18)
+corner_radius_top_left = 22
+corner_radius_top_right = 22
+corner_radius_bottom_right = 22
+corner_radius_bottom_left = 22
+shadow_color = Color(0, 0, 0, 0.12)
+shadow_size = 8
+
+[sub_resource type="StyleBoxFlat" id="4"]
+bg_color = Color(0.188235, 0.74902, 0.45098, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.0823529, 0.215686, 0.152941, 1)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
 shadow_color = Color(0, 0, 0, 0.16)
-shadow_size = 16
+shadow_size = 8
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_card"]
-bg_color = Color(0.980392, 0.670588, 0.392157, 1)
-corner_radius_top_left = 18
-corner_radius_top_right = 18
-corner_radius_bottom_right = 18
-corner_radius_bottom_left = 18
+[sub_resource type="StyleBoxFlat" id="6"]
+bg_color = Color(0.270588, 0.886275, 0.584314, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.0823529, 0.215686, 0.152941, 1)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button_blue"]
-bg_color = Color(0.152941, 0.470588, 0.94902, 1)
-corner_radius_top_left = 18
-corner_radius_top_right = 18
-corner_radius_bottom_right = 18
-corner_radius_bottom_left = 18
-shadow_color = Color(0, 0, 0, 0.18)
-shadow_size = 10
+[sub_resource type="StyleBoxFlat" id="5"]
+bg_color = Color(0.262745, 0.345098, 0.576471, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.109804, 0.141176, 0.239216, 1)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+shadow_color = Color(0, 0, 0, 0.16)
+shadow_size = 8
 
-[node name="EndGameScreen" type="Control" unique_id=722119028]
+[sub_resource type="StyleBoxFlat" id="7"]
+bg_color = Color(0.352941, 0.439216, 0.698039, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.109804, 0.141176, 0.239216, 1)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+
+[node name="EndGameScreen" type="Control" unique_id=1530250526]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_end")
+script = ExtResource("1")
 
-[node name="Background" type="TextureRect" parent="." unique_id=1813857587]
+[node name="Background" type="TextureRect" parent="." unique_id=992089566]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-texture = ExtResource("2_bg")
-expand_mode = 1
+mouse_filter = 2
+texture = ExtResource("2")
 stretch_mode = 6
 
-[node name="Overlay" type="ColorRect" parent="." unique_id=1392009718]
+[node name="BackgroundTint" type="ColorRect" parent="." unique_id=2086194218]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.94902, 0.521569, 0.0627451, 0.76)
+mouse_filter = 2
+color = Color(0.0470588, 0.0823529, 0.160784, 0.18)
 
-[node name="Content" type="MarginContainer" parent="." unique_id=1999001182]
+[node name="DecorOrbLeft" type="Panel" parent="." unique_id=1773780535]
+custom_minimum_size = Vector2(220, 220)
+layout_mode = 0
+offset_left = 40.0
+offset_top = 90.0
+offset_right = 260.0
+offset_bottom = 310.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("10")
+
+[node name="DecorOrbRight" type="Panel" parent="." unique_id=1179533004]
+custom_minimum_size = Vector2(240, 240)
+layout_mode = 0
+offset_left = 1060.0
+offset_top = 70.0
+offset_right = 1300.0
+offset_bottom = 310.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("11")
+
+[node name="PainelCentral" type="Panel" parent="." unique_id=218675024]
+custom_minimum_size = Vector2(920, 660)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -420.0
+offset_top = -326.0
+offset_right = 500.0
+offset_bottom = 334.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("1")
+
+[node name="MarginContainer" type="MarginContainer" parent="PainelCentral" unique_id=514727486]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 80.0
-offset_top = 48.0
-offset_right = -80.0
-offset_bottom = -48.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_constants/margin_left = 34
+theme_override_constants/margin_top = 28
+theme_override_constants/margin_right = 34
+theme_override_constants/margin_bottom = 28
 
-[node name="Center" type="CenterContainer" parent="Content" unique_id=1767683840]
+[node name="MainVBox" type="VBoxContainer" parent="PainelCentral/MarginContainer" unique_id=1116553589]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="HeaderBox" type="VBoxContainer" parent="PainelCentral/MarginContainer/MainVBox" unique_id=881760401]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Badge" type="Panel" parent="PainelCentral/MarginContainer/MainVBox/HeaderBox" unique_id=1440741988]
+custom_minimum_size = Vector2(250, 42)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_styles/panel = SubResource("8")
+
+[node name="BadgeText" type="Label" parent="PainelCentral/MarginContainer/MainVBox/HeaderBox/Badge" unique_id=144747647]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = 5.0
+offset_right = -10.0
+offset_bottom = -5.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 0.976471, 0.909804, 1)
+theme_override_font_sizes/font_size = 17
+text = "RESULTADO FINAL"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Character" type="TextureRect" parent="PainelCentral/MarginContainer/MainVBox/HeaderBox/Badge" unique_id=1321107639]
+custom_minimum_size = Vector2(260, 300)
+layout_mode = 0
+offset_left = -358.0
+offset_top = -90.0
+offset_right = -98.0
+offset_bottom = 210.0
+mouse_filter = 2
+texture = ExtResource("4")
+expand_mode = 1
+stretch_mode = 5
+flip_h = true
+
+[node name="Title" type="Label" parent="PainelCentral/MarginContainer/MainVBox/HeaderBox" unique_id=437331584]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.117647, 0.12549, 0.188235, 1)
+theme_override_font_sizes/font_size = 42
+text = "Jornada Concluida"
+horizontal_alignment = 1
+
+[node name="ContentRow" type="HBoxContainer" parent="PainelCentral/MarginContainer/MainVBox" unique_id=1189833805]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="ScoreHeroCard" type="Panel" parent="PainelCentral/MarginContainer/MainVBox/ContentRow" unique_id=404229529]
+custom_minimum_size = Vector2(0, 230)
 layout_mode = 2
 size_flags_horizontal = 3
-size_flags_vertical = 3
+theme_override_styles/panel = SubResource("2")
 
-[node name="MainPanel" type="Panel" parent="Content/Center" unique_id=1798527708]
-custom_minimum_size = Vector2(860, 560)
-layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
-
-[node name="Inner" type="MarginContainer" parent="Content/Center/MainPanel" unique_id=408838585]
+[node name="HeroMargin" type="MarginContainer" parent="PainelCentral/MarginContainer/MainVBox/ContentRow/ScoreHeroCard" unique_id=127320509]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 28.0
-offset_top = 24.0
-offset_right = -28.0
-offset_bottom = -24.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 24
 
-[node name="VBox" type="VBoxContainer" parent="Content/Center/MainPanel/Inner" unique_id=2090910477]
-layout_mode = 2
-theme_override_constants/separation = 14
-
-[node name="Crown" type="Label" parent="Content/Center/MainPanel/Inner/VBox" unique_id=382932664]
-layout_mode = 2
-theme_override_font_sizes/font_size = 55
-text = "👑"
-horizontal_alignment = 1
-
-[node name="Title" type="Label" parent="Content/Center/MainPanel/Inner/VBox" unique_id=295024941]
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 46
-text = "VITÓRIA!"
-horizontal_alignment = 1
-
-[node name="Subtitle" type="Label" parent="Content/Center/MainPanel/Inner/VBox" unique_id=873788195]
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.968627, 0.890196, 1)
-theme_override_font_sizes/font_size = 19
-text = "Parabéns! Você concluiu a jornada do conhecimento."
-horizontal_alignment = 1
-
-[node name="StatsRow" type="HBoxContainer" parent="Content/Center/MainPanel/Inner/VBox" unique_id=1291428522]
+[node name="HeroVBox" type="VBoxContainer" parent="PainelCentral/MarginContainer/MainVBox/ContentRow/ScoreHeroCard/HeroMargin" unique_id=615690931]
 layout_mode = 2
 theme_override_constants/separation = 12
-alignment = 1
 
-[node name="Card1" type="Panel" parent="Content/Center/MainPanel/Inner/VBox/StatsRow" unique_id=393842379]
-custom_minimum_size = Vector2(140, 90)
+[node name="PerformanceSeal" type="Panel" parent="PainelCentral/MarginContainer/MainVBox/ContentRow/ScoreHeroCard/HeroMargin/HeroVBox" unique_id=2020576436]
+custom_minimum_size = Vector2(116, 46)
 layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_card")
+size_flags_horizontal = 4
+theme_override_styles/panel = SubResource("9")
 
-[node name="Card1V" type="VBoxContainer" parent="Content/Center/MainPanel/Inner/VBox/StatsRow/Card1" unique_id=206520645]
+[node name="PerformanceSealText" type="Label" parent="PainelCentral/MarginContainer/MainVBox/ContentRow/ScoreHeroCard/HeroMargin/HeroVBox/PerformanceSeal" unique_id=508511540]
 layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 10.0
-offset_top = 10.0
-offset_right = -10.0
-offset_bottom = -10.0
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -28.0
+offset_top = -17.0
+offset_right = 28.0
+offset_bottom = 17.0
 grow_horizontal = 2
 grow_vertical = 2
-alignment = 1
-
-[node name="Card1Top" type="Label" parent="Content/Center/MainPanel/Inner/VBox/StatsRow/Card1/Card1V" unique_id=1168905189]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.4, 0.25098, 0.117647, 1)
-theme_override_font_sizes/font_size = 15
-text = "Resultado"
-horizontal_alignment = 1
-
-[node name="Card1Value" type="Label" parent="Content/Center/MainPanel/Inner/VBox/StatsRow/Card1/Card1V" unique_id=2062734702]
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_color = Color(1, 0.909804, 0.588235, 1)
 theme_override_font_sizes/font_size = 26
-text = "2.450"
+text = "A+"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="HeroTag" type="Label" parent="PainelCentral/MarginContainer/MainVBox/ContentRow/ScoreHeroCard/HeroMargin/HeroVBox" unique_id=141697884]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.894118, 0.921569, 1, 0.92)
+theme_override_font_sizes/font_size = 18
+text = "Pontuacao Final"
 horizontal_alignment = 1
 
-[node name="Card3" type="Panel" parent="Content/Center/MainPanel/Inner/VBox/StatsRow" unique_id=232986828]
-custom_minimum_size = Vector2(140, 90)
+[node name="ResultValue" type="Label" parent="PainelCentral/MarginContainer/MainVBox/ContentRow/ScoreHeroCard/HeroMargin/HeroVBox" unique_id=1649478980]
+custom_minimum_size = Vector2(0, 82)
 layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_card")
+theme_override_colors/font_color = Color(1, 0.956863, 0.807843, 1)
+theme_override_font_sizes/font_size = 64
+text = "0"
+horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="Card3V" type="VBoxContainer" parent="Content/Center/MainPanel/Inner/VBox/StatsRow/Card3" unique_id=588155028]
+[node name="PerformanceMessage" type="Label" parent="PainelCentral/MarginContainer/MainVBox/ContentRow/ScoreHeroCard/HeroMargin/HeroVBox" unique_id=2087867255]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.913725, 0.952941, 1, 1)
+theme_override_font_sizes/font_size = 20
+text = "Excelente! Voce mandou muito bem!"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="SummaryCard" type="Panel" parent="PainelCentral/MarginContainer/MainVBox/ContentRow" unique_id=1116093641]
+custom_minimum_size = Vector2(260, 230)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("3")
+
+[node name="SummaryMargin" type="MarginContainer" parent="PainelCentral/MarginContainer/MainVBox/ContentRow/SummaryCard" unique_id=79544764]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 10.0
-offset_top = 10.0
-offset_right = -10.0
-offset_bottom = -10.0
 grow_horizontal = 2
 grow_vertical = 2
-alignment = 1
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
 
-[node name="Card3Top" type="Label" parent="Content/Center/MainPanel/Inner/VBox/StatsRow/Card3/Card3V" unique_id=1000697597]
+[node name="SummaryVBox" type="VBoxContainer" parent="PainelCentral/MarginContainer/MainVBox/ContentRow/SummaryCard/SummaryMargin" unique_id=584067802]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.4, 0.25098, 0.117647, 1)
-theme_override_font_sizes/font_size = 15
+theme_override_constants/separation = 12
+
+[node name="SummaryTitle" type="Label" parent="PainelCentral/MarginContainer/MainVBox/ContentRow/SummaryCard/SummaryMargin/SummaryVBox" unique_id=1911706228]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.121569, 0.14902, 0.239216, 1)
+theme_override_font_sizes/font_size = 24
+text = "Resumo da Jornada"
+
+[node name="SummaryDivider" type="HSeparator" parent="PainelCentral/MarginContainer/MainVBox/ContentRow/SummaryCard/SummaryMargin/SummaryVBox" unique_id=1606706455]
+layout_mode = 2
+
+[node name="AccuracyRow" type="HBoxContainer" parent="PainelCentral/MarginContainer/MainVBox/ContentRow/SummaryCard/SummaryMargin/SummaryVBox" unique_id=1346288342]
+layout_mode = 2
+
+[node name="AccuracyLabel" type="Label" parent="PainelCentral/MarginContainer/MainVBox/ContentRow/SummaryCard/SummaryMargin/SummaryVBox/AccuracyRow" unique_id=1115801604]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.188235, 0.227451, 0.337255, 0.92)
+theme_override_font_sizes/font_size = 18
+text = "Aproveitamento"
+
+[node name="AccuracyValue" type="Label" parent="PainelCentral/MarginContainer/MainVBox/ContentRow/SummaryCard/SummaryMargin/SummaryVBox/AccuracyRow" unique_id=1347226922]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.121569, 0.14902, 0.239216, 1)
+theme_override_font_sizes/font_size = 20
+text = "0%"
+horizontal_alignment = 2
+
+[node name="LevelRow" type="HBoxContainer" parent="PainelCentral/MarginContainer/MainVBox/ContentRow/SummaryCard/SummaryMargin/SummaryVBox" unique_id=234703849]
+layout_mode = 2
+
+[node name="LevelLabel" type="Label" parent="PainelCentral/MarginContainer/MainVBox/ContentRow/SummaryCard/SummaryMargin/SummaryVBox/LevelRow" unique_id=1434371841]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.188235, 0.227451, 0.337255, 0.92)
+theme_override_font_sizes/font_size = 18
+text = "Nivel alcancado"
+
+[node name="LevelValue" type="Label" parent="PainelCentral/MarginContainer/MainVBox/ContentRow/SummaryCard/SummaryMargin/SummaryVBox/LevelRow" unique_id=654722547]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.121569, 0.14902, 0.239216, 1)
+theme_override_font_sizes/font_size = 20
+text = "1"
+horizontal_alignment = 2
+
+[node name="AnsweredRow" type="HBoxContainer" parent="PainelCentral/MarginContainer/MainVBox/ContentRow/SummaryCard/SummaryMargin/SummaryVBox" unique_id=720486242]
+layout_mode = 2
+
+[node name="AnsweredSummaryLabel" type="Label" parent="PainelCentral/MarginContainer/MainVBox/ContentRow/SummaryCard/SummaryMargin/SummaryVBox/AnsweredRow" unique_id=1097961787]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.188235, 0.227451, 0.337255, 0.92)
+theme_override_font_sizes/font_size = 18
+text = "Perguntas respondidas"
+
+[node name="AnsweredSummaryValue" type="Label" parent="PainelCentral/MarginContainer/MainVBox/ContentRow/SummaryCard/SummaryMargin/SummaryVBox/AnsweredRow" unique_id=1748479201]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.121569, 0.14902, 0.239216, 1)
+theme_override_font_sizes/font_size = 20
+text = "0"
+horizontal_alignment = 2
+
+[node name="MetricsRow" type="HBoxContainer" parent="PainelCentral/MarginContainer/MainVBox" unique_id=451064583]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="DetailRespondidas" type="Panel" parent="PainelCentral/MarginContainer/MainVBox/MetricsRow" unique_id=1932478065]
+custom_minimum_size = Vector2(0, 118)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("3")
+
+[node name="MarginRespondidas" type="MarginContainer" parent="PainelCentral/MarginContainer/MainVBox/MetricsRow/DetailRespondidas" unique_id=579117803]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="VBoxRespondidas" type="VBoxContainer" parent="PainelCentral/MarginContainer/MainVBox/MetricsRow/DetailRespondidas/MarginRespondidas" unique_id=1118848473]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="AnsweredLabel" type="Label" parent="PainelCentral/MarginContainer/MainVBox/MetricsRow/DetailRespondidas/MarginRespondidas/VBoxRespondidas" unique_id=828442394]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.188235, 0.227451, 0.337255, 0.92)
+theme_override_font_sizes/font_size = 17
+text = "Respondidas"
+horizontal_alignment = 1
+
+[node name="AnsweredValue" type="Label" parent="PainelCentral/MarginContainer/MainVBox/MetricsRow/DetailRespondidas/MarginRespondidas/VBoxRespondidas" unique_id=569263377]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.121569, 0.14902, 0.239216, 1)
+theme_override_font_sizes/font_size = 34
+text = "0"
+horizontal_alignment = 1
+
+[node name="DetailCertas" type="Panel" parent="PainelCentral/MarginContainer/MainVBox/MetricsRow" unique_id=106579962]
+custom_minimum_size = Vector2(0, 118)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("3")
+
+[node name="MarginCertas" type="MarginContainer" parent="PainelCentral/MarginContainer/MainVBox/MetricsRow/DetailCertas" unique_id=1946908646]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="VBoxCertas" type="VBoxContainer" parent="PainelCentral/MarginContainer/MainVBox/MetricsRow/DetailCertas/MarginCertas" unique_id=1731683397]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="CorrectLabel" type="Label" parent="PainelCentral/MarginContainer/MainVBox/MetricsRow/DetailCertas/MarginCertas/VBoxCertas" unique_id=2044085087]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.188235, 0.227451, 0.337255, 0.92)
+theme_override_font_sizes/font_size = 17
 text = "Acertos"
 horizontal_alignment = 1
 
-[node name="Card3Value" type="Label" parent="Content/Center/MainPanel/Inner/VBox/StatsRow/Card3/Card3V" unique_id=1508785754]
+[node name="CorrectValue" type="Label" parent="PainelCentral/MarginContainer/MainVBox/MetricsRow/DetailCertas/MarginCertas/VBoxCertas" unique_id=916851494]
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 26
-text = "83%"
+theme_override_colors/font_color = Color(0.152941, 0.505882, 0.290196, 1)
+theme_override_font_sizes/font_size = 34
+text = "0"
 horizontal_alignment = 1
 
-[node name="Card4" type="Panel" parent="Content/Center/MainPanel/Inner/VBox/StatsRow" unique_id=799762133]
-custom_minimum_size = Vector2(140, 90)
+[node name="DetailErros" type="Panel" parent="PainelCentral/MarginContainer/MainVBox/MetricsRow" unique_id=125388281]
+custom_minimum_size = Vector2(0, 118)
 layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_card")
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("3")
 
-[node name="Card4V" type="VBoxContainer" parent="Content/Center/MainPanel/Inner/VBox/StatsRow/Card4" unique_id=1582595217]
+[node name="MarginErros" type="MarginContainer" parent="PainelCentral/MarginContainer/MainVBox/MetricsRow/DetailErros" unique_id=1871982618]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 10.0
-offset_top = 10.0
-offset_right = -10.0
-offset_bottom = -10.0
 grow_horizontal = 2
 grow_vertical = 2
-alignment = 1
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
 
-[node name="Card4Top" type="Label" parent="Content/Center/MainPanel/Inner/VBox/StatsRow/Card4/Card4V" unique_id=771661500]
+[node name="VBoxErros" type="VBoxContainer" parent="PainelCentral/MarginContainer/MainVBox/MetricsRow/DetailErros/MarginErros" unique_id=1855886116]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.4, 0.25098, 0.117647, 1)
-theme_override_font_sizes/font_size = 15
-text = "Nível"
-horizontal_alignment = 1
+theme_override_constants/separation = 6
 
-[node name="Card4Value" type="Label" parent="Content/Center/MainPanel/Inner/VBox/StatsRow/Card4/Card4V" unique_id=398911617]
+[node name="WrongLabel" type="Label" parent="PainelCentral/MarginContainer/MainVBox/MetricsRow/DetailErros/MarginErros/VBoxErros" unique_id=1844893402]
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 26
-text = "4"
-horizontal_alignment = 1
-
-[node name="DetailsPanel" type="Panel" parent="Content/Center/MainPanel/Inner/VBox" unique_id=956693203]
-custom_minimum_size = Vector2(0, 150)
-layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_card")
-
-[node name="DetailsInner" type="MarginContainer" parent="Content/Center/MainPanel/Inner/VBox/DetailsPanel" unique_id=1081444040]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 18.0
-offset_top = 16.0
-offset_right = -18.0
-offset_bottom = -16.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="DetailsVBox" type="VBoxContainer" parent="Content/Center/MainPanel/Inner/VBox/DetailsPanel/DetailsInner" unique_id=605842301]
-layout_mode = 2
-theme_override_constants/separation = 14
-
-[node name="DetailsTitle" type="Label" parent="Content/Center/MainPanel/Inner/VBox/DetailsPanel/DetailsInner/DetailsVBox" unique_id=1427155917]
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 28
-text = "📊 Estatísticas da partida"
-
-[node name="DetailsStats" type="HBoxContainer" parent="Content/Center/MainPanel/Inner/VBox/DetailsPanel/DetailsInner/DetailsVBox" unique_id=1619186679]
-layout_mode = 2
-theme_override_constants/separation = 36
-
-[node name="D1" type="VBoxContainer" parent="Content/Center/MainPanel/Inner/VBox/DetailsPanel/DetailsInner/DetailsVBox/DetailsStats" unique_id=1342176102]
-layout_mode = 2
-
-[node name="D1Top" type="Label" parent="Content/Center/MainPanel/Inner/VBox/DetailsPanel/DetailsInner/DetailsVBox/DetailsStats/D1" unique_id=1471089831]
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.933333, 0.858824, 1)
-theme_override_font_sizes/font_size = 15
-text = "Perguntas respondidas"
-
-[node name="D1Value" type="Label" parent="Content/Center/MainPanel/Inner/VBox/DetailsPanel/DetailsInner/DetailsVBox/DetailsStats/D1" unique_id=1899025584]
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 34
-text = "18"
-
-[node name="D2" type="VBoxContainer" parent="Content/Center/MainPanel/Inner/VBox/DetailsPanel/DetailsInner/DetailsVBox/DetailsStats" unique_id=2032031515]
-layout_mode = 2
-
-[node name="D2Top" type="Label" parent="Content/Center/MainPanel/Inner/VBox/DetailsPanel/DetailsInner/DetailsVBox/DetailsStats/D2" unique_id=1724326513]
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.933333, 0.858824, 1)
-theme_override_font_sizes/font_size = 15
-text = "Respostas certas"
-
-[node name="D2Value" type="Label" parent="Content/Center/MainPanel/Inner/VBox/DetailsPanel/DetailsInner/DetailsVBox/DetailsStats/D2" unique_id=2092425623]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.345098, 1, 0.647059, 1)
-theme_override_font_sizes/font_size = 34
-text = "15"
-
-[node name="D3" type="VBoxContainer" parent="Content/Center/MainPanel/Inner/VBox/DetailsPanel/DetailsInner/DetailsVBox/DetailsStats" unique_id=201629974]
-layout_mode = 2
-
-[node name="D3Top" type="Label" parent="Content/Center/MainPanel/Inner/VBox/DetailsPanel/DetailsInner/DetailsVBox/DetailsStats/D3" unique_id=1383715601]
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.933333, 0.858824, 1)
-theme_override_font_sizes/font_size = 15
+theme_override_colors/font_color = Color(0.188235, 0.227451, 0.337255, 0.92)
+theme_override_font_sizes/font_size = 17
 text = "Erros"
+horizontal_alignment = 1
 
-[node name="D3Value" type="Label" parent="Content/Center/MainPanel/Inner/VBox/DetailsPanel/DetailsInner/DetailsVBox/DetailsStats/D3" unique_id=2062023329]
+[node name="WrongValue" type="Label" parent="PainelCentral/MarginContainer/MainVBox/MetricsRow/DetailErros/MarginErros/VBoxErros" unique_id=1787621071]
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.462745, 0.537255, 1)
+theme_override_colors/font_color = Color(0.74902, 0.282353, 0.266667, 1)
 theme_override_font_sizes/font_size = 34
-text = "3"
+text = "0"
+horizontal_alignment = 1
 
-[node name="ButtonsRow" type="HBoxContainer" parent="Content/Center/MainPanel/Inner/VBox" unique_id=611635748]
+[node name="ButtonsRow" type="HBoxContainer" parent="PainelCentral/MarginContainer/MainVBox" unique_id=545521553]
 layout_mode = 2
-theme_override_constants/separation = 18
-alignment = 1
+theme_override_constants/separation = 16
 
-[node name="MainMenu" type="Button" parent="Content/Center/MainPanel/Inner/VBox/ButtonsRow" unique_id=265706476]
-custom_minimum_size = Vector2(240, 64)
+[node name="BotaoJogarNovamente" type="Button" parent="PainelCentral/MarginContainer/MainVBox/ButtonsRow" unique_id=1555295305]
+custom_minimum_size = Vector2(0, 62)
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.0627451, 0.14902, 0.109804, 1)
+theme_override_colors/font_pressed_color = Color(0.0627451, 0.14902, 0.109804, 1)
+theme_override_colors/font_hover_color = Color(0.0627451, 0.14902, 0.109804, 1)
 theme_override_font_sizes/font_size = 22
-theme_override_styles/normal = SubResource("StyleBoxFlat_button_blue")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_button_blue")
-theme_override_styles/hover = SubResource("StyleBoxFlat_button_blue")
-text = "VOLTAR AO INÍCIO"
+theme_override_styles/normal = SubResource("4")
+theme_override_styles/pressed = SubResource("6")
+theme_override_styles/hover = SubResource("6")
+text = "JOGAR NOVAMENTE"
 
-[node name="Character" type="TextureRect" parent="." unique_id=462759124]
-custom_minimum_size = Vector2(210, 210)
+[node name="BotaoMenuPrincipal" type="Button" parent="PainelCentral/MarginContainer/MainVBox/ButtonsRow" unique_id=745386104]
+custom_minimum_size = Vector2(0, 62)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.945098, 0.960784, 1, 1)
+theme_override_colors/font_pressed_color = Color(0.945098, 0.960784, 1, 1)
+theme_override_colors/font_hover_color = Color(0.945098, 0.960784, 1, 1)
+theme_override_font_sizes/font_size = 22
+theme_override_styles/normal = SubResource("5")
+theme_override_styles/pressed = SubResource("7")
+theme_override_styles/hover = SubResource("7")
+text = "VOLTAR AO MENU"
+
+[node name="BotaoConfiguracao" type="TextureButton" parent="." unique_id=1407949206]
+custom_minimum_size = Vector2(128, 128)
 layout_mode = 1
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
+anchors_preset = -1
+anchor_left = 0.89000005
+anchor_top = 0.79700005
+anchor_right = 1.0020001
 anchor_bottom = 1.0
-offset_left = -486.0
-offset_top = -550.0
-offset_right = 66.0
-offset_bottom = -193.0
-grow_horizontal = 0
+offset_left = 0.2598877
+offset_top = 0.15997314
+offset_right = -0.5501709
+offset_bottom = -4.104004
 grow_vertical = 0
-texture = ExtResource("4_char")
-expand_mode = 1
-stretch_mode = 5
-
-[connection signal="pressed" from="Content/Center/MainPanel/Inner/VBox/ButtonsRow/MainMenu" to="." method="_on_restart_pressed"]
+texture_normal = ExtResource("5")
+ignore_texture_size = true
+stretch_mode = 6

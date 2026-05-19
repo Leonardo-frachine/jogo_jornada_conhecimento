@@ -5,9 +5,14 @@ signal settings_changed
 
 const CONFIG_PATH := "user://settings.cfg"
 const OVERLAY_SCENE := preload("res://ui/settings/SettingsOverlay.tscn")
+const ACCESS_SCENE_PATH := "res://scene/selecao_perfil.tscn"
 const ALLOWED_OVERLAY_SCENES := {
+	"res://scene/selecao_perfil.tscn": true,
 	"res://scene/tela_inicial.tscn": true,
 	"res://scene/game.tscn": true,
+	"res://scene/acesso_professor.tscn": true,
+	"res://scene/painel_professor.tscn": true,
+	"res://scene/end_game_screen.tscn": true,
 }
 
 const DEFAULT_MASTER_VOLUME := 0.85
@@ -96,6 +101,17 @@ func toggle_menu() -> void:
 		close_menu()
 	else:
 		open_menu()
+
+func return_to_access_screen() -> void:
+	get_tree().paused = false
+
+	if has_node("/root/ProfessorSession"):
+		var professor_session: Node = get_node("/root/ProfessorSession")
+		if professor_session.has_method("clear_session"):
+			professor_session.call("clear_session")
+
+	close_menu()
+	get_tree().change_scene_to_file(ACCESS_SCENE_PATH)
 
 func set_master_volume(value: float) -> void:
 	master_volume = clampf(value, 0.0, 1.0)

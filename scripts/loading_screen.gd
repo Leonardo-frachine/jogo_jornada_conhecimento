@@ -1,11 +1,13 @@
 extends Control
 
-@onready var logo = $Logo
-@onready var loading_card = $Content/Center/VBox/LoadingCard
-@onready var subtitle: Label = $Content/Center/VBox/Subtitle
-@onready var dot_1 = $Content/Center/VBox/LoadingCard/LoadingCenter/LoadingRow/Dot1
-@onready var dot_2 = $Content/Center/VBox/LoadingCard/LoadingCenter/LoadingRow/Dot2
-@onready var dot_3 = $Content/Center/VBox/LoadingCard/LoadingCenter/LoadingRow/Dot3
+@onready var logo: TextureRect = $PainelCentral/MarginContainer/VBoxContainer/Logo
+@onready var loading_card: Panel = $PainelCentral/MarginContainer/VBoxContainer/LoadingCard
+@onready var subtitle: Label = $PainelCentral/MarginContainer/VBoxContainer/Subtitle
+@onready var hint_text: Label = $PainelCentral/MarginContainer/VBoxContainer/HintText
+@onready var dot_1: Label = $PainelCentral/MarginContainer/VBoxContainer/LoadingCard/LoadingCenter/LoadingRow/Dot1
+@onready var dot_2: Label = $PainelCentral/MarginContainer/VBoxContainer/LoadingCard/LoadingCenter/LoadingRow/Dot2
+@onready var dot_3: Label = $PainelCentral/MarginContainer/VBoxContainer/LoadingCard/LoadingCenter/LoadingRow/Dot3
+@onready var personagem: TextureRect = $Personagem
 
 var _dot_base_y = {}
 
@@ -18,12 +20,14 @@ func _ready() -> void:
 
 	if not GameState.player_name.is_empty():
 		subtitle.text = "Preparando o tabuleiro para %s..." % GameState.player_name
+		hint_text.text = "A sala, as perguntas e o progresso do jogador estao sendo preparados."
 
 	if not GameState.session_preparation_updated.is_connected(_on_session_preparation_updated):
 		GameState.session_preparation_updated.connect(_on_session_preparation_updated)
 
 	animate_logo()
 	animate_loading_card()
+	animate_character()
 	animate_dot(dot_1, 0.0)
 	animate_dot(dot_2, 0.14)
 	animate_dot(dot_3, 0.28)
@@ -54,6 +58,13 @@ func animate_loading_card() -> void:
 	tween.tween_property(loading_card, "scale", base_scale * 1.01, 0.7).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	tween.tween_property(loading_card, "scale", base_scale, 0.7).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 
+func animate_character() -> void:
+	var base_y = personagem.position.y
+	var tween = create_tween()
+	tween.set_loops()
+	tween.tween_property(personagem, "position:y", base_y - 8.0, 0.9).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	tween.tween_property(personagem, "position:y", base_y, 0.9).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+
 func animate_dot(dot: Control, delay: float) -> void:
 	var base_y = _dot_base_y[dot]
 	var tween = create_tween()
@@ -68,13 +79,11 @@ func _on_session_preparation_updated(message: String) -> void:
 
 func _show_startup_error(message: String) -> void:
 	subtitle.text = message
+	hint_text.text = "Nao foi possivel preparar a partida."
 	var dialog := AcceptDialog.new()
 	add_child(dialog)
 	dialog.title = "Falha ao iniciar"
 	dialog.dialog_text = message
 	dialog.popup_centered()
 	await dialog.confirmed
-	get_tree().change_scene_to_file("res://scene/tela_inicial.tscn")
-
-func _on_timer_timeout() -> void:
-	pass
+	get_tree().change_scene_to_file("res://scene/selecao_perfil.tscn")
