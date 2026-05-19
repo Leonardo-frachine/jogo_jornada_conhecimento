@@ -4,6 +4,7 @@ const DEFAULT_BASE_URL := "http://127.0.0.1:3000"
 const BASE_URL_SETTING := "application/config/api_base_url"
 const REQUEST_TIMEOUT_SECONDS := 10.0
 const IMPORT_REQUEST_TIMEOUT_SECONDS := 30.0
+const AI_REQUEST_TIMEOUT_SECONDS := 45.0
 
 var base_url: String = DEFAULT_BASE_URL
 
@@ -51,6 +52,32 @@ func fetch_room_answers(room_id: int) -> Dictionary:
 
 func fetch_questions() -> Dictionary:
 	return await _request_json(HTTPClient.METHOD_GET, "/perguntas")
+
+func generate_questions_ai(tema: String, materia: String, dificuldade: String, quantidade: int, pontuacao: int, tempo_limite: int) -> Dictionary:
+	var payload: Dictionary = {
+		"tema": tema,
+		"materia": materia,
+		"dificuldade": dificuldade,
+		"quantidade": quantidade,
+		"pontuacao": pontuacao,
+	}
+	if tempo_limite > 0:
+		payload["tempoLimite"] = tempo_limite
+
+	return await _request_json(
+		HTTPClient.METHOD_POST,
+		"/perguntas/gerar-ia",
+		payload,
+		AI_REQUEST_TIMEOUT_SECONDS
+	)
+
+func save_generated_questions(perguntas_aprovadas: Array) -> Dictionary:
+	return await _request_json(
+		HTTPClient.METHOD_POST,
+		"/perguntas/salvar-geradas",
+		perguntas_aprovadas,
+		AI_REQUEST_TIMEOUT_SECONDS
+	)
 
 func import_questions_spreadsheet(file_path: String) -> Dictionary:
 	var extension: String = file_path.get_extension().to_lower()

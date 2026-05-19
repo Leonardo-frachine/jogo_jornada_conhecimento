@@ -8,6 +8,8 @@ import { AppModule } from '../src/app.module';
 
 describe('AppController (e2e)', () => {
   let app: INestApplication<App>;
+  const originalIaEnabled = process.env.IA_ENABLED;
+  const originalGeminiApiKey = process.env.GEMINI_API_KEY;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -17,6 +19,11 @@ describe('AppController (e2e)', () => {
     app = moduleFixture.createNestApplication();
     configureApp(app);
     await app.init();
+  });
+
+  afterEach(() => {
+    process.env.IA_ENABLED = originalIaEnabled;
+    process.env.GEMINI_API_KEY = originalGeminiApiKey;
   });
 
   it('/ (GET)', () => {
@@ -228,6 +235,116 @@ describe('AppController (e2e)', () => {
       pontuacao: 220,
     });
     expect(importacaoXlsxResponse.body.perguntas[0].id).not.toBe(500);
+  });
+
+  it('retorna erro amigavel quando a geracao por IA esta desativada', async () => {
+    process.env.IA_ENABLED = 'false';
+    delete process.env.GEMINI_API_KEY;
+
+    const response = await request(app.getHttpServer())
+      .post('/perguntas/gerar-ia')
+      .send({
+        tema: 'Sistema Solar',
+        materia: 'Ciencias',
+        dificuldade: 'Medio',
+        quantidade: 2,
+        pontuacao: 100,
+        tempoLimite: 30,
+      })
+      .expect(503);
+
+    expect(response.body.message).toBe(
+      'A geracao por IA esta desativada no servidor.',
+    );
+  });
+
+  it('retorna erro amigavel quando a chave do Gemini nao esta configurada', async () => {
+    process.env.IA_ENABLED = 'true';
+    delete process.env.GEMINI_API_KEY;
+
+    const response = await request(app.getHttpServer())
+      .post('/perguntas/gerar-ia')
+      .send({
+        tema: 'Sistema Solar',
+        materia: 'Ciencias',
+        dificuldade: 'Medio',
+        quantidade: 2,
+        pontuacao: 100,
+        tempoLimite: 30,
+      })
+      .expect(503);
+
+    expect(response.body.message).toBe(
+      'Chave da API Gemini nao configurada no servidor.',
+    );
+  });
+
+  it('salva apenas as perguntas aprovadas enviadas pelo professor', async () => {
+    const response = await request(app.getHttpServer())
+      .post('/perguntas/salvar-geradas')
+      .send([
+        {
+          titulo: 'Sistema Solar',
+          enunciado: 'Qual planeta e conhecido como planeta vermelho?',
+          alternativaA: 'Marte',
+          alternativaB: 'Venus',
+          alternativaC: 'Jupiter',
+          alternativaD: 'Saturno',
+          respostaCorreta: 'A',
+          materia: 'Ciencias',
+          dificuldade: 'Facil',
+          pontuacao: 100,
+          tempoLimite: 30,
+        },
+        {
+          titulo: 'Oceanos',
+          enunciado: 'Qual oceano banha a costa leste do Brasil?',
+          alternativaA: 'Pacifico',
+          alternativaB: 'Atlantico',
+          alternativaC: 'Indico',
+          alternativaD: 'Artico',
+          respostaCorreta: 'B',
+          materia: 'Geografia',
+          dificuldade: 'Medio',
+          pontuacao: 150,
+        },
+      ])
+      .expect(201);
+
+    expect(response.body).toMatchObject({
+      total: 2,
+    });
+    expect(response.body.perguntas[0].id).toBeGreaterThan(0);
+    expect(response.body.perguntas[1].id).toBeGreaterThan(0);
+
+    const perguntasResponse = await request(app.getHttpServer())
+      .get('/perguntas')
+      .expect(200);
+
+    const perguntas = perguntasResponse.body as Array<{
+      enunciado: string;
+      respostaCorreta: string;
+      materia: string;
+    }>;
+
+    expect(
+      perguntas.some(
+        (pergunta) =>
+          pergunta.enunciado ===
+            'Qual planeta e conhecido como planeta vermelho?' &&
+          pergunta.respostaCorreta === 'A' &&
+          pergunta.materia === 'Ciencias',
+      ),
+    ).toBe(true);
+    expect(
+      perguntas.some(
+        (pergunta) =>
+          pergunta.enunciado ===
+            'Qual oceano banha a costa leste do Brasil?' &&
+          pergunta.respostaCorreta === 'B' &&
+          pergunta.materia === 'Geografia',
+      ),
+    ).toBe(true);
   });
 
   afterAll(async () => {

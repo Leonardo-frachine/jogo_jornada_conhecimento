@@ -9,8 +9,22 @@ import * as XLSX from 'xlsx';
 import { Pergunta } from './pergunta.entity';
 import { AtualizarPerguntaDto } from './dto/atualizar-pergunta.dto';
 import { CriarPerguntaDto } from './dto/criar-pergunta.dto';
+import { SalvarPerguntaGeradaDto } from './dto/salvar-perguntas-geradas.dto';
 
 type SpreadsheetFormat = 'csv' | 'xlsx';
+type PerguntaPersistivel = {
+  titulo?: string;
+  enunciado: string;
+  alternativaA: string;
+  alternativaB: string;
+  alternativaC: string;
+  alternativaD: string;
+  respostaCorreta: string;
+  materia?: string;
+  dificuldade?: string;
+  pontuacao?: number;
+  tempoLimite?: number;
+};
 
 @Injectable()
 export class PerguntasService {
@@ -39,6 +53,28 @@ export class PerguntasService {
     );
 
     return this.perguntaRepository.save(pergunta);
+  }
+
+  async salvarGeradas(perguntasDto: SalvarPerguntaGeradaDto[]): Promise<{
+    total: number;
+    perguntas: Pergunta[];
+  }> {
+    if (perguntasDto.length === 0) {
+      throw new BadRequestException(
+        'Envie ao menos uma pergunta aprovada para salvar.',
+      );
+    }
+
+    const perguntas = perguntasDto.map((perguntaDto) =>
+      this.perguntaRepository.create(this.montarDadosPergunta(perguntaDto)),
+    );
+
+    const perguntasSalvas = await this.perguntaRepository.save(perguntas);
+
+    return {
+      total: perguntasSalvas.length,
+      perguntas: perguntasSalvas,
+    };
   }
 
   async listar(): Promise<Pergunta[]> {
@@ -184,7 +220,7 @@ export class PerguntasService {
     }
   }
 
-  private montarDadosPergunta(dto: CriarPerguntaDto): Partial<Pergunta> {
+  private montarDadosPergunta(dto: PerguntaPersistivel): Partial<Pergunta> {
     return {
       titulo: dto.titulo,
       enunciado: dto.enunciado,

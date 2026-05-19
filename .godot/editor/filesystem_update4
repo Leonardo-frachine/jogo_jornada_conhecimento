@@ -1,16 +1,1 @@
-res://scripts/ApiClient.gd
-res://scripts/GameState.gd
-res://scripts/SettingsManager.gd
-res://scripts/selecao_perfil.gd
-res://scripts/tela_inicial.gd
-res://ui/settings/root.tscn
-res://ui/settings/SettingsOverlay.gd
-res://scene/tela_inicial.tscn
-res://scene/selecao_perfil.tscn
-res://scene/acesso_professor.tscn
-res://scene/painel_professor.tscn
-res://scripts/painel_professor.gd
-res://scripts/end_game_screen.gd
-res://scripts/loading_screen.gd
 res://scene/end_game_screen.tscn
-res://scene/loading_screen.tscn

@@ -159,6 +159,13 @@ custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 text = "Importar Perguntas"
 
+[node name="SeparadorIa" type="HSeparator" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/BlocoPerguntas/VBoxPerguntas" unique_id=176501233]
+layout_mode = 2
+
+[node name="IaArea" type="VBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/BlocoPerguntas/VBoxPerguntas" unique_id=528615781]
+layout_mode = 2
+theme_override_constants/separation = 10
+
 [node name="BlocoDashboard" type="PanelContainer" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo" unique_id=1912926290]
 layout_mode = 2
 
