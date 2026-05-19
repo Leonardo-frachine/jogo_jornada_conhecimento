@@ -53,6 +53,12 @@ func fetch_room_answers(room_id: int) -> Dictionary:
 func fetch_questions() -> Dictionary:
 	return await _request_json(HTTPClient.METHOD_GET, "/perguntas")
 
+func update_question(question_id: int, payload: Dictionary) -> Dictionary:
+	return await _request_json(HTTPClient.METHOD_PATCH, "/perguntas/%d" % question_id, payload)
+
+func delete_question(question_id: int) -> Dictionary:
+	return await _request_json(HTTPClient.METHOD_DELETE, "/perguntas/%d" % question_id)
+
 func generate_questions_ai(tema: String, materia: String, dificuldade: String, quantidade: int, pontuacao: int, tempo_limite: int) -> Dictionary:
 	var payload: Dictionary = {
 		"tema": tema,

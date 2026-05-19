@@ -48,7 +48,7 @@ func _set_modo(cadastro: bool) -> void:
 	subtitulo.text = "Crie seu acesso para gerenciar salas." if modo_cadastro else "Entre para acompanhar a sua turma."
 	grupo_nome.visible = modo_cadastro
 	botao_acao.text = "CRIAR CONTA" if modo_cadastro else "ENTRAR"
-	botao_alternar.text = "Ja tenho conta" if modo_cadastro else "Quero me cadastrar"
+	botao_alternar.text = "JA TENHO CONTA" if modo_cadastro else "QUERO ME CADASTRAR"
 	botao_entrar.disabled = not modo_cadastro
 	botao_cadastrar.disabled = modo_cadastro
 	label_status.text = ""

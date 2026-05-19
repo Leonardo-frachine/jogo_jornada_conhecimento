@@ -1,1 +1,3 @@
-res://scene/end_game_screen.tscn
+res://scripts/ApiClient.gd
+res://scripts/acesso_professor.gd
+res://scene/acesso_professor.tscn
