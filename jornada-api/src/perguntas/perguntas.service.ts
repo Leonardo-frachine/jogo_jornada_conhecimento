@@ -1,10 +1,11 @@
 import {
   BadRequestException,
   Injectable,
+  OnModuleInit,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import * as XLSX from 'xlsx';
 import { Pergunta } from './pergunta.entity';
 import { AtualizarPerguntaDto } from './dto/atualizar-pergunta.dto';
@@ -27,7 +28,7 @@ type PerguntaPersistivel = {
 };
 
 @Injectable()
-export class PerguntasService {
+export class PerguntasService implements OnModuleInit {
   private readonly requiredSpreadsheetColumns = [
     'enunciado',
     'alternativaa',
@@ -43,7 +44,12 @@ export class PerguntasService {
   constructor(
     @InjectRepository(Pergunta)
     private readonly perguntaRepository: Repository<Pergunta>,
+    private readonly dataSource: DataSource,
   ) {}
+
+  async onModuleInit(): Promise<void> {
+    await this.normalizarIdsPerguntasSeNecessario();
+  }
 
   async criar(criarPerguntaDto: CriarPerguntaDto): Promise<Pergunta> {
     this.validarCamposObrigatorios(criarPerguntaDto);
@@ -130,6 +136,7 @@ export class PerguntasService {
     const pergunta = await this.buscarPorId(id);
 
     await this.perguntaRepository.remove(pergunta);
+    await this.resetarSequenciaPerguntasSeBancoVazio();
 
     return { id, removido: true };
   }
@@ -547,5 +554,123 @@ export class PerguntasService {
     }
 
     return `"${valor.replace(/"/g, '""')}"`;
+  }
+
+  private async normalizarIdsPerguntasSeNecessario(): Promise<void> {
+    const perguntas: Array<{ id: number }> = await this.dataSource.query(
+      'SELECT id FROM perguntas ORDER BY id ASC',
+    );
+
+    if (perguntas.length === 0) {
+      await this.resetarSequenciaPerguntas(0);
+      return;
+    }
+
+    const precisaNormalizar = perguntas.some(
+      (pergunta, index) => pergunta.id !== index + 1,
+    );
+
+    if (!precisaNormalizar) {
+      await this.resetarSequenciaPerguntas(perguntas.length);
+      return;
+    }
+
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+
+    try {
+      await queryRunner.query('PRAGMA foreign_keys = OFF');
+      await queryRunner.startTransaction();
+
+      const mapeamentos = perguntas.map((pergunta, index) => ({
+        idAtual: Number(pergunta.id),
+        idTemporario: -(index + 1),
+        idFinal: index + 1,
+      }));
+
+      for (const mapeamento of mapeamentos) {
+        await queryRunner.query('UPDATE perguntas SET id = ? WHERE id = ?', [
+          mapeamento.idTemporario,
+          mapeamento.idAtual,
+        ]);
+        await queryRunner.query(
+          'UPDATE progresso SET perguntaId = ? WHERE perguntaId = ?',
+          [mapeamento.idTemporario, mapeamento.idAtual],
+        );
+      }
+
+      for (const mapeamento of mapeamentos) {
+        await queryRunner.query('UPDATE perguntas SET id = ? WHERE id = ?', [
+          mapeamento.idFinal,
+          mapeamento.idTemporario,
+        ]);
+        await queryRunner.query(
+          'UPDATE progresso SET perguntaId = ? WHERE perguntaId = ?',
+          [mapeamento.idFinal, mapeamento.idTemporario],
+        );
+      }
+
+      await this.atualizarSequenciaPerguntasComQueryRunner(
+        queryRunner,
+        mapeamentos.length,
+      );
+
+      await queryRunner.commitTransaction();
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      try {
+        await queryRunner.query('PRAGMA foreign_keys = ON');
+      } finally {
+        await queryRunner.release();
+      }
+    }
+  }
+
+  private async resetarSequenciaPerguntasSeBancoVazio(): Promise<void> {
+    const totalPerguntas = await this.perguntaRepository.count();
+
+    if (totalPerguntas === 0) {
+      await this.resetarSequenciaPerguntas(0);
+    }
+  }
+
+  private async resetarSequenciaPerguntas(seq: number): Promise<void> {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+
+    try {
+      await this.atualizarSequenciaPerguntasComQueryRunner(queryRunner, seq);
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  private async atualizarSequenciaPerguntasComQueryRunner(
+    queryRunner: {
+      query: (query: string, parameters?: unknown[]) => Promise<unknown>;
+    },
+    seq: number,
+  ): Promise<void> {
+    const tabelas = (await queryRunner.query(
+      "SELECT name FROM sqlite_master WHERE type = 'table' AND name = ?",
+      ['sqlite_sequence'],
+    )) as Array<{ name: string }>;
+
+    if (tabelas.length === 0) {
+      return;
+    }
+
+    await queryRunner.query('DELETE FROM sqlite_sequence WHERE name = ?', [
+      'perguntas',
+    ]);
+
+    if (seq > 0) {
+      await queryRunner.query(
+        'INSERT INTO sqlite_sequence (name, seq) VALUES (?, ?)',
+        ['perguntas', seq],
+      );
+    }
   }
 }
