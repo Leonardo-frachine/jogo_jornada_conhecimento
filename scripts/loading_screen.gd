@@ -8,8 +8,21 @@ extends Control
 @onready var dot_2: Label = $PainelCentral/MarginContainer/VBoxContainer/LoadingCard/LoadingCenter/LoadingRow/Dot2
 @onready var dot_3: Label = $PainelCentral/MarginContainer/VBoxContainer/LoadingCard/LoadingCenter/LoadingRow/Dot3
 @onready var personagem: TextureRect = $Personagem
+@onready var progress_bar: ProgressBar = $PainelCentral/MarginContainer/VBoxContainer/ProgressSection/ProgressBar
+@onready var step_1: Panel = $PainelCentral/MarginContainer/VBoxContainer/ProgressSection/StepsContainer/Step1
+@onready var step_2: Panel = $PainelCentral/MarginContainer/VBoxContainer/ProgressSection/StepsContainer/Step2
+@onready var step_3: Panel = $PainelCentral/MarginContainer/VBoxContainer/ProgressSection/StepsContainer/Step3
+@onready var step_1_label: Label = $PainelCentral/MarginContainer/VBoxContainer/ProgressSection/StepsContainer/Step1/Step1Label
+@onready var step_2_label: Label = $PainelCentral/MarginContainer/VBoxContainer/ProgressSection/StepsContainer/Step2/Step2Label
+@onready var step_3_label: Label = $PainelCentral/MarginContainer/VBoxContainer/ProgressSection/StepsContainer/Step3/Step3Label
 
 var _dot_base_y = {}
+var _current_step: int = 0
+var _step_colors = {
+	0: Color(0.9, 0.9, 1, 0.7),  # Cinza claro
+	1: Color(0.4, 0.7, 1.0, 1.0),  # Azul claro
+	2: Color(0.3, 0.8, 0.5, 1.0),  # Verde
+}
 
 func _ready() -> void:
 	SettingsManager.pause_tree_when_open = false
@@ -25,6 +38,10 @@ func _ready() -> void:
 	if not GameState.session_preparation_updated.is_connected(_on_session_preparation_updated):
 		GameState.session_preparation_updated.connect(_on_session_preparation_updated)
 
+	# Inicializar progresso
+	progress_bar.value = 0.0
+	_update_step_visual(0)
+
 	animate_logo()
 	animate_loading_card()
 	animate_character()
@@ -37,6 +54,8 @@ func _ready() -> void:
 		await _show_startup_error(result.get("error", "Nao foi possivel iniciar a partida."))
 		return
 
+	# Animar para 100% antes de trocar de cena
+	_animate_progress_to(100.0, 0.4)
 	await get_tree().create_timer(0.6).timeout
 	get_tree().change_scene_to_file("res://scene/game.tscn")
 
@@ -76,6 +95,41 @@ func animate_dot(dot: Control, delay: float) -> void:
 
 func _on_session_preparation_updated(message: String) -> void:
 	subtitle.text = message
+	
+	# Atualizar progresso baseado na mensagem
+	if "Conectando" in message:
+		_update_step_visual(0)
+		_animate_progress_to(25.0, 0.3)
+	elif "Validando" in message:
+		_update_step_visual(1)
+		_animate_progress_to(50.0, 0.3)
+	elif "Carregando" in message:
+		_update_step_visual(1)
+		_animate_progress_to(75.0, 0.3)
+	elif "pronto" in message.to_lower() or "Tudo" in message:
+		_update_step_visual(2)
+		_animate_progress_to(95.0, 0.3)
+
+func _update_step_visual(step: int) -> void:
+	_current_step = step
+	var steps = [step_1, step_2, step_3]
+	var step_labels = [step_1_label, step_2_label, step_3_label]
+	
+	for i in range(steps.size()):
+		if i <= step:
+			# Ativar step
+			var tween = create_tween()
+			tween.tween_property(steps[i], "self_modulate", Color.WHITE, 0.2)
+			step_labels[i].add_theme_color_override("font_color", _step_colors[min(i, 2)])
+		else:
+			# Desativar step
+			var tween = create_tween()
+			tween.tween_property(steps[i], "self_modulate", Color(1, 1, 1, 0.6), 0.2)
+			step_labels[i].add_theme_color_override("font_color", _step_colors[0])
+
+func _animate_progress_to(target: float, duration: float) -> void:
+	var tween = create_tween()
+	tween.tween_property(progress_bar, "value", target, duration).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 
 func _show_startup_error(message: String) -> void:
 	subtitle.text = message
