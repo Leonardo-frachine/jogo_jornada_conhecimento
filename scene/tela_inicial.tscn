@@ -1,13 +1,14 @@
-[gd_scene format=3 uid="uid://2uol8j735lpf"]
+[gd_scene load_steps=9 format=3 uid="uid://2uol8j735lpf"]
 
-[ext_resource type="Script" uid="uid://y7et67s3t0hk" path="res://scripts/tela_inicial.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/tela_inicial.gd" id="1"]
 [ext_resource type="Texture2D" uid="uid://3ljo201dpbbx" path="res://imagens/fundo_tabuleiro/fundo_embacado.png" id="2"]
 [ext_resource type="Texture2D" uid="uid://bv2xmb27g64al" path="res://imagens/logo_jogo/logo_jogo.png" id="3"]
+[ext_resource type="FontFile" uid="uid://cnk767mck3js2" path="res://fonts/Fredoka-Bold.ttf" id="3_hyw51"]
 [ext_resource type="Texture2D" uid="uid://ctyknso0bfdn6" path="res://imagens/personagem/personagem_logo.png" id="4"]
 [ext_resource type="Texture2D" uid="uid://cbpn68ac6bol8" path="res://imagens/configuracoes/configuracoes.png" id="5"]
 
 [sub_resource type="StyleBoxFlat" id="1"]
-bg_color = Color(1, 0.64705884, 0, 1)
+bg_color = Color(1, 0.647059, 0, 1)
 border_width_left = 4
 border_width_top = 4
 border_width_right = 4
@@ -30,7 +31,7 @@ corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
 
-[node name="TelaInicial" type="Control" unique_id=940967829]
+[node name="TelaInicial" type="Control"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -39,7 +40,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1")
 
-[node name="Background" type="TextureRect" parent="." unique_id=996580370]
+[node name="Background" type="TextureRect" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -50,7 +51,7 @@ mouse_filter = 2
 texture = ExtResource("2")
 stretch_mode = 6
 
-[node name="PainelCentral" type="Panel" parent="." unique_id=1524215596]
+[node name="PainelCentral" type="Panel" parent="."]
 custom_minimum_size = Vector2(460, 420)
 layout_mode = 1
 anchors_preset = 8
@@ -66,7 +67,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("1")
 
-[node name="MarginContainer" type="MarginContainer" parent="PainelCentral" unique_id=362709778]
+[node name="MarginContainer" type="MarginContainer" parent="PainelCentral"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -78,63 +79,70 @@ theme_override_constants/margin_top = 34
 theme_override_constants/margin_right = 35
 theme_override_constants/margin_bottom = 34
 
-[node name="VBoxContainer" type="VBoxContainer" parent="PainelCentral/MarginContainer" unique_id=1258502653]
+[node name="VBoxContainer" type="VBoxContainer" parent="PainelCentral/MarginContainer"]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="Titulo" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer" unique_id=1457730692]
+[node name="Titulo" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer"]
 layout_mode = 2
+theme_override_fonts/font = ExtResource("3_hyw51")
 text = "Acesso do Aluno"
 horizontal_alignment = 1
 
-[node name="Subtitulo" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer" unique_id=904372686]
+[node name="Subtitulo" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer"]
 layout_mode = 2
+theme_override_fonts/font = ExtResource("3_hyw51")
 text = "Preencha os dados para continuar no fluxo atual do jogo."
 horizontal_alignment = 1
 autowrap_mode = 3
 
-[node name="Espacador" type="Control" parent="PainelCentral/MarginContainer/VBoxContainer" unique_id=1486566113]
+[node name="Espacador" type="Control" parent="PainelCentral/MarginContainer/VBoxContainer"]
 custom_minimum_size = Vector2(0, 8)
 layout_mode = 2
 
-[node name="LabelNome" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer" unique_id=1478898787]
+[node name="LabelNome" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer"]
 layout_mode = 2
+theme_override_fonts/font = ExtResource("3_hyw51")
 text = "Nome do Aluno"
 
-[node name="InputNome" type="LineEdit" parent="PainelCentral/MarginContainer/VBoxContainer" unique_id=1832882609]
+[node name="InputNome" type="LineEdit" parent="PainelCentral/MarginContainer/VBoxContainer"]
 custom_minimum_size = Vector2(0, 60)
 layout_mode = 2
+theme_override_fonts/font = ExtResource("3_hyw51")
 placeholder_text = "Insira seu nome"
 
-[node name="LabelCodigo" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer" unique_id=2011045104]
+[node name="LabelCodigo" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer"]
 layout_mode = 2
+theme_override_fonts/font = ExtResource("3_hyw51")
 text = "Codigo da Sala"
 
-[node name="InputCodigo" type="LineEdit" parent="PainelCentral/MarginContainer/VBoxContainer" unique_id=1646268257]
+[node name="InputCodigo" type="LineEdit" parent="PainelCentral/MarginContainer/VBoxContainer"]
 custom_minimum_size = Vector2(0, 60)
 layout_mode = 2
+theme_override_fonts/font = ExtResource("3_hyw51")
 placeholder_text = "Digite o codigo"
 
-[node name="BotoesAcao" type="HBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer" unique_id=598053959]
+[node name="BotoesAcao" type="HBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="BotaoVoltar" type="Button" parent="PainelCentral/MarginContainer/VBoxContainer/BotoesAcao" unique_id=1584766610]
+[node name="BotaoVoltar" type="Button" parent="PainelCentral/MarginContainer/VBoxContainer/BotoesAcao"]
 custom_minimum_size = Vector2(0, 55)
 layout_mode = 2
 size_flags_horizontal = 3
 text = "VOLTAR"
 
-[node name="BotaoJogar" type="Button" parent="PainelCentral/MarginContainer/VBoxContainer/BotoesAcao" unique_id=682062586]
+[node name="BotaoJogar" type="Button" parent="PainelCentral/MarginContainer/VBoxContainer/BotoesAcao"]
 custom_minimum_size = Vector2(0, 55)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("3_hyw51")
 theme_override_styles/normal = SubResource("2")
 text = "JOGAR"
 
-[node name="Logo" type="TextureRect" parent="." unique_id=2017186406]
+[node name="Logo" type="TextureRect" parent="."]
 custom_minimum_size = Vector2(285, 35)
 layout_mode = 0
 offset_left = 533.0
@@ -146,7 +154,7 @@ texture = ExtResource("3")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Personagem" type="TextureRect" parent="." unique_id=173901561]
+[node name="Personagem" type="TextureRect" parent="."]
 custom_minimum_size = Vector2(280, 320)
 layout_mode = 0
 offset_left = -16.0
@@ -159,18 +167,18 @@ expand_mode = 1
 stretch_mode = 5
 flip_h = true
 
-[node name="BotaoConfiguracao" type="TextureButton" parent="." unique_id=401731881]
+[node name="BotaoConfiguracao" type="TextureButton" parent="."]
 custom_minimum_size = Vector2(128, 128)
 layout_mode = 1
 anchors_preset = -1
-anchor_left = 0.89000005
-anchor_top = 0.79700005
-anchor_right = 1.0020001
+anchor_left = 0.89
+anchor_top = 0.797
+anchor_right = 1.002
 anchor_bottom = 1.0
-offset_left = 0.2598877
-offset_top = 0.15997314
-offset_right = -0.5501709
-offset_bottom = -4.104004
+offset_left = 0.259888
+offset_top = 0.159973
+offset_right = -0.550171
+offset_bottom = -4.104
 grow_vertical = 0
 texture_normal = ExtResource("5")
 ignore_texture_size = true

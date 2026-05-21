@@ -2,29 +2,26 @@
 
 importer="font_data_dynamic"
 type="FontFile"
-uid="uid://dffxt3vwl71a7"
-path="res://.godot/imported/Fredoka-Regular.ttf-97ffc55333803fd0ead45b798c89459b.fontdata"
+uid="uid://cnk767mck3js2"
+path="res://.godot/imported/Fredoka-Bold.ttf-982956071f36f4f46b4c1917b3d91565.fontdata"
 
 [deps]
 
-source_file="res://fonts/Fredoka-Regular.ttf"
-dest_files=["res://.godot/imported/Fredoka-Regular.ttf-97ffc55333803fd0ead45b798c89459b.fontdata"]
+source_file="res://fonts/Fredoka-Bold.ttf"
+dest_files=["res://.godot/imported/Fredoka-Bold.ttf-982956071f36f4f46b4c1917b3d91565.fontdata"]
 
 [params]
 
 Rendering=null
 antialiasing=1
 generate_mipmaps=false
-disable_embedded_bitmaps=true
 multichannel_signed_distance_field=false
 msdf_pixel_range=8
 msdf_size=48
 allow_system_fallback=true
 force_autohinter=false
-modulate_color_glyphs=false
 hinting=1
-subpixel_positioning=4
-keep_rounding_remainders=true
+subpixel_positioning=1
 oversampling=0.0
 Fallbacks=null
 fallbacks=[]

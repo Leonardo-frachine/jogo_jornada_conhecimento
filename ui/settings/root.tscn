@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://cmj7lumsowtif"]
+[gd_scene load_steps=10 format=3 uid="uid://cmj7lumsowtif"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
 bg_color = Color(0.34902, 0.388235, 0.462745, 1)
@@ -111,7 +111,7 @@ corner_radius_top_right = 14
 corner_radius_bottom_right = 14
 corner_radius_bottom_left = 14
 
-[node name="Root" type="Control" unique_id=1040774563]
+[node name="Root" type="Control"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -120,46 +120,46 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 1
 
-[node name="Backdrop" type="ColorRect" parent="." unique_id=623229225]
+[node name="Backdrop" type="ColorRect" parent="."]
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 color = Color(0, 0, 0, 0.55)
 
-[node name="CloseBackdrop" type="Button" parent="." unique_id=939976569]
+[node name="CloseBackdrop" type="Button" parent="."]
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 focus_mode = 0
 flat = true
 
-[node name="CenterContainer" type="CenterContainer" parent="." unique_id=1993141222]
+[node name="CenterContainer" type="CenterContainer" parent="."]
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 
-[node name="Panel" type="PanelContainer" parent="CenterContainer" unique_id=57714302]
+[node name="Panel" type="PanelContainer" parent="CenterContainer"]
 custom_minimum_size = Vector2(720, 620)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
 
-[node name="Margin" type="MarginContainer" parent="CenterContainer/Panel" unique_id=939622693]
+[node name="Margin" type="MarginContainer" parent="CenterContainer/Panel"]
 layout_mode = 2
 theme_override_constants/margin_left = 22
 theme_override_constants/margin_top = 22
 theme_override_constants/margin_right = 22
 theme_override_constants/margin_bottom = 22
 
-[node name="VBox" type="VBoxContainer" parent="CenterContainer/Panel/Margin" unique_id=1411966395]
+[node name="VBox" type="VBoxContainer" parent="CenterContainer/Panel/Margin"]
 layout_mode = 2
 theme_override_constants/separation = 14
 
-[node name="Header" type="PanelContainer" parent="CenterContainer/Panel/Margin/VBox" unique_id=369937480]
+[node name="Header" type="PanelContainer" parent="CenterContainer/Panel/Margin/VBox"]
 custom_minimum_size = Vector2(0, 78)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_header")
 
-[node name="Title" type="Label" parent="CenterContainer/Panel/Margin/VBox/Header" unique_id=233419829]
+[node name="Title" type="Label" parent="CenterContainer/Panel/Margin/VBox/Header"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.960784, 0.968627, 0.980392, 1)
 theme_override_font_sizes/font_size = 30
@@ -167,38 +167,38 @@ text = "CONFIGURACOES"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Scroll" type="ScrollContainer" parent="CenterContainer/Panel/Margin/VBox" unique_id=114719006]
+[node name="Scroll" type="ScrollContainer" parent="CenterContainer/Panel/Margin/VBox"]
 custom_minimum_size = Vector2(0, 420)
 layout_mode = 2
 size_flags_vertical = 3
 horizontal_scroll_mode = 0
 
-[node name="Content" type="VBoxContainer" parent="CenterContainer/Panel/Margin/VBox/Scroll" unique_id=509556801]
+[node name="Content" type="VBoxContainer" parent="CenterContainer/Panel/Margin/VBox/Scroll"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 14
 
-[node name="AudioSection" type="PanelContainer" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content" unique_id=228042657]
+[node name="AudioSection" type="PanelContainer" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content"]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
 
-[node name="Margin" type="MarginContainer" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content/AudioSection" unique_id=887843559]
+[node name="Margin" type="MarginContainer" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content/AudioSection"]
 layout_mode = 2
 theme_override_constants/margin_left = 16
 theme_override_constants/margin_top = 16
 theme_override_constants/margin_right = 16
 theme_override_constants/margin_bottom = 16
 
-[node name="Rows" type="VBoxContainer" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content/AudioSection/Margin" unique_id=1373927662]
+[node name="Rows" type="VBoxContainer" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content/AudioSection/Margin"]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="MasterRow" type="HBoxContainer" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content/AudioSection/Margin/Rows" unique_id=738812033]
+[node name="MasterRow" type="HBoxContainer" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content/AudioSection/Margin/Rows"]
 layout_mode = 2
 theme_override_constants/separation = 12
 alignment = 1
 
-[node name="MasterText" type="Label" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content/AudioSection/Margin/Rows/MasterRow" unique_id=746705144]
+[node name="MasterText" type="Label" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content/AudioSection/Margin/Rows/MasterRow"]
 custom_minimum_size = Vector2(150, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.960784, 0.968627, 0.980392, 1)
@@ -206,17 +206,17 @@ theme_override_font_sizes/font_size = 18
 text = "Volume Geral"
 vertical_alignment = 1
 
-[node name="MasterSlider" type="HSlider" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content/AudioSection/Margin/Rows/MasterRow" unique_id=1661062921]
+[node name="MasterSlider" type="HSlider" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content/AudioSection/Margin/Rows/MasterRow"]
 clip_contents = true
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="SfxRow" type="HBoxContainer" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content/AudioSection/Margin/Rows" unique_id=505098558]
+[node name="SfxRow" type="HBoxContainer" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content/AudioSection/Margin/Rows"]
 layout_mode = 2
 theme_override_constants/separation = 12
 alignment = 1
 
-[node name="SfxText" type="Label" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content/AudioSection/Margin/Rows/SfxRow" unique_id=114896001]
+[node name="SfxText" type="Label" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content/AudioSection/Margin/Rows/SfxRow"]
 custom_minimum_size = Vector2(150, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.960784, 0.968627, 0.980392, 1)
@@ -224,31 +224,31 @@ theme_override_font_sizes/font_size = 18
 text = "Efeitos Sonoros"
 vertical_alignment = 1
 
-[node name="SfxSlider" type="HSlider" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content/AudioSection/Margin/Rows/SfxRow" unique_id=1129085844]
+[node name="SfxSlider" type="HSlider" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content/AudioSection/Margin/Rows/SfxRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="TogglesSection" type="PanelContainer" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content" unique_id=1255557144]
+[node name="TogglesSection" type="PanelContainer" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content"]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
 
-[node name="Margin" type="MarginContainer" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content/TogglesSection" unique_id=187843125]
+[node name="Margin" type="MarginContainer" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content/TogglesSection"]
 layout_mode = 2
 theme_override_constants/margin_left = 16
 theme_override_constants/margin_top = 16
 theme_override_constants/margin_right = 16
 theme_override_constants/margin_bottom = 16
 
-[node name="Rows" type="VBoxContainer" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content/TogglesSection/Margin" unique_id=1734538203]
+[node name="Rows" type="VBoxContainer" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content/TogglesSection/Margin"]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="MusicRow" type="HBoxContainer" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content/TogglesSection/Margin/Rows" unique_id=149029081]
+[node name="MusicRow" type="HBoxContainer" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content/TogglesSection/Margin/Rows"]
 layout_mode = 2
 theme_override_constants/separation = 12
 alignment = 1
 
-[node name="MusicText" type="Label" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content/TogglesSection/Margin/Rows/MusicRow" unique_id=976196941]
+[node name="MusicText" type="Label" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content/TogglesSection/Margin/Rows/MusicRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.960784, 0.968627, 0.980392, 1)
@@ -256,30 +256,29 @@ theme_override_font_sizes/font_size = 18
 text = "Musica"
 vertical_alignment = 1
 
-[node name="MusicToggle" type="Button" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content/TogglesSection/Margin/Rows/MusicRow" unique_id=1591569159]
+[node name="MusicToggle" type="Button" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content/TogglesSection/Margin/Rows/MusicRow"]
 custom_minimum_size = Vector2(96, 38)
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_pressed_color = Color(0.0470588, 0.0627451, 0.0901961, 1)
 theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
 theme_override_styles/normal = SubResource("StyleBoxFlat_toggle_off")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_toggle_on")
 theme_override_styles/hover = SubResource("StyleBoxFlat_toggle_off")
-theme_override_styles/hover_pressed = SubResource("StyleBoxFlat_toggle_on")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_toggle_on")
 toggle_mode = true
 text = "ON"
 
-[node name="VfxRow" type="HBoxContainer" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content/TogglesSection/Margin/Rows" unique_id=338287510]
+[node name="VfxRow" type="HBoxContainer" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content/TogglesSection/Margin/Rows"]
 layout_mode = 2
 theme_override_constants/separation = 12
 alignment = 1
 
-[node name="SubtitleRow" type="HBoxContainer" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content/TogglesSection/Margin/Rows" unique_id=666025600]
+[node name="SubtitleRow" type="HBoxContainer" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content/TogglesSection/Margin/Rows"]
 layout_mode = 2
 theme_override_constants/separation = 12
 alignment = 1
 
-[node name="SubtitleText" type="Label" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content/TogglesSection/Margin/Rows/SubtitleRow" unique_id=2088956902]
+[node name="SubtitleText" type="Label" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content/TogglesSection/Margin/Rows/SubtitleRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.960784, 0.968627, 0.980392, 1)
@@ -287,32 +286,31 @@ theme_override_font_sizes/font_size = 18
 text = "Legendas"
 vertical_alignment = 1
 
-[node name="SubtitleToggle" type="Button" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content/TogglesSection/Margin/Rows/SubtitleRow" unique_id=417545568]
+[node name="SubtitleToggle" type="Button" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content/TogglesSection/Margin/Rows/SubtitleRow"]
 custom_minimum_size = Vector2(96, 38)
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_pressed_color = Color(0.0470588, 0.0627451, 0.0901961, 1)
 theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
 theme_override_styles/normal = SubResource("StyleBoxFlat_toggle_off")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_toggle_on")
 theme_override_styles/hover = SubResource("StyleBoxFlat_toggle_off")
-theme_override_styles/hover_pressed = SubResource("StyleBoxFlat_toggle_on")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_toggle_on")
 toggle_mode = true
 text = "ON"
 
-[node name="Footer" type="HBoxContainer" parent="CenterContainer/Panel/Margin/VBox" unique_id=1267021719]
+[node name="Footer" type="HBoxContainer" parent="CenterContainer/Panel/Margin/VBox"]
 layout_mode = 2
 theme_override_constants/separation = 12
 alignment = 2
 
-[node name="ResetButton" type="Button" parent="CenterContainer/Panel/Margin/VBox/Footer" unique_id=1263426442]
+[node name="ResetButton" type="Button" parent="CenterContainer/Panel/Margin/VBox/Footer"]
 custom_minimum_size = Vector2(170, 44)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.960784, 0.968627, 0.980392, 1)
 theme_override_colors/font_hover_color = Color(0.960784, 0.968627, 0.980392, 1)
 theme_override_styles/normal = SubResource("StyleBoxFlat_button_reset")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_button_reset")
 theme_override_styles/hover = SubResource("StyleBoxFlat_button_reset_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button_reset")
 text = "Resetar"
 
 [node name="ExitButton" type="Button" parent="CenterContainer/Panel/Margin/VBox/Footer"]
@@ -321,16 +319,16 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.960784, 0.968627, 0.980392, 1)
 theme_override_colors/font_hover_color = Color(0.960784, 0.968627, 0.980392, 1)
 theme_override_styles/normal = SubResource("StyleBoxFlat_button_reset")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_button_reset")
 theme_override_styles/hover = SubResource("StyleBoxFlat_button_reset_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button_reset")
 text = "Sair"
 
-[node name="CloseButton" type="Button" parent="CenterContainer/Panel/Margin/VBox/Footer" unique_id=1464780783]
+[node name="CloseButton" type="Button" parent="CenterContainer/Panel/Margin/VBox/Footer"]
 custom_minimum_size = Vector2(170, 44)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.0470588, 0.0627451, 0.0901961, 1)
 theme_override_colors/font_hover_color = Color(0.0470588, 0.0627451, 0.0901961, 1)
 theme_override_styles/normal = SubResource("StyleBoxFlat_button_close")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_button_close")
 theme_override_styles/hover = SubResource("StyleBoxFlat_button_close_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button_close")
 text = "Fechar"

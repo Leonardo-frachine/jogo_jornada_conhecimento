@@ -1,13 +1,13 @@
-[gd_scene format=3 uid="uid://cmhjak623c8sw"]
+[gd_scene load_steps=7 format=3 uid="uid://cmhjak623c8sw"]
 
-[ext_resource type="Script" uid="uid://cx2xusmamsv0a" path="res://scripts/painel_professor.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/painel_professor.gd" id="1"]
 [ext_resource type="Texture2D" uid="uid://3ljo201dpbbx" path="res://imagens/fundo_tabuleiro/fundo_embacado.png" id="2"]
 [ext_resource type="Texture2D" uid="uid://bv2xmb27g64al" path="res://imagens/logo_jogo/logo_jogo.png" id="3"]
 [ext_resource type="Texture2D" uid="uid://cbpn68ac6bol8" path="res://imagens/configuracoes/configuracoes.png" id="4"]
 [ext_resource type="Texture2D" uid="uid://ctyknso0bfdn6" path="res://imagens/personagem/personagem_logo.png" id="5"]
 
 [sub_resource type="StyleBoxFlat" id="1"]
-bg_color = Color(1, 0.64705884, 0, 0.95)
+bg_color = Color(1, 0.647059, 0, 0.95)
 border_width_left = 4
 border_width_top = 4
 border_width_right = 4
@@ -18,7 +18,7 @@ corner_radius_top_right = 30
 corner_radius_bottom_right = 30
 corner_radius_bottom_left = 30
 
-[node name="PainelProfessor" type="Control" unique_id=1039756367]
+[node name="PainelProfessor" type="Control"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -27,7 +27,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1")
 
-[node name="Background" type="TextureRect" parent="." unique_id=871369693]
+[node name="Background" type="TextureRect" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -38,7 +38,7 @@ mouse_filter = 2
 texture = ExtResource("2")
 stretch_mode = 6
 
-[node name="PainelCentral" type="Panel" parent="." unique_id=1692842237]
+[node name="PainelCentral" type="Panel" parent="."]
 custom_minimum_size = Vector2(860, 610)
 layout_mode = 1
 anchors_preset = 8
@@ -54,7 +54,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("1")
 
-[node name="MarginContainer" type="MarginContainer" parent="PainelCentral" unique_id=2135920405]
+[node name="MarginContainer" type="MarginContainer" parent="PainelCentral"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -66,302 +66,302 @@ theme_override_constants/margin_top = 24
 theme_override_constants/margin_right = 28
 theme_override_constants/margin_bottom = 24
 
-[node name="VBoxContainer" type="VBoxContainer" parent="PainelCentral/MarginContainer" unique_id=1358191232]
+[node name="VBoxContainer" type="VBoxContainer" parent="PainelCentral/MarginContainer"]
 layout_mode = 2
 theme_override_constants/separation = 14
 
-[node name="TituloPainel" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer" unique_id=942723455]
+[node name="TituloPainel" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer"]
 layout_mode = 2
 text = "Painel do Professor"
 horizontal_alignment = 1
 
-[node name="Header" type="VBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer" unique_id=1268993802]
+[node name="Header" type="VBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_constants/separation = 4
 
-[node name="LabelProfessor" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer/Header" unique_id=381479474]
+[node name="LabelProfessor" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer/Header"]
 layout_mode = 2
 text = "Professor:"
 
-[node name="LabelSalaAtual" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer/Header" unique_id=583568006]
+[node name="LabelSalaAtual" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer/Header"]
 layout_mode = 2
 text = "Sala ativa:"
 
-[node name="LabelStatus" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer" unique_id=1068945837]
+[node name="LabelStatus" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer"]
 layout_mode = 2
 autowrap_mode = 3
 
-[node name="ScrollContainer" type="ScrollContainer" parent="PainelCentral/MarginContainer/VBoxContainer" unique_id=1381686596]
+[node name="ScrollContainer" type="ScrollContainer" parent="PainelCentral/MarginContainer/VBoxContainer"]
 custom_minimum_size = Vector2(0, 390)
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="Conteudo" type="VBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer" unique_id=103058173]
+[node name="Conteudo" type="VBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 18
 
-[node name="BlocoSala" type="PanelContainer" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo" unique_id=1132112644]
+[node name="BlocoSala" type="PanelContainer" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo"]
 layout_mode = 2
 
-[node name="VBoxSala" type="VBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/BlocoSala" unique_id=214539779]
+[node name="VBoxSala" type="VBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/BlocoSala"]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="TituloSala" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/BlocoSala/VBoxSala" unique_id=919095627]
+[node name="TituloSala" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/BlocoSala/VBoxSala"]
 layout_mode = 2
 text = "Gerenciar Sala"
 
-[node name="InputNomeSala" type="LineEdit" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/BlocoSala/VBoxSala" unique_id=397897169]
+[node name="InputNomeSala" type="LineEdit" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/BlocoSala/VBoxSala"]
 custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 placeholder_text = "Nome da sala (opcional)"
 
-[node name="AcoesSala" type="HBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/BlocoSala/VBoxSala" unique_id=612225864]
+[node name="AcoesSala" type="HBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/BlocoSala/VBoxSala"]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="BotaoCriarSala" type="Button" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/BlocoSala/VBoxSala/AcoesSala" unique_id=1518878424]
+[node name="BotaoCriarSala" type="Button" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/BlocoSala/VBoxSala/AcoesSala"]
 custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 size_flags_horizontal = 3
 text = "CRIAR SALA"
 
-[node name="SeletorSalas" type="OptionButton" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/BlocoSala/VBoxSala/AcoesSala" unique_id=2083439291]
+[node name="SeletorSalas" type="OptionButton" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/BlocoSala/VBoxSala/AcoesSala"]
 custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="BotaoAtualizar" type="Button" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/BlocoSala/VBoxSala/AcoesSala" unique_id=1044761952]
+[node name="BotaoAtualizar" type="Button" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/BlocoSala/VBoxSala/AcoesSala"]
 custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 size_flags_horizontal = 3
 text = "ATUALIZAR"
 
-[node name="NavegacaoAbas" type="HBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo" unique_id=1674321001]
+[node name="NavegacaoAbas" type="HBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo"]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="BotaoAbaDashboard" type="Button" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/NavegacaoAbas" unique_id=520041122]
+[node name="BotaoAbaDashboard" type="Button" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/NavegacaoAbas"]
 custom_minimum_size = Vector2(0, 46)
 layout_mode = 2
 size_flags_horizontal = 3
 text = "DASHBOARD"
 
-[node name="BotaoAbaAlunos" type="Button" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/NavegacaoAbas" unique_id=989174554]
+[node name="BotaoAbaAlunos" type="Button" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/NavegacaoAbas"]
 custom_minimum_size = Vector2(0, 46)
 layout_mode = 2
 size_flags_horizontal = 3
 text = "ACOMPANHAMENTO"
 
-[node name="BotaoAbaPerguntas" type="Button" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/NavegacaoAbas" unique_id=1865449005]
+[node name="BotaoAbaPerguntas" type="Button" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/NavegacaoAbas"]
 custom_minimum_size = Vector2(0, 46)
 layout_mode = 2
 size_flags_horizontal = 3
 text = "BANCO DE PERGUNTAS"
 
-[node name="PaginaDashboard" type="PanelContainer" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo" unique_id=166212000]
+[node name="PaginaDashboard" type="PanelContainer" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="VBoxDashboard" type="VBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaDashboard" unique_id=419663502]
+[node name="VBoxDashboard" type="VBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaDashboard"]
 layout_mode = 2
 theme_override_constants/separation = 14
 
-[node name="TituloDashboard" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaDashboard/VBoxDashboard" unique_id=1743380592]
+[node name="TituloDashboard" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaDashboard/VBoxDashboard"]
 layout_mode = 2
 text = "Dashboard"
 
-[node name="DescricaoDashboard" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaDashboard/VBoxDashboard" unique_id=1408005110]
+[node name="DescricaoDashboard" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaDashboard/VBoxDashboard"]
 layout_mode = 2
 text = "Visao geral da sala com indicadores essenciais para acompanhar a turma."
 autowrap_mode = 3
 
-[node name="GridResumoDashboard" type="GridContainer" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaDashboard/VBoxDashboard" unique_id=462008112]
+[node name="GridResumoDashboard" type="GridContainer" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaDashboard/VBoxDashboard"]
 layout_mode = 2
 size_flags_horizontal = 3
-columns = 2
 theme_override_constants/h_separation = 12
 theme_override_constants/v_separation = 12
+columns = 2
 
-[node name="SecoesDashboard" type="HBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaDashboard/VBoxDashboard" unique_id=1527071948]
+[node name="SecoesDashboard" type="HBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaDashboard/VBoxDashboard"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 12
 
-[node name="PainelMaterias" type="PanelContainer" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaDashboard/VBoxDashboard/SecoesDashboard" unique_id=1490822000]
+[node name="PainelMaterias" type="PanelContainer" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaDashboard/VBoxDashboard/SecoesDashboard"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="VBoxMaterias" type="VBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaDashboard/VBoxDashboard/SecoesDashboard/PainelMaterias" unique_id=1102300147]
+[node name="VBoxMaterias" type="VBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaDashboard/VBoxDashboard/SecoesDashboard/PainelMaterias"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="TituloMaterias" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaDashboard/VBoxDashboard/SecoesDashboard/PainelMaterias/VBoxMaterias" unique_id=213550034]
+[node name="TituloMaterias" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaDashboard/VBoxDashboard/SecoesDashboard/PainelMaterias/VBoxMaterias"]
 layout_mode = 2
 text = "Desempenho por Matéria"
 
-[node name="ListaMaterias" type="VBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaDashboard/VBoxDashboard/SecoesDashboard/PainelMaterias/VBoxMaterias" unique_id=180358334]
+[node name="ListaMaterias" type="VBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaDashboard/VBoxDashboard/SecoesDashboard/PainelMaterias/VBoxMaterias"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="PainelDificuldades" type="PanelContainer" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaDashboard/VBoxDashboard/SecoesDashboard" unique_id=1268662440]
+[node name="PainelDificuldades" type="PanelContainer" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaDashboard/VBoxDashboard/SecoesDashboard"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="VBoxDificuldades" type="VBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaDashboard/VBoxDashboard/SecoesDashboard/PainelDificuldades" unique_id=1394653212]
+[node name="VBoxDificuldades" type="VBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaDashboard/VBoxDashboard/SecoesDashboard/PainelDificuldades"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="TituloDificuldades" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaDashboard/VBoxDashboard/SecoesDashboard/PainelDificuldades/VBoxDificuldades" unique_id=1754048477]
+[node name="TituloDificuldades" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaDashboard/VBoxDashboard/SecoesDashboard/PainelDificuldades/VBoxDificuldades"]
 layout_mode = 2
 text = "Desempenho por Dificuldade"
 
-[node name="ListaDificuldades" type="VBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaDashboard/VBoxDashboard/SecoesDashboard/PainelDificuldades/VBoxDificuldades" unique_id=1192200530]
+[node name="ListaDificuldades" type="VBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaDashboard/VBoxDashboard/SecoesDashboard/PainelDificuldades/VBoxDificuldades"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="PaginaAlunos" type="PanelContainer" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo" unique_id=361811919]
+[node name="PaginaAlunos" type="PanelContainer" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo"]
 visible = false
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="VBoxAlunos" type="VBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaAlunos" unique_id=1749288022]
+[node name="VBoxAlunos" type="VBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaAlunos"]
 layout_mode = 2
 theme_override_constants/separation = 14
 
-[node name="TituloAlunos" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaAlunos/VBoxAlunos" unique_id=2146068418]
+[node name="TituloAlunos" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaAlunos/VBoxAlunos"]
 layout_mode = 2
 text = "Acompanhamento dos Alunos"
 
-[node name="DescricaoAlunos" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaAlunos/VBoxAlunos" unique_id=1789715927]
+[node name="DescricaoAlunos" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaAlunos/VBoxAlunos"]
 layout_mode = 2
 text = "Ranking da turma para identificar rapidamente destaques, constancia e alunos que precisam de atencao."
 autowrap_mode = 3
 
-[node name="ResumoAlunos" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaAlunos/VBoxAlunos" unique_id=211477440]
+[node name="ResumoAlunos" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaAlunos/VBoxAlunos"]
 layout_mode = 2
 autowrap_mode = 3
 
-[node name="CabecalhoRanking" type="HBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaAlunos/VBoxAlunos" unique_id=1065713884]
+[node name="CabecalhoRanking" type="HBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaAlunos/VBoxAlunos"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="ColPosicao" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaAlunos/VBoxAlunos/CabecalhoRanking" unique_id=2015754092]
+[node name="ColPosicao" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaAlunos/VBoxAlunos/CabecalhoRanking"]
 custom_minimum_size = Vector2(62, 0)
 layout_mode = 2
 text = "Pos"
 
-[node name="ColAluno" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaAlunos/VBoxAlunos/CabecalhoRanking" unique_id=59436548]
+[node name="ColAluno" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaAlunos/VBoxAlunos/CabecalhoRanking"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Aluno"
 
-[node name="ColPontuacao" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaAlunos/VBoxAlunos/CabecalhoRanking" unique_id=858905363]
+[node name="ColPontuacao" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaAlunos/VBoxAlunos/CabecalhoRanking"]
 custom_minimum_size = Vector2(90, 0)
 layout_mode = 2
 text = "Pontos"
 
-[node name="ColAcertos" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaAlunos/VBoxAlunos/CabecalhoRanking" unique_id=641255728]
+[node name="ColAcertos" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaAlunos/VBoxAlunos/CabecalhoRanking"]
 custom_minimum_size = Vector2(70, 0)
 layout_mode = 2
 text = "Acertos"
 
-[node name="ColErros" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaAlunos/VBoxAlunos/CabecalhoRanking" unique_id=1777920108]
+[node name="ColErros" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaAlunos/VBoxAlunos/CabecalhoRanking"]
 custom_minimum_size = Vector2(60, 0)
 layout_mode = 2
 text = "Erros"
 
-[node name="ColAproveitamento" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaAlunos/VBoxAlunos/CabecalhoRanking" unique_id=2100101484]
+[node name="ColAproveitamento" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaAlunos/VBoxAlunos/CabecalhoRanking"]
 custom_minimum_size = Vector2(92, 0)
 layout_mode = 2
 text = "Aprov."
 
-[node name="ColStatus" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaAlunos/VBoxAlunos/CabecalhoRanking" unique_id=1233789548]
+[node name="ColStatus" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaAlunos/VBoxAlunos/CabecalhoRanking"]
 custom_minimum_size = Vector2(116, 0)
 layout_mode = 2
 text = "Status"
 
-[node name="ColEvolucao" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaAlunos/VBoxAlunos/CabecalhoRanking" unique_id=569753740]
+[node name="ColEvolucao" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaAlunos/VBoxAlunos/CabecalhoRanking"]
 custom_minimum_size = Vector2(96, 0)
 layout_mode = 2
 text = "Evolucao"
 
-[node name="ListaRanking" type="VBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaAlunos/VBoxAlunos" unique_id=1711080947]
+[node name="ListaRanking" type="VBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaAlunos/VBoxAlunos"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="PaginaPerguntas" type="PanelContainer" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo" unique_id=91230751]
+[node name="PaginaPerguntas" type="PanelContainer" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo"]
 visible = false
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="VBoxPerguntas" type="VBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaPerguntas" unique_id=1842522708]
+[node name="VBoxPerguntas" type="VBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaPerguntas"]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="TituloPerguntas" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaPerguntas/VBoxPerguntas" unique_id=1017066606]
+[node name="TituloPerguntas" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaPerguntas/VBoxPerguntas"]
 layout_mode = 2
 text = "Banco de Perguntas"
 
-[node name="DescricaoPerguntas" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaPerguntas/VBoxPerguntas" unique_id=1529074093]
+[node name="DescricaoPerguntas" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaPerguntas/VBoxPerguntas"]
 layout_mode = 2
 text = "Gerencie o banco oficial, importe planilhas e use a IA em um fluxo separado do dashboard."
 autowrap_mode = 3
 
-[node name="AcoesPerguntas" type="HBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaPerguntas/VBoxPerguntas" unique_id=903557121]
+[node name="AcoesPerguntas" type="HBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaPerguntas/VBoxPerguntas"]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="BotaoImportar" type="Button" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaPerguntas/VBoxPerguntas/AcoesPerguntas" unique_id=242204100]
+[node name="BotaoImportar" type="Button" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaPerguntas/VBoxPerguntas/AcoesPerguntas"]
 custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 size_flags_horizontal = 3
 text = "IMPORTAR PERGUNTAS"
 
-[node name="BotaoAtualizarPerguntas" type="Button" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaPerguntas/VBoxPerguntas/AcoesPerguntas" unique_id=101803700]
+[node name="BotaoAtualizarPerguntas" type="Button" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaPerguntas/VBoxPerguntas/AcoesPerguntas"]
 custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 size_flags_horizontal = 3
 text = "ATUALIZAR BANCO"
 
-[node name="ResumoBancoPerguntas" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaPerguntas/VBoxPerguntas" unique_id=748813012]
+[node name="ResumoBancoPerguntas" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaPerguntas/VBoxPerguntas"]
 layout_mode = 2
 autowrap_mode = 3
 
-[node name="PainelBancoPerguntas" type="PanelContainer" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaPerguntas/VBoxPerguntas" unique_id=2124970274]
+[node name="PainelBancoPerguntas" type="PanelContainer" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaPerguntas/VBoxPerguntas"]
 layout_mode = 2
 
-[node name="VBoxBancoPerguntas" type="VBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaPerguntas/VBoxPerguntas/PainelBancoPerguntas" unique_id=1493206609]
+[node name="VBoxBancoPerguntas" type="VBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaPerguntas/VBoxPerguntas/PainelBancoPerguntas"]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="TituloBancoPerguntas" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaPerguntas/VBoxPerguntas/PainelBancoPerguntas/VBoxBancoPerguntas" unique_id=191328454]
+[node name="TituloBancoPerguntas" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaPerguntas/VBoxPerguntas/PainelBancoPerguntas/VBoxBancoPerguntas"]
 layout_mode = 2
 text = "Perguntas Salvas"
 
-[node name="ListaBancoPerguntas" type="VBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaPerguntas/VBoxPerguntas/PainelBancoPerguntas/VBoxBancoPerguntas" unique_id=886930833]
+[node name="ListaBancoPerguntas" type="VBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaPerguntas/VBoxPerguntas/PainelBancoPerguntas/VBoxBancoPerguntas"]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="SeparadorIa" type="HSeparator" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaPerguntas/VBoxPerguntas" unique_id=176501233]
+[node name="SeparadorIa" type="HSeparator" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaPerguntas/VBoxPerguntas"]
 layout_mode = 2
 
-[node name="IaArea" type="VBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaPerguntas/VBoxPerguntas" unique_id=528615781]
+[node name="IaArea" type="VBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaPerguntas/VBoxPerguntas"]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="Footer" type="HBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer" unique_id=370669953]
+[node name="Footer" type="HBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer"]
 layout_mode = 2
 alignment = 2
 
-[node name="BotaoSair" type="Button" parent="PainelCentral/MarginContainer/VBoxContainer/Footer" unique_id=473630639]
+[node name="BotaoSair" type="Button" parent="PainelCentral/MarginContainer/VBoxContainer/Footer"]
 custom_minimum_size = Vector2(180, 42)
 layout_mode = 2
 text = "SAIR DO PAINEL
 "
 
-[node name="Logo" type="TextureRect" parent="." unique_id=439598737]
+[node name="Logo" type="TextureRect" parent="."]
 custom_minimum_size = Vector2(280, 80)
 layout_mode = 0
 offset_left = 475.0
@@ -373,7 +373,7 @@ texture = ExtResource("3")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Personagem" type="TextureRect" parent="." unique_id=1002818170]
+[node name="Personagem" type="TextureRect" parent="."]
 custom_minimum_size = Vector2(250, 310)
 layout_mode = 0
 offset_left = 903.0
@@ -385,18 +385,18 @@ texture = ExtResource("5")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="BotaoConfiguracao" type="TextureButton" parent="." unique_id=1737899753]
+[node name="BotaoConfiguracao" type="TextureButton" parent="."]
 custom_minimum_size = Vector2(128, 128)
 layout_mode = 1
 anchors_preset = -1
-anchor_left = 0.89000005
-anchor_top = 0.79700005
-anchor_right = 1.0020001
+anchor_left = 0.89
+anchor_top = 0.797
+anchor_right = 1.002
 anchor_bottom = 1.0
-offset_left = 0.2598877
-offset_top = 0.15997314
-offset_right = -0.5501709
-offset_bottom = -4.104004
+offset_left = 0.259888
+offset_top = 0.159973
+offset_right = -0.550171
+offset_bottom = -4.104
 grow_vertical = 0
 texture_normal = ExtResource("4")
 ignore_texture_size = true

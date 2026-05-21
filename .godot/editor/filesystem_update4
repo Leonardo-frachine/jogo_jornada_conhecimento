@@ -1,0 +1,8 @@
+res://scene/loading_screen.tscn
+res://scene/end_game_screen.tscn
+res://scene/game.tscn
+res://scene/tela_inicial.tscn
+res://scene/selecao_perfil.tscn
+res://scene/acesso_professor.tscn
+res://ui/settings/root.tscn
+res://scene/painel_professor.tscn
