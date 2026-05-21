@@ -31,38 +31,51 @@ const VIEW_QUESTIONS := "questions"
 @onready var painel_central: Panel = $PainelCentral
 @onready var margin_container: MarginContainer = $PainelCentral/MarginContainer
 @onready var main_vbox: VBoxContainer = $PainelCentral/MarginContainer/VBoxContainer
-@onready var titulo_painel: Label = $PainelCentral/MarginContainer/VBoxContainer/TituloPainel
-@onready var label_professor: Label = $PainelCentral/MarginContainer/VBoxContainer/Header/LabelProfessor
-@onready var label_sala_atual: Label = $PainelCentral/MarginContainer/VBoxContainer/Header/LabelSalaAtual
-@onready var label_status: Label = $PainelCentral/MarginContainer/VBoxContainer/LabelStatus
-@onready var scroll_container: ScrollContainer = $PainelCentral/MarginContainer/VBoxContainer/ScrollContainer
-@onready var conteudo_scroll: VBoxContainer = $PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo
-@onready var bloco_sala: PanelContainer = $PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/BlocoSala
-@onready var input_nome_sala: LineEdit = $PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/BlocoSala/VBoxSala/InputNomeSala
-@onready var botao_criar_sala: Button = $PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/BlocoSala/VBoxSala/AcoesSala/BotaoCriarSala
-@onready var seletor_salas: OptionButton = $PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/BlocoSala/VBoxSala/AcoesSala/SeletorSalas
-@onready var botao_atualizar: Button = $PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/BlocoSala/VBoxSala/AcoesSala/BotaoAtualizar
-@onready var navegacao_abas: HBoxContainer = $PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/NavegacaoAbas
-@onready var botao_aba_dashboard: Button = $PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/NavegacaoAbas/BotaoAbaDashboard
-@onready var botao_aba_alunos: Button = $PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/NavegacaoAbas/BotaoAbaAlunos
-@onready var botao_aba_perguntas: Button = $PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/NavegacaoAbas/BotaoAbaPerguntas
-@onready var pagina_dashboard: PanelContainer = $PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaDashboard
-@onready var pagina_alunos: PanelContainer = $PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaAlunos
-@onready var pagina_perguntas: PanelContainer = $PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaPerguntas
-@onready var resumo_dashboard_grid: GridContainer = $PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaDashboard/VBoxDashboard/GridResumoDashboard
-@onready var secoes_dashboard: HBoxContainer = $PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaDashboard/VBoxDashboard/SecoesDashboard
-@onready var lista_materias_dashboard: VBoxContainer = $PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaDashboard/VBoxDashboard/SecoesDashboard/PainelMaterias/VBoxMaterias/ListaMaterias
-@onready var lista_dificuldades_dashboard: VBoxContainer = $PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaDashboard/VBoxDashboard/SecoesDashboard/PainelDificuldades/VBoxDificuldades/ListaDificuldades
-@onready var resumo_alunos: Label = $PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaAlunos/VBoxAlunos/ResumoAlunos
-@onready var lista_ranking: VBoxContainer = $PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaAlunos/VBoxAlunos/ListaRanking
-@onready var botao_importar: Button = $PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaPerguntas/VBoxPerguntas/AcoesPerguntas/BotaoImportar
-@onready var botao_atualizar_perguntas: Button = $PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaPerguntas/VBoxPerguntas/AcoesPerguntas/BotaoAtualizarPerguntas
-@onready var resumo_banco_perguntas: Label = $PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaPerguntas/VBoxPerguntas/ResumoBancoPerguntas
-@onready var lista_banco_perguntas: VBoxContainer = $PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaPerguntas/VBoxPerguntas/PainelBancoPerguntas/VBoxBancoPerguntas/ListaBancoPerguntas
-@onready var ia_area: VBoxContainer = $PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaPerguntas/VBoxPerguntas/IaArea
-@onready var botao_sair: Button = $PainelCentral/MarginContainer/VBoxContainer/Footer/BotaoSair
-@onready var botao_configuracao: TextureButton = $BotaoConfiguracao
-@onready var personagem: TextureRect = $Personagem
+@onready var header_card: PanelContainer = $PainelCentral/MarginContainer/VBoxContainer/HeaderCard
+@onready var titulo_painel: Label = $PainelCentral/MarginContainer/VBoxContainer/HeaderCard/HeaderMargin/HeaderLayout/HeaderPrincipal/TituloPainel
+@onready var label_professor: Label = $PainelCentral/MarginContainer/VBoxContainer/HeaderCard/HeaderMargin/HeaderLayout/HeaderPrincipal/HeaderMetaRow/LabelProfessor
+@onready var chip_sala_codigo: PanelContainer = $PainelCentral/MarginContainer/VBoxContainer/HeaderCard/HeaderMargin/HeaderLayout/HeaderPrincipal/HeaderMetaRow/SalaAtivaWrap/ChipSalaCodigo
+@onready var label_sala_atual: Label = $PainelCentral/MarginContainer/VBoxContainer/HeaderCard/HeaderMargin/HeaderLayout/HeaderPrincipal/HeaderMetaRow/SalaAtivaWrap/ChipSalaCodigo/ChipSalaCodigoMargin/LabelSalaAtual
+@onready var label_sala_atual_detalhe: Label = $PainelCentral/MarginContainer/VBoxContainer/HeaderCard/HeaderMargin/HeaderLayout/HeaderPrincipal/HeaderMetaRow/SalaAtivaWrap/LabelSalaAtualDetalhe
+@onready var label_status: Label = $PainelCentral/MarginContainer/VBoxContainer/HeaderCard/HeaderMargin/HeaderLayout/HeaderPrincipal/LabelStatus
+@onready var bloco_sala: PanelContainer = $PainelCentral/MarginContainer/VBoxContainer/BlocoSala
+@onready var chip_sala_ativa: PanelContainer = $PainelCentral/MarginContainer/VBoxContainer/BlocoSala/SalaMargin/VBoxSala/CabecalhoSala/ChipSalaAtiva
+@onready var label_sala_badge: Label = $PainelCentral/MarginContainer/VBoxContainer/BlocoSala/SalaMargin/VBoxSala/CabecalhoSala/ChipSalaAtiva/ChipSalaAtivaMargin/LabelSalaBadge
+@onready var grid_sala: GridContainer = $PainelCentral/MarginContainer/VBoxContainer/BlocoSala/SalaMargin/VBoxSala/GridSala
+@onready var input_nome_sala: LineEdit = $PainelCentral/MarginContainer/VBoxContainer/BlocoSala/SalaMargin/VBoxSala/GridSala/CardCriarSala/CriarSalaMargin/VBoxCriarSala/InputNomeSala
+@onready var botao_criar_sala: Button = $PainelCentral/MarginContainer/VBoxContainer/BlocoSala/SalaMargin/VBoxSala/GridSala/CardCriarSala/CriarSalaMargin/VBoxCriarSala/BotaoCriarSala
+@onready var seletor_salas: OptionButton = $PainelCentral/MarginContainer/VBoxContainer/BlocoSala/SalaMargin/VBoxSala/GridSala/CardSelecionarSala/SelecionarSalaMargin/VBoxSelecionarSala/SeletorSalas
+@onready var botao_atualizar: Button = $PainelCentral/MarginContainer/VBoxContainer/BlocoSala/SalaMargin/VBoxSala/GridSala/CardSelecionarSala/SelecionarSalaMargin/VBoxSelecionarSala/LinhaAcoesSala/BotaoAtualizar
+@onready var navegacao_abas: HBoxContainer = $PainelCentral/MarginContainer/VBoxContainer/NavegacaoAbas
+@onready var botao_aba_dashboard: Button = $PainelCentral/MarginContainer/VBoxContainer/NavegacaoAbas/BotaoAbaDashboard
+@onready var botao_aba_alunos: Button = $PainelCentral/MarginContainer/VBoxContainer/NavegacaoAbas/BotaoAbaAlunos
+@onready var botao_aba_perguntas: Button = $PainelCentral/MarginContainer/VBoxContainer/NavegacaoAbas/BotaoAbaPerguntas
+@onready var content_frame: PanelContainer = $PainelCentral/MarginContainer/VBoxContainer/ContentFrame
+@onready var scroll_container: ScrollContainer = $PainelCentral/MarginContainer/VBoxContainer/ContentFrame/ScrollContainer
+@onready var conteudo_scroll: VBoxContainer = $PainelCentral/MarginContainer/VBoxContainer/ContentFrame/ScrollContainer/Conteudo
+@onready var pagina_dashboard: PanelContainer = $PainelCentral/MarginContainer/VBoxContainer/ContentFrame/ScrollContainer/Conteudo/PaginaDashboard
+@onready var pagina_alunos: PanelContainer = $PainelCentral/MarginContainer/VBoxContainer/ContentFrame/ScrollContainer/Conteudo/PaginaAlunos
+@onready var pagina_perguntas: PanelContainer = $PainelCentral/MarginContainer/VBoxContainer/ContentFrame/ScrollContainer/Conteudo/PaginaPerguntas
+@onready var resumo_sala_dashboard: PanelContainer = $PainelCentral/MarginContainer/VBoxContainer/ContentFrame/ScrollContainer/Conteudo/PaginaDashboard/DashboardMargin/VBoxDashboard/ResumoSalaDashboard
+@onready var titulo_resumo_sala: Label = $PainelCentral/MarginContainer/VBoxContainer/ContentFrame/ScrollContainer/Conteudo/PaginaDashboard/DashboardMargin/VBoxDashboard/ResumoSalaDashboard/ResumoSalaMargin/VBoxResumoSalaDashboard/TituloResumoSala
+@onready var descricao_resumo_sala: Label = $PainelCentral/MarginContainer/VBoxContainer/ContentFrame/ScrollContainer/Conteudo/PaginaDashboard/DashboardMargin/VBoxDashboard/ResumoSalaDashboard/ResumoSalaMargin/VBoxResumoSalaDashboard/DescricaoResumoSala
+@onready var resumo_dashboard_grid: GridContainer = $PainelCentral/MarginContainer/VBoxContainer/ContentFrame/ScrollContainer/Conteudo/PaginaDashboard/DashboardMargin/VBoxDashboard/GridResumoDashboard
+@onready var secoes_dashboard: GridContainer = $PainelCentral/MarginContainer/VBoxContainer/ContentFrame/ScrollContainer/Conteudo/PaginaDashboard/DashboardMargin/VBoxDashboard/SecoesDashboard
+@onready var lista_materias_dashboard: VBoxContainer = $PainelCentral/MarginContainer/VBoxContainer/ContentFrame/ScrollContainer/Conteudo/PaginaDashboard/DashboardMargin/VBoxDashboard/SecoesDashboard/PainelMaterias/MateriasMargin/VBoxMaterias/ListaMaterias
+@onready var lista_dificuldades_dashboard: VBoxContainer = $PainelCentral/MarginContainer/VBoxContainer/ContentFrame/ScrollContainer/Conteudo/PaginaDashboard/DashboardMargin/VBoxDashboard/SecoesDashboard/PainelDificuldades/DificuldadesMargin/VBoxDificuldades/ListaDificuldades
+@onready var resumo_alunos: Label = $PainelCentral/MarginContainer/VBoxContainer/ContentFrame/ScrollContainer/Conteudo/PaginaAlunos/AlunosMargin/VBoxAlunos/ResumoAlunos
+@onready var lista_ranking: VBoxContainer = $PainelCentral/MarginContainer/VBoxContainer/ContentFrame/ScrollContainer/Conteudo/PaginaAlunos/AlunosMargin/VBoxAlunos/PainelTabelaRanking/TabelaRankingMargin/VBoxTabelaRanking/ScrollRanking/ListaRanking
+@onready var acoes_perguntas: GridContainer = $PainelCentral/MarginContainer/VBoxContainer/ContentFrame/ScrollContainer/Conteudo/PaginaPerguntas/PerguntasMargin/VBoxPerguntas/AcoesPerguntas
+@onready var botao_importar: Button = $PainelCentral/MarginContainer/VBoxContainer/ContentFrame/ScrollContainer/Conteudo/PaginaPerguntas/PerguntasMargin/VBoxPerguntas/AcoesPerguntas/BotaoImportar
+@onready var botao_atualizar_perguntas: Button = $PainelCentral/MarginContainer/VBoxContainer/ContentFrame/ScrollContainer/Conteudo/PaginaPerguntas/PerguntasMargin/VBoxPerguntas/AcoesPerguntas/BotaoAtualizarPerguntas
+@onready var botao_ir_para_ia: Button = $PainelCentral/MarginContainer/VBoxContainer/ContentFrame/ScrollContainer/Conteudo/PaginaPerguntas/PerguntasMargin/VBoxPerguntas/AcoesPerguntas/BotaoIrParaIa
+@onready var chip_contador_perguntas: PanelContainer = $PainelCentral/MarginContainer/VBoxContainer/ContentFrame/ScrollContainer/Conteudo/PaginaPerguntas/PerguntasMargin/VBoxPerguntas/CabecalhoPerguntas/ChipContadorPerguntas
+@onready var contador_banco_perguntas: Label = $PainelCentral/MarginContainer/VBoxContainer/ContentFrame/ScrollContainer/Conteudo/PaginaPerguntas/PerguntasMargin/VBoxPerguntas/CabecalhoPerguntas/ChipContadorPerguntas/ChipContadorMargin/ContadorBancoPerguntas
+@onready var resumo_banco_perguntas: Label = $PainelCentral/MarginContainer/VBoxContainer/ContentFrame/ScrollContainer/Conteudo/PaginaPerguntas/PerguntasMargin/VBoxPerguntas/ResumoBancoPerguntas
+@onready var lista_banco_perguntas: VBoxContainer = $PainelCentral/MarginContainer/VBoxContainer/ContentFrame/ScrollContainer/Conteudo/PaginaPerguntas/PerguntasMargin/VBoxPerguntas/PainelBancoPerguntas/BancoPerguntasMargin/VBoxBancoPerguntas/ListaBancoPerguntas
+@onready var ia_area: VBoxContainer = $PainelCentral/MarginContainer/VBoxContainer/ContentFrame/ScrollContainer/Conteudo/PaginaPerguntas/PerguntasMargin/VBoxPerguntas/PainelIa/PainelIaMargin/VBoxIa/IaArea
+@onready var botao_sair: Button = $PainelCentral/MarginContainer/VBoxContainer/HeaderCard/HeaderMargin/HeaderLayout/HeaderActions/BotaoSair
+@onready var botao_configuracao: TextureButton = $PainelCentral/MarginContainer/VBoxContainer/HeaderCard/HeaderMargin/HeaderLayout/HeaderActions/BotaoConfiguracao
 
 var salas: Array[Dictionary] = []
 var carregando := false
@@ -107,6 +120,7 @@ func _ready() -> void:
 	botao_atualizar.pressed.connect(_on_botao_atualizar_pressed)
 	botao_importar.pressed.connect(_on_botao_importar_pressed)
 	botao_atualizar_perguntas.pressed.connect(_on_botao_atualizar_banco_perguntas_pressed)
+	botao_ir_para_ia.pressed.connect(_on_botao_ir_para_ia_pressed)
 	botao_sair.pressed.connect(_on_botao_sair_pressed)
 	botao_configuracao.pressed.connect(_on_botao_configuracao_pressed)
 	botao_aba_dashboard.pressed.connect(_on_navigation_pressed.bind(VIEW_DASHBOARD))
@@ -115,6 +129,7 @@ func _ready() -> void:
 	seletor_salas.item_selected.connect(_on_seletor_salas_item_selected)
 	_ensure_import_dialog()
 	_setup_panel_layout()
+	_promote_primary_sections()
 	_build_ai_section()
 
 	_refresh_header()
@@ -130,44 +145,33 @@ func _configure_fullscreen_layout() -> void:
 	painel_central.set_anchors_preset(Control.PRESET_FULL_RECT)
 	scroll_container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	scroll_container.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	scroll_container.custom_minimum_size = Vector2.ZERO
 	conteudo_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	main_vbox.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	main_vbox.add_theme_constant_override("separation", 18)
-	titulo_painel.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	label_status.custom_minimum_size = Vector2(0, 24)
-
-	if personagem != null:
-		personagem.visible = false
-
-	_promote_primary_sections()
 
 	if not get_viewport().size_changed.is_connected(_update_responsive_layout):
 		get_viewport().size_changed.connect(_update_responsive_layout)
 	call_deferred("_update_responsive_layout")
 
 func _promote_primary_sections() -> void:
-	if bloco_sala != null and bloco_sala.get_parent() != main_vbox:
-		var scroll_index := main_vbox.get_children().find(scroll_container)
-		conteudo_scroll.remove_child(bloco_sala)
-		main_vbox.add_child(bloco_sala)
-		main_vbox.move_child(bloco_sala, scroll_index)
+	if bloco_sala == null or conteudo_scroll == null:
+		return
+	if bloco_sala.get_parent() == conteudo_scroll:
+		conteudo_scroll.move_child(bloco_sala, 0)
+		return
 
-	if navegacao_abas != null and navegacao_abas.get_parent() != main_vbox:
-		var scroll_index := main_vbox.get_children().find(scroll_container)
-		conteudo_scroll.remove_child(navegacao_abas)
-		main_vbox.add_child(navegacao_abas)
-		main_vbox.move_child(navegacao_abas, scroll_index)
-
-	if bloco_sala != null:
-		bloco_sala.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	if navegacao_abas != null:
-		navegacao_abas.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var previous_parent: Node = bloco_sala.get_parent()
+	if previous_parent != null:
+		previous_parent.remove_child(bloco_sala)
+	conteudo_scroll.add_child(bloco_sala)
+	conteudo_scroll.move_child(bloco_sala, 0)
+	bloco_sala.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
 func _update_responsive_layout() -> void:
 	var viewport_size: Vector2 = get_viewport().get_visible_rect().size
-	var horizontal_margin: int = 18 if viewport_size.x < 1180.0 else 28
-	var vertical_margin: int = 18 if viewport_size.y < 760.0 else 28
+	var horizontal_margin: int = 18 if viewport_size.x < 1200.0 else 26
+	var vertical_margin: int = 18 if viewport_size.y < 780.0 else 24
 
 	painel_central.offset_left = horizontal_margin
 	painel_central.offset_top = vertical_margin
@@ -177,20 +181,30 @@ func _update_responsive_layout() -> void:
 	margin_container.add_theme_constant_override("margin_left", horizontal_margin)
 	margin_container.add_theme_constant_override("margin_top", vertical_margin)
 	margin_container.add_theme_constant_override("margin_right", horizontal_margin)
-	margin_container.add_theme_constant_override("margin_bottom", vertical_margin - 2)
+	margin_container.add_theme_constant_override("margin_bottom", vertical_margin)
 
-	resumo_dashboard_grid.columns = 2 if viewport_size.x < 1320.0 else 4
-	secoes_dashboard.alignment = BoxContainer.ALIGNMENT_BEGIN
+	grid_sala.columns = 1 if viewport_size.x < 1080.0 else 2
+	resumo_dashboard_grid.columns = 2 if viewport_size.x < 1280.0 else 4
+	secoes_dashboard.columns = 1 if viewport_size.x < 1140.0 else 2
+	acoes_perguntas.columns = 1 if viewport_size.x < 980.0 else (2 if viewport_size.x < 1240.0 else 3)
 
 func _refresh_header() -> void:
 	label_professor.text = "Professor: %s" % ProfessorSession.professor_name
 	if ProfessorSession.has_current_room():
-		label_sala_atual.text = "Sala ativa: %s (%s)" % [
-			ProfessorSession.current_room_name,
-			ProfessorSession.current_room_code,
-		]
+		var room_code := ProfessorSession.current_room_code.strip_edges().to_upper()
+		var room_name := ProfessorSession.current_room_name.strip_edges()
+		label_sala_atual.text = room_code if not room_code.is_empty() else "SEM CODIGO"
+		label_sala_atual_detalhe.text = room_name if not room_name.is_empty() else "Sala ativa selecionada"
+		var badge_suffix := " (%s)" % room_code if not room_code.is_empty() else ""
+		label_sala_badge.text = "Sala ativa: %s%s" % [room_name if not room_name.is_empty() else "Sala", badge_suffix]
+		_apply_badge_panel_style(chip_sala_codigo, _tint_color(IA_COLOR_ACCENT, 0.82), IA_COLOR_ACCENT, 16, 10, 6)
+		_apply_badge_panel_style(chip_sala_ativa, _tint_color(STATUS_INFO, 0.84), STATUS_INFO, 16, 12, 8)
 	else:
-		label_sala_atual.text = "Sala ativa: nenhuma sala criada"
+		label_sala_atual.text = "SEM SALA"
+		label_sala_atual_detalhe.text = "Crie ou selecione uma sala para comecar"
+		label_sala_badge.text = "Nenhuma sala ativa"
+		_apply_badge_panel_style(chip_sala_codigo, _tint_color(IA_COLOR_BORDER, 0.75), IA_COLOR_BORDER, 16, 10, 6)
+		_apply_badge_panel_style(chip_sala_ativa, _tint_color(IA_COLOR_BORDER, 0.80), IA_COLOR_BORDER, 16, 12, 8)
 
 func _setup_panel_layout() -> void:
 	UITheme.apply_page_shell(painel_central)
@@ -203,15 +217,22 @@ func _setup_panel_layout() -> void:
 func _apply_root_panel_styles() -> void:
 	UITheme.apply_title(titulo_painel, 34, IA_COLOR_TEXT)
 	UITheme.apply_subtitle(label_professor, 16, IA_COLOR_TEXT)
-	UITheme.apply_subtitle(label_sala_atual, 15, IA_COLOR_MUTED)
-	UITheme.apply_subtitle(label_status, 14, STATUS_INFO)
+	UITheme.apply_subtitle(label_sala_atual, 15, IA_COLOR_ACCENT_DARK)
+	UITheme.apply_subtitle(label_sala_atual_detalhe, 15, IA_COLOR_MUTED)
+	UITheme.apply_subtitle(label_status, 14, IA_COLOR_MUTED)
+	UITheme.apply_subtitle(label_sala_badge, 14, STATUS_INFO)
+	UITheme.apply_subtitle(contador_banco_perguntas, 16, IA_COLOR_ACCENT_DARK)
 	_apply_input_palette(input_nome_sala)
 	_apply_button_palette(botao_criar_sala, IA_COLOR_ACCENT, IA_COLOR_ACCENT_DARK)
 	_apply_button_palette(botao_atualizar, STATUS_INFO, _shade_color(STATUS_INFO, 0.28))
 	_apply_button_palette(botao_importar, IA_COLOR_ACCENT, IA_COLOR_ACCENT_DARK)
 	_apply_button_palette(botao_atualizar_perguntas, STATUS_INFO, _shade_color(STATUS_INFO, 0.28))
+	_apply_button_palette(botao_ir_para_ia, IA_COLOR_APPROVED, _shade_color(IA_COLOR_APPROVED, 0.28))
 	_apply_button_palette(botao_sair, IA_COLOR_REJECTED, _shade_color(IA_COLOR_REJECTED, 0.28))
 	_apply_option_button_palette(seletor_salas)
+	botao_configuracao.modulate = Color(1.0, 1.0, 1.0, 0.92)
+	_refresh_header()
+	_update_question_count_badge()
 
 func _apply_navigation_styles() -> void:
 	_apply_navigation_button_style(botao_aba_dashboard, true)
@@ -220,53 +241,75 @@ func _apply_navigation_styles() -> void:
 
 func _apply_section_title_styles() -> void:
 	var title_paths: Array[String] = [
-		"PainelCentral/MarginContainer/VBoxContainer/TituloPainel",
-		"PainelCentral/MarginContainer/VBoxContainer/BlocoSala/VBoxSala/TituloSala",
-		"PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaDashboard/VBoxDashboard/TituloDashboard",
-		"PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaDashboard/VBoxDashboard/SecoesDashboard/PainelMaterias/VBoxMaterias/TituloMaterias",
-		"PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaDashboard/VBoxDashboard/SecoesDashboard/PainelDificuldades/VBoxDificuldades/TituloDificuldades",
-		"PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaAlunos/VBoxAlunos/TituloAlunos",
-		"PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaPerguntas/VBoxPerguntas/TituloPerguntas",
-		"PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaPerguntas/VBoxPerguntas/PainelBancoPerguntas/VBoxBancoPerguntas/TituloBancoPerguntas",
+		"PainelCentral/MarginContainer/VBoxContainer/HeaderCard/HeaderMargin/HeaderLayout/HeaderPrincipal/TituloPainel",
+		"PainelCentral/MarginContainer/VBoxContainer/BlocoSala/SalaMargin/VBoxSala/CabecalhoSala/TitulosSala/TituloSala",
+		"PainelCentral/MarginContainer/VBoxContainer/BlocoSala/SalaMargin/VBoxSala/GridSala/CardCriarSala/CriarSalaMargin/VBoxCriarSala/TituloCriarSala",
+		"PainelCentral/MarginContainer/VBoxContainer/BlocoSala/SalaMargin/VBoxSala/GridSala/CardSelecionarSala/SelecionarSalaMargin/VBoxSelecionarSala/TituloSelecionarSala",
+		"PainelCentral/MarginContainer/VBoxContainer/ContentFrame/ScrollContainer/Conteudo/PaginaDashboard/DashboardMargin/VBoxDashboard/TituloDashboard",
+		"PainelCentral/MarginContainer/VBoxContainer/ContentFrame/ScrollContainer/Conteudo/PaginaDashboard/DashboardMargin/VBoxDashboard/ResumoSalaDashboard/ResumoSalaMargin/VBoxResumoSalaDashboard/TituloResumoSala",
+		"PainelCentral/MarginContainer/VBoxContainer/ContentFrame/ScrollContainer/Conteudo/PaginaDashboard/DashboardMargin/VBoxDashboard/SecoesDashboard/PainelMaterias/MateriasMargin/VBoxMaterias/TituloMaterias",
+		"PainelCentral/MarginContainer/VBoxContainer/ContentFrame/ScrollContainer/Conteudo/PaginaDashboard/DashboardMargin/VBoxDashboard/SecoesDashboard/PainelDificuldades/DificuldadesMargin/VBoxDificuldades/TituloDificuldades",
+		"PainelCentral/MarginContainer/VBoxContainer/ContentFrame/ScrollContainer/Conteudo/PaginaAlunos/AlunosMargin/VBoxAlunos/TituloAlunos",
+		"PainelCentral/MarginContainer/VBoxContainer/ContentFrame/ScrollContainer/Conteudo/PaginaPerguntas/PerguntasMargin/VBoxPerguntas/CabecalhoPerguntas/TitulosPerguntas/TituloPerguntas",
+		"PainelCentral/MarginContainer/VBoxContainer/ContentFrame/ScrollContainer/Conteudo/PaginaPerguntas/PerguntasMargin/VBoxPerguntas/PainelBancoPerguntas/BancoPerguntasMargin/VBoxBancoPerguntas/TituloBancoPerguntas",
+		"PainelCentral/MarginContainer/VBoxContainer/ContentFrame/ScrollContainer/Conteudo/PaginaPerguntas/PerguntasMargin/VBoxPerguntas/PainelIa/PainelIaMargin/VBoxIa/TituloIa",
 	]
 	for path in title_paths:
 		var label: Label = get_node_or_null(path) as Label
 		if label != null:
+			UITheme.apply_font_only(label, 22)
 			label.add_theme_color_override("font_color", IA_COLOR_ACCENT_DARK)
 
 	var text_paths: Array[String] = [
-		"PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaDashboard/VBoxDashboard/DescricaoDashboard",
-		"PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaAlunos/VBoxAlunos/DescricaoAlunos",
-		"PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaPerguntas/VBoxPerguntas/DescricaoPerguntas",
-		"PainelCentral/MarginContainer/VBoxContainer/Header/LabelProfessor",
-		"PainelCentral/MarginContainer/VBoxContainer/Header/LabelSalaAtual",
+		"PainelCentral/MarginContainer/VBoxContainer/BlocoSala/SalaMargin/VBoxSala/CabecalhoSala/TitulosSala/DescricaoSala",
+		"PainelCentral/MarginContainer/VBoxContainer/BlocoSala/SalaMargin/VBoxSala/GridSala/CardCriarSala/CriarSalaMargin/VBoxCriarSala/DescricaoCriarSala",
+		"PainelCentral/MarginContainer/VBoxContainer/BlocoSala/SalaMargin/VBoxSala/GridSala/CardSelecionarSala/SelecionarSalaMargin/VBoxSelecionarSala/DescricaoSelecionarSala",
+		"PainelCentral/MarginContainer/VBoxContainer/ContentFrame/ScrollContainer/Conteudo/PaginaDashboard/DashboardMargin/VBoxDashboard/DescricaoDashboard",
+		"PainelCentral/MarginContainer/VBoxContainer/ContentFrame/ScrollContainer/Conteudo/PaginaDashboard/DashboardMargin/VBoxDashboard/ResumoSalaDashboard/ResumoSalaMargin/VBoxResumoSalaDashboard/DescricaoResumoSala",
+		"PainelCentral/MarginContainer/VBoxContainer/ContentFrame/ScrollContainer/Conteudo/PaginaAlunos/AlunosMargin/VBoxAlunos/DescricaoAlunos",
+		"PainelCentral/MarginContainer/VBoxContainer/ContentFrame/ScrollContainer/Conteudo/PaginaPerguntas/PerguntasMargin/VBoxPerguntas/CabecalhoPerguntas/TitulosPerguntas/DescricaoPerguntas",
+		"PainelCentral/MarginContainer/VBoxContainer/ContentFrame/ScrollContainer/Conteudo/PaginaPerguntas/PerguntasMargin/VBoxPerguntas/PainelBancoPerguntas/BancoPerguntasMargin/VBoxBancoPerguntas/DescricaoBancoPerguntas",
 	]
 	for path in text_paths:
 		var text_label: Label = get_node_or_null(path) as Label
 		if text_label != null:
-			text_label.add_theme_color_override("font_color", IA_COLOR_TEXT)
+			UITheme.apply_font_only(text_label, 15)
+			text_label.add_theme_color_override("font_color", IA_COLOR_MUTED)
 
 func _apply_section_panel_styles() -> void:
 	var panel_paths: Array[String] = [
+		"PainelCentral/MarginContainer/VBoxContainer/HeaderCard",
 		"PainelCentral/MarginContainer/VBoxContainer/BlocoSala",
-		"PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaDashboard",
-		"PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaDashboard/VBoxDashboard/SecoesDashboard/PainelMaterias",
-		"PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaDashboard/VBoxDashboard/SecoesDashboard/PainelDificuldades",
-		"PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaAlunos",
-		"PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaPerguntas",
-		"PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaPerguntas/VBoxPerguntas/PainelBancoPerguntas",
+		"PainelCentral/MarginContainer/VBoxContainer/BlocoSala/SalaMargin/VBoxSala/GridSala/CardCriarSala",
+		"PainelCentral/MarginContainer/VBoxContainer/BlocoSala/SalaMargin/VBoxSala/GridSala/CardSelecionarSala",
+		"PainelCentral/MarginContainer/VBoxContainer/ContentFrame",
+		"PainelCentral/MarginContainer/VBoxContainer/ContentFrame/ScrollContainer/Conteudo/PaginaDashboard/DashboardMargin/VBoxDashboard/ResumoSalaDashboard",
+		"PainelCentral/MarginContainer/VBoxContainer/ContentFrame/ScrollContainer/Conteudo/PaginaDashboard/DashboardMargin/VBoxDashboard/SecoesDashboard/PainelMaterias",
+		"PainelCentral/MarginContainer/VBoxContainer/ContentFrame/ScrollContainer/Conteudo/PaginaDashboard/DashboardMargin/VBoxDashboard/SecoesDashboard/PainelDificuldades",
+		"PainelCentral/MarginContainer/VBoxContainer/ContentFrame/ScrollContainer/Conteudo/PaginaAlunos/AlunosMargin/VBoxAlunos/PainelTabelaRanking",
+		"PainelCentral/MarginContainer/VBoxContainer/ContentFrame/ScrollContainer/Conteudo/PaginaPerguntas/PerguntasMargin/VBoxPerguntas/PainelBancoPerguntas",
+		"PainelCentral/MarginContainer/VBoxContainer/ContentFrame/ScrollContainer/Conteudo/PaginaPerguntas/PerguntasMargin/VBoxPerguntas/PainelIa",
 	]
 	for path in panel_paths:
 		var panel: PanelContainer = get_node_or_null(path) as PanelContainer
 		if panel != null:
-			panel.add_theme_stylebox_override("panel", _create_ia_surface_style(IA_COLOR_SURFACE, IA_COLOR_BORDER, 2, 18, 18, 16))
+			panel.add_theme_stylebox_override("panel", _create_ia_surface_style(IA_COLOR_SURFACE, IA_COLOR_BORDER, 2, 20, 18, 16))
 
-	var ranking_header: HBoxContainer = get_node_or_null("PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaAlunos/VBoxAlunos/CabecalhoRanking") as HBoxContainer
+	content_frame.add_theme_stylebox_override("panel", _create_ia_surface_style(Color(0.99, 0.97, 0.94, 0.72), Color(0.58, 0.42, 0.27, 0.22), 1, 24, 10, 10))
+	pagina_dashboard.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
+	pagina_alunos.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
+	pagina_perguntas.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
+	_apply_badge_panel_style(chip_sala_codigo, _tint_color(IA_COLOR_ACCENT, 0.82), IA_COLOR_ACCENT, 16, 10, 6)
+	_apply_badge_panel_style(chip_sala_ativa, _tint_color(STATUS_INFO, 0.84), STATUS_INFO, 16, 12, 8)
+	_apply_badge_panel_style(chip_contador_perguntas, _tint_color(IA_COLOR_ACCENT, 0.84), IA_COLOR_ACCENT, 18, 14, 10)
+
+	var ranking_header: HBoxContainer = get_node_or_null("PainelCentral/MarginContainer/VBoxContainer/ContentFrame/ScrollContainer/Conteudo/PaginaAlunos/AlunosMargin/VBoxAlunos/PainelTabelaRanking/TabelaRankingMargin/VBoxTabelaRanking/CabecalhoRanking") as HBoxContainer
 	if ranking_header != null:
-		ranking_header.add_theme_stylebox_override("panel", _create_ia_surface_style(IA_COLOR_SURFACE_ALT, IA_COLOR_BORDER, 2, 12, 12, 10))
+		ranking_header.add_theme_stylebox_override("panel", _create_ia_surface_style(_tint_color(STATUS_INFO, 0.88), STATUS_INFO, 1, 12, 12, 10))
 		for child in ranking_header.get_children():
 			if child is Label:
-				(child as Label).add_theme_color_override("font_color", IA_COLOR_MUTED)
+				UITheme.apply_font_only(child as Label, 14)
+				(child as Label).add_theme_color_override("font_color", STATUS_INFO)
 
 func _set_loading_state(enabled: bool) -> void:
 	carregando = enabled
@@ -352,7 +395,7 @@ func _build_ai_section() -> void:
 	ia_botao_gerar = Button.new()
 	ia_botao_gerar.custom_minimum_size = Vector2(0, 44)
 	ia_botao_gerar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	ia_botao_gerar.text = "GERAR COM IA"
+	ia_botao_gerar.text = "Gerar com IA"
 	_apply_button_palette(ia_botao_gerar, IA_COLOR_ACCENT, IA_COLOR_ACCENT_DARK)
 	ia_botao_gerar.pressed.connect(_on_botao_gerar_ia_pressed)
 	button_row.add_child(ia_botao_gerar)
@@ -360,7 +403,7 @@ func _build_ai_section() -> void:
 	ia_botao_salvar = Button.new()
 	ia_botao_salvar.custom_minimum_size = Vector2(0, 44)
 	ia_botao_salvar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	ia_botao_salvar.text = "SALVAR PERGUNTAS APROVADAS"
+	ia_botao_salvar.text = "Salvar Perguntas Aprovadas"
 	_apply_button_palette(ia_botao_salvar, IA_COLOR_APPROVED, _shade_color(IA_COLOR_APPROVED, 0.28))
 	ia_botao_salvar.pressed.connect(_on_botao_salvar_aprovadas_pressed)
 	button_row.add_child(ia_botao_salvar)
@@ -386,7 +429,7 @@ func _build_ai_section() -> void:
 	ia_botao_aprovar_todas = Button.new()
 	ia_botao_aprovar_todas.custom_minimum_size = Vector2(0, 42)
 	ia_botao_aprovar_todas.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	ia_botao_aprovar_todas.text = "APROVAR TODAS"
+	ia_botao_aprovar_todas.text = "Aprovar Todas"
 	_apply_button_palette(ia_botao_aprovar_todas, IA_COLOR_APPROVED, _shade_color(IA_COLOR_APPROVED, 0.28))
 	ia_botao_aprovar_todas.pressed.connect(_on_botao_aprovar_todas_pressed)
 	bulk_actions.add_child(ia_botao_aprovar_todas)
@@ -394,7 +437,7 @@ func _build_ai_section() -> void:
 	ia_botao_rejeitar_todas = Button.new()
 	ia_botao_rejeitar_todas.custom_minimum_size = Vector2(0, 42)
 	ia_botao_rejeitar_todas.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	ia_botao_rejeitar_todas.text = "REJEITAR TODAS"
+	ia_botao_rejeitar_todas.text = "Rejeitar Todas"
 	_apply_button_palette(ia_botao_rejeitar_todas, IA_COLOR_REJECTED, _shade_color(IA_COLOR_REJECTED, 0.28))
 	ia_botao_rejeitar_todas.pressed.connect(_on_botao_rejeitar_todas_pressed)
 	bulk_actions.add_child(ia_botao_rejeitar_todas)
@@ -462,6 +505,60 @@ func _create_ia_surface_style(background: Color, border: Color, border_width: in
 	style.shadow_offset = Vector2(0, 3)
 	return style
 
+func _apply_badge_panel_style(panel: PanelContainer, background: Color, border: Color, corner_radius: int = 999, horizontal_padding: int = 12, vertical_padding: int = 8) -> void:
+	if panel == null:
+		return
+	panel.add_theme_stylebox_override("panel", _create_ia_surface_style(background, border, 2, corner_radius, horizontal_padding, vertical_padding))
+
+func _create_empty_state_panel(title_text: String, description_text: String) -> PanelContainer:
+	var panel: PanelContainer = PanelContainer.new()
+	panel.add_theme_stylebox_override("panel", _create_ia_surface_style(_tint_color(IA_COLOR_SURFACE_ALT, 0.12), IA_COLOR_BORDER, 1, 16, 16, 14))
+
+	var content: VBoxContainer = VBoxContainer.new()
+	content.add_theme_constant_override("separation", 4)
+	panel.add_child(content)
+
+	var title: Label = Label.new()
+	title.text = title_text
+	UITheme.apply_font_only(title, 18)
+	title.add_theme_color_override("font_color", IA_COLOR_ACCENT_DARK)
+	content.add_child(title)
+
+	var description: Label = Label.new()
+	description.text = description_text
+	description.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	UITheme.apply_font_only(description, 15)
+	description.add_theme_color_override("font_color", IA_COLOR_MUTED)
+	content.add_child(description)
+
+	return panel
+
+func _create_inline_badge(text_value: String, background: Color, border: Color, text_color: Color = IA_COLOR_TEXT) -> PanelContainer:
+	var badge: PanelContainer = PanelContainer.new()
+	badge.add_theme_stylebox_override("panel", _create_ia_surface_style(background, border, 1, 999, 10, 6))
+
+	var label: Label = Label.new()
+	label.text = text_value
+	UITheme.apply_font_only(label, 14)
+	label.add_theme_color_override("font_color", text_color)
+	badge.add_child(label)
+
+	return badge
+
+func _set_question_bank_feedback(message: String, color_value: Color) -> void:
+	resumo_banco_perguntas.text = message
+	resumo_banco_perguntas.add_theme_color_override("font_color", color_value)
+
+func _update_question_count_badge() -> void:
+	if contador_banco_perguntas == null:
+		return
+
+	if carregando_banco_perguntas:
+		contador_banco_perguntas.text = "Atualizando..."
+		return
+
+	contador_banco_perguntas.text = "%d perguntas" % banco_perguntas.size()
+
 func _tint_color(color_value: Color, amount: float) -> Color:
 	return color_value.lerp(Color(1.0, 1.0, 1.0, color_value.a), clampf(amount, 0.0, 1.0))
 
@@ -527,6 +624,12 @@ func _set_current_view(view_name: String) -> void:
 	_apply_navigation_button_style(botao_aba_dashboard, view_name == VIEW_DASHBOARD)
 	_apply_navigation_button_style(botao_aba_alunos, view_name == VIEW_STUDENTS)
 	_apply_navigation_button_style(botao_aba_perguntas, view_name == VIEW_QUESTIONS)
+	scroll_container.scroll_vertical = 0
+
+func _on_botao_ir_para_ia_pressed() -> void:
+	_set_current_view(VIEW_QUESTIONS)
+	await get_tree().process_frame
+	scroll_container.ensure_control_visible(ia_area)
 
 func _load_rooms() -> void:
 	await _fetch_rooms(true)
@@ -687,11 +790,21 @@ func _refresh_dashboard() -> void:
 
 func _render_dashboard_data(payload: Dictionary) -> void:
 	var indicadores: Dictionary = payload.get("indicadores", {})
+	var total_alunos: int = int(indicadores.get("totalAlunos", 0))
+	var total_respostas: int = int(indicadores.get("totalPerguntasRespondidas", 0))
+	var room_name := ProfessorSession.current_room_name.strip_edges()
+
+	titulo_resumo_sala.text = "Resumo da sala"
+	if total_respostas <= 0:
+		descricao_resumo_sala.text = "A sala %s ja esta pronta, mas ainda nao ha respostas suficientes para gerar tendencias. Incentive a turma a iniciar as atividades." % (room_name if not room_name.is_empty() else "selecionada")
+	else:
+		descricao_resumo_sala.text = "%d alunos participaram e ja geraram %d respostas registradas. Use os indicadores abaixo para identificar desempenho, constancia e pontos de atencao." % [total_alunos, total_respostas]
+
 	_clear_container(resumo_dashboard_grid)
-	resumo_dashboard_grid.add_child(_create_metric_card("Alunos", str(int(indicadores.get("totalAlunos", 0))), "participando da sala", IA_COLOR_ACCENT))
-	resumo_dashboard_grid.add_child(_create_metric_card("Atividades", str(int(indicadores.get("totalPerguntasRespondidas", 0))), "respostas registradas", STATUS_INFO))
-	resumo_dashboard_grid.add_child(_create_metric_card("Desempenho Medio", "%d%%" % int(indicadores.get("percentualAcertoTurma", 0)), "aproveitamento da turma", IA_COLOR_APPROVED))
-	resumo_dashboard_grid.add_child(_create_metric_card("Evolucao Geral", _build_overview_label(indicadores), _build_overview_caption(indicadores), IA_COLOR_PENDING))
+	resumo_dashboard_grid.add_child(_create_metric_card("Alunos participantes", str(total_alunos), "estudantes com respostas vinculadas a sala", IA_COLOR_ACCENT))
+	resumo_dashboard_grid.add_child(_create_metric_card("Atividades e respostas", str(total_respostas), "registros usados para acompanhar a turma", STATUS_INFO))
+	resumo_dashboard_grid.add_child(_create_metric_card("Desempenho medio", "%d%%" % int(indicadores.get("percentualAcertoTurma", 0)), "aproveitamento agregado da turma", IA_COLOR_APPROVED))
+	resumo_dashboard_grid.add_child(_create_metric_card("Evolucao geral", _build_overview_label(indicadores), _build_overview_caption(indicadores), IA_COLOR_PENDING))
 
 	_render_group_summary_list(
 		lista_materias_dashboard,
@@ -708,25 +821,29 @@ func _render_dashboard_data(payload: Dictionary) -> void:
 
 func _create_metric_card(title_text: String, value_text: String, subtitle_text: String, accent_color: Color) -> PanelContainer:
 	var panel: PanelContainer = PanelContainer.new()
-	panel.add_theme_stylebox_override("panel", _create_ia_surface_style(_tint_color(accent_color, 0.86), accent_color, 2, 16, 16, 14))
+	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	panel.add_theme_stylebox_override("panel", _create_ia_surface_style(_tint_color(accent_color, 0.88), accent_color, 2, 18, 16, 15))
 
 	var content: VBoxContainer = VBoxContainer.new()
-	content.add_theme_constant_override("separation", 4)
+	content.add_theme_constant_override("separation", 6)
 	panel.add_child(content)
 
 	var title: Label = Label.new()
 	title.text = title_text
+	UITheme.apply_font_only(title, 15)
 	title.add_theme_color_override("font_color", IA_COLOR_MUTED)
 	content.add_child(title)
 
 	var value: Label = Label.new()
 	value.text = value_text
+	UITheme.apply_font_only(value, 32)
 	value.add_theme_color_override("font_color", accent_color)
 	content.add_child(value)
 
 	var subtitle: Label = Label.new()
 	subtitle.text = subtitle_text
 	subtitle.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	UITheme.apply_font_only(subtitle, 14)
 	subtitle.add_theme_color_override("font_color", IA_COLOR_TEXT)
 	content.add_child(subtitle)
 
@@ -747,11 +864,7 @@ func _render_group_summary_list(container: VBoxContainer, groups: Variant, key_n
 	_clear_container(container)
 
 	if groups is not Array or groups.is_empty():
-		var empty_label: Label = Label.new()
-		empty_label.text = empty_message
-		empty_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		empty_label.add_theme_color_override("font_color", IA_COLOR_MUTED)
-		container.add_child(empty_label)
+		container.add_child(_create_empty_state_panel("Sem dados suficientes", empty_message))
 		return
 
 	for item in groups:
@@ -769,6 +882,7 @@ func _create_group_summary_row(item: Dictionary, key_name: String) -> PanelConta
 
 	var title: Label = Label.new()
 	title.text = str(item.get(key_name, "Sem nome"))
+	UITheme.apply_font_only(title, 16)
 	title.add_theme_color_override("font_color", IA_COLOR_TEXT)
 	content.add_child(title)
 
@@ -780,6 +894,7 @@ func _create_group_summary_row(item: Dictionary, key_name: String) -> PanelConta
 		int(item.get("percentualAcerto", 0)),
 	]
 	detail.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	UITheme.apply_font_only(detail, 14)
 	detail.add_theme_color_override("font_color", IA_COLOR_MUTED)
 	content.add_child(detail)
 
@@ -799,12 +914,13 @@ func _render_student_ranking(respostas: Array[Dictionary]) -> void:
 	_clear_container(lista_ranking)
 
 	if respostas.is_empty():
-		resumo_alunos.text = "Nenhuma resposta vinculada a esta sala ainda."
+		resumo_alunos.text = "Nenhum aluno apareceu no ranking ainda."
 		resumo_alunos.add_theme_color_override("font_color", IA_COLOR_MUTED)
+		lista_ranking.add_child(_create_empty_state_panel("Ranking aguardando atividade", "Assim que a turma responder perguntas, o painel mostrara posicao, aproveitamento, status e evolucao de cada aluno."))
 		return
 
 	var ranking_data: Array[Dictionary] = _build_student_ranking_data(respostas)
-	resumo_alunos.text = "Visao rapida da turma: %d alunos ranqueados com base em pontuacao, acertos e constancia recente." % ranking_data.size()
+	resumo_alunos.text = "Visao rapida da turma: %d alunos ranqueados com base em pontuacao, acertos, erros e tendencia recente." % ranking_data.size()
 	resumo_alunos.add_theme_color_override("font_color", IA_COLOR_TEXT)
 
 	for index in range(ranking_data.size()):
@@ -843,7 +959,7 @@ func _build_student_ranking_data(respostas: Array[Dictionary]) -> Array[Dictiona
 		var acertos_total: int = int(item.get("acertos", 0))
 		var aproveitamento: int = 0 if respostas_total == 0 else int(round((float(acertos_total) / float(respostas_total)) * 100.0))
 		item["aproveitamento"] = aproveitamento
-		item["status"] = _get_student_status(aproveitamento)
+		item["status"] = _get_student_status(aproveitamento, respostas_total)
 		item["trend"] = _build_student_trend(item.get("historico", []))
 		ranking.append(item)
 
@@ -857,14 +973,14 @@ func _build_student_ranking_data(respostas: Array[Dictionary]) -> Array[Dictiona
 
 	return ranking
 
-func _get_student_status(aproveitamento: int) -> String:
+func _get_student_status(aproveitamento: int, respostas_total: int) -> String:
+	if respostas_total <= 1:
+		return "Novo"
 	if aproveitamento >= 85:
 		return "Excelente"
 	if aproveitamento >= 70:
 		return "Bom"
-	if aproveitamento >= 50:
-		return "Atencao"
-	return "Precisa melhorar"
+	return "Atencao"
 
 func _build_student_trend(historico_variant: Variant) -> Dictionary:
 	var historico: Array = historico_variant if historico_variant is Array else []
@@ -874,9 +990,10 @@ func _build_student_trend(historico_variant: Variant) -> Dictionary:
 			"color": IA_COLOR_PENDING,
 		}
 
-	var recent_slice: Array = historico.slice(0, min(3, historico.size()))
-	var previous_start: int = recent_slice.size()
-	var previous_slice: Array = historico.slice(previous_start, min(previous_start + 3, historico.size()))
+	var recent_start: int = max(0, historico.size() - 3)
+	var recent_slice: Array = historico.slice(recent_start, historico.size())
+	var previous_start: int = max(0, recent_start - 3)
+	var previous_slice: Array = historico.slice(previous_start, recent_start)
 
 	var recent_rate: float = _calculate_boolean_rate(recent_slice)
 	var previous_rate: float = _calculate_boolean_rate(previous_slice)
@@ -945,9 +1062,11 @@ func _create_student_ranking_row(data: Dictionary, index: int) -> PanelContainer
 func _create_rank_text_cell(text_value: String, min_width: int, color_value: Color, expand: bool) -> Label:
 	var label: Label = Label.new()
 	label.text = text_value
-	label.custom_minimum_size = Vector2(min_width, 0)
+	label.custom_minimum_size = Vector2(min_width, 36)
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL if expand else Control.SIZE_SHRINK_BEGIN
+	UITheme.apply_font_only(label, 15)
 	label.add_theme_color_override("font_color", color_value)
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	return label
 
 func _create_rank_badge_cell(text_value: String, min_width: int, color_value: Color) -> PanelContainer:
@@ -958,6 +1077,7 @@ func _create_rank_badge_cell(text_value: String, min_width: int, color_value: Co
 	var label: Label = Label.new()
 	label.text = text_value
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	UITheme.apply_font_only(label, 14)
 	label.add_theme_color_override("font_color", _shade_color(color_value, 0.38))
 	panel.add_child(label)
 	return panel
@@ -968,6 +1088,8 @@ func _get_status_badge_color(status: String) -> Color:
 			return IA_COLOR_APPROVED
 		"Bom":
 			return STATUS_INFO
+		"Novo":
+			return IA_COLOR_PENDING
 		"Atencao":
 			return IA_COLOR_PENDING
 		_:
@@ -975,11 +1097,13 @@ func _get_status_badge_color(status: String) -> Color:
 
 func _render_empty_dashboard() -> void:
 	dashboard_payload.clear()
+	titulo_resumo_sala.text = "Resumo da sala"
+	descricao_resumo_sala.text = "Crie uma sala ou selecione uma turma existente para visualizar indicadores, tendencias e desempenho da turma."
 	_clear_container(resumo_dashboard_grid)
-	resumo_dashboard_grid.add_child(_create_metric_card("Alunos", "0", "participando da sala", IA_COLOR_ACCENT))
-	resumo_dashboard_grid.add_child(_create_metric_card("Atividades", "0", "respostas registradas", STATUS_INFO))
-	resumo_dashboard_grid.add_child(_create_metric_card("Desempenho Medio", "0%", "aproveitamento da turma", IA_COLOR_APPROVED))
-	resumo_dashboard_grid.add_child(_create_metric_card("Evolucao Geral", "Sem dados", "aguardando respostas", IA_COLOR_PENDING))
+	resumo_dashboard_grid.add_child(_create_metric_card("Alunos participantes", "0", "estudantes com respostas vinculadas a sala", IA_COLOR_ACCENT))
+	resumo_dashboard_grid.add_child(_create_metric_card("Atividades e respostas", "0", "registros usados para acompanhar a turma", STATUS_INFO))
+	resumo_dashboard_grid.add_child(_create_metric_card("Desempenho medio", "0%", "aproveitamento agregado da turma", IA_COLOR_APPROVED))
+	resumo_dashboard_grid.add_child(_create_metric_card("Evolucao geral", "Sem dados", "aguardando respostas da turma", IA_COLOR_PENDING))
 	_render_group_summary_list(lista_materias_dashboard, [], "materia", "Nenhum dado de materia vinculado ainda.")
 	_render_group_summary_list(lista_dificuldades_dashboard, [], "dificuldade", "Nenhum dado de dificuldade vinculado ainda.")
 
@@ -996,7 +1120,7 @@ func _on_import_file_selected(path: String) -> void:
 
 	importando_perguntas = true
 	botao_importar.disabled = true
-	botao_importar.text = "IMPORTANDO..."
+	botao_importar.text = "Importando..."
 	_update_ia_controls_state()
 	_show_status("Importando perguntas para o banco de dados...", STATUS_INFO)
 
@@ -1004,7 +1128,7 @@ func _on_import_file_selected(path: String) -> void:
 
 	importando_perguntas = false
 	botao_importar.disabled = carregando
-	botao_importar.text = "IMPORTAR PERGUNTAS"
+	botao_importar.text = "Importar Perguntas"
 	_update_ia_controls_state()
 
 	if not response.get("ok", false):
@@ -1025,17 +1149,17 @@ func _refresh_question_bank() -> void:
 
 	carregando_banco_perguntas = true
 	_update_question_bank_controls_state()
-	resumo_banco_perguntas.text = "Atualizando o banco oficial de perguntas..."
-	resumo_banco_perguntas.add_theme_color_override("font_color", STATUS_INFO)
+	_update_question_count_badge()
+	_set_question_bank_feedback("Atualizando o banco oficial de perguntas...", STATUS_INFO)
 
 	var response: Dictionary = await ApiClient.fetch_questions()
 
 	carregando_banco_perguntas = false
 	_update_question_bank_controls_state()
+	_update_question_count_badge()
 
 	if not response.get("ok", false):
-		resumo_banco_perguntas.text = response.get("error", "Nao foi possivel carregar o banco de perguntas.")
-		resumo_banco_perguntas.add_theme_color_override("font_color", STATUS_ERROR)
+		_set_question_bank_feedback(response.get("error", "Nao foi possivel carregar o banco de perguntas."), STATUS_ERROR)
 		banco_perguntas.clear()
 		_render_question_bank()
 		return
@@ -1076,20 +1200,14 @@ func _render_question_bank() -> void:
 
 	_clear_container(lista_banco_perguntas)
 	cards_banco_perguntas.clear()
+	_update_question_count_badge()
 
 	if banco_perguntas.is_empty():
-		resumo_banco_perguntas.text = "Nenhuma pergunta salva no banco ainda."
-		resumo_banco_perguntas.add_theme_color_override("font_color", IA_COLOR_MUTED)
-
-		var empty_label: Label = Label.new()
-		empty_label.text = "O banco oficial ainda esta vazio. Importe uma planilha ou salve perguntas geradas pela IA."
-		empty_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		empty_label.add_theme_color_override("font_color", IA_COLOR_MUTED)
-		lista_banco_perguntas.add_child(empty_label)
+		_set_question_bank_feedback("Nenhuma pergunta salva no banco ainda.", IA_COLOR_MUTED)
+		lista_banco_perguntas.add_child(_create_empty_state_panel("Banco vazio", "Importe uma planilha ou aprove perguntas geradas pela IA para comecar a montar seu banco oficial."))
 		return
 
-	resumo_banco_perguntas.text = "%d perguntas cadastradas no banco oficial." % banco_perguntas.size()
-	resumo_banco_perguntas.add_theme_color_override("font_color", IA_COLOR_TEXT)
+	_set_question_bank_feedback("%d perguntas cadastradas e prontas para revisao." % banco_perguntas.size(), IA_COLOR_TEXT)
 
 	for index in range(banco_perguntas.size()):
 		lista_banco_perguntas.add_child(_create_question_bank_card(banco_perguntas[index], index))
@@ -1109,6 +1227,7 @@ func _create_question_bank_card(question: Dictionary, index: int) -> PanelContai
 	var title: Label = Label.new()
 	title.text = "Pergunta #%d" % int(question.get("id", 0))
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	UITheme.apply_font_only(title, 18)
 	title.add_theme_color_override("font_color", IA_COLOR_ACCENT_DARK)
 	header.add_child(title)
 
@@ -1118,8 +1237,19 @@ func _create_question_bank_card(question: Dictionary, index: int) -> PanelContai
 
 	var status_label: Label = Label.new()
 	status_label.text = "Banco oficial"
+	UITheme.apply_font_only(status_label, 14)
 	status_label.add_theme_color_override("font_color", IA_COLOR_TEXT)
 	status.add_child(status_label)
+
+	var meta_badges: HFlowContainer = HFlowContainer.new()
+	meta_badges.add_theme_constant_override("h_separation", 8)
+	meta_badges.add_theme_constant_override("v_separation", 8)
+	content.add_child(meta_badges)
+	meta_badges.add_child(_create_inline_badge("Materia: %s" % str(question.get("materia", "Sem materia")), _tint_color(STATUS_INFO, 0.88), STATUS_INFO))
+	meta_badges.add_child(_create_inline_badge("Dificuldade: %s" % str(question.get("dificuldade", "Facil")), _tint_color(IA_COLOR_PENDING, 0.86), IA_COLOR_PENDING))
+	meta_badges.add_child(_create_inline_badge("Pontuacao: %d" % int(question.get("pontuacao", 100)), _tint_color(IA_COLOR_APPROVED, 0.88), IA_COLOR_APPROVED))
+	meta_badges.add_child(_create_inline_badge("Tempo: %ds" % int(question.get("tempoLimite", 0)), _tint_color(IA_COLOR_BORDER, 0.84), IA_COLOR_BORDER))
+	meta_badges.add_child(_create_inline_badge("Correta: %s" % str(question.get("respostaCorreta", "A")), _tint_color(IA_COLOR_ACCENT, 0.88), IA_COLOR_ACCENT))
 
 	content.add_child(_create_bank_question_line_edit("Titulo", str(question.get("titulo", "")), index, "titulo"))
 	content.add_child(_create_bank_question_text_edit("Enunciado", str(question.get("enunciado", "")), index, "enunciado"))
@@ -1262,14 +1392,12 @@ func _on_bank_question_save_pressed(index: int) -> void:
 	var question: Dictionary = banco_perguntas[index]
 	var validation_error: String = _validate_editable_question(question, index)
 	if not validation_error.is_empty():
-		resumo_banco_perguntas.text = validation_error
-		resumo_banco_perguntas.add_theme_color_override("font_color", STATUS_ERROR)
+		_set_question_bank_feedback(validation_error, STATUS_ERROR)
 		return
 
 	carregando_banco_perguntas = true
 	_update_question_bank_controls_state()
-	resumo_banco_perguntas.text = "Salvando alteracoes da pergunta #%d..." % int(question.get("id", 0))
-	resumo_banco_perguntas.add_theme_color_override("font_color", STATUS_INFO)
+	_set_question_bank_feedback("Salvando alteracoes da pergunta #%d..." % int(question.get("id", 0)), STATUS_INFO)
 
 	var response: Dictionary = await ApiClient.update_question(int(question.get("id", 0)), _build_question_payload(question))
 
@@ -1277,12 +1405,10 @@ func _on_bank_question_save_pressed(index: int) -> void:
 	_update_question_bank_controls_state()
 
 	if not response.get("ok", false):
-		resumo_banco_perguntas.text = response.get("error", "Nao foi possivel salvar a pergunta.")
-		resumo_banco_perguntas.add_theme_color_override("font_color", STATUS_ERROR)
+		_set_question_bank_feedback(response.get("error", "Nao foi possivel salvar a pergunta."), STATUS_ERROR)
 		return
 
-	resumo_banco_perguntas.text = "Pergunta #%d atualizada com sucesso." % int(question.get("id", 0))
-	resumo_banco_perguntas.add_theme_color_override("font_color", STATUS_OK)
+	_set_question_bank_feedback("Pergunta #%d atualizada com sucesso." % int(question.get("id", 0)), STATUS_OK)
 	await _refresh_question_bank()
 
 func _on_bank_question_delete_pressed(index: int) -> void:
@@ -1292,8 +1418,7 @@ func _on_bank_question_delete_pressed(index: int) -> void:
 	var question_id: int = int(banco_perguntas[index].get("id", 0))
 	carregando_banco_perguntas = true
 	_update_question_bank_controls_state()
-	resumo_banco_perguntas.text = "Excluindo a pergunta #%d..." % question_id
-	resumo_banco_perguntas.add_theme_color_override("font_color", STATUS_INFO)
+	_set_question_bank_feedback("Excluindo a pergunta #%d..." % question_id, STATUS_INFO)
 
 	var response: Dictionary = await ApiClient.delete_question(question_id)
 
@@ -1301,12 +1426,10 @@ func _on_bank_question_delete_pressed(index: int) -> void:
 	_update_question_bank_controls_state()
 
 	if not response.get("ok", false):
-		resumo_banco_perguntas.text = response.get("error", "Nao foi possivel excluir a pergunta.")
-		resumo_banco_perguntas.add_theme_color_override("font_color", STATUS_ERROR)
+		_set_question_bank_feedback(response.get("error", "Nao foi possivel excluir a pergunta."), STATUS_ERROR)
 		return
 
-	resumo_banco_perguntas.text = "Pergunta #%d excluida com sucesso." % question_id
-	resumo_banco_perguntas.add_theme_color_override("font_color", STATUS_OK)
+	_set_question_bank_feedback("Pergunta #%d excluida com sucesso." % question_id, STATUS_OK)
 	await _refresh_question_bank()
 
 func _build_question_payload(question: Dictionary) -> Dictionary:
@@ -1325,11 +1448,13 @@ func _validate_editable_question(question: Dictionary, index: int) -> String:
 
 func _update_question_bank_controls_state() -> void:
 	if botao_atualizar_perguntas != null:
-		botao_atualizar_perguntas.disabled = carregando_banco_perguntas or importando_perguntas
-		botao_atualizar_perguntas.text = "ATUALIZANDO..." if carregando_banco_perguntas else "ATUALIZAR BANCO"
+		botao_atualizar_perguntas.disabled = carregando or carregando_banco_perguntas or importando_perguntas
+		botao_atualizar_perguntas.text = "Atualizando..." if carregando_banco_perguntas else "Atualizar Banco"
 	if botao_importar != null:
 		botao_importar.disabled = carregando or importando_perguntas or carregando_banco_perguntas
-		botao_importar.text = "IMPORTANDO..." if importando_perguntas else "IMPORTAR PERGUNTAS"
+		botao_importar.text = "Importando..." if importando_perguntas else "Importar Perguntas"
+	if botao_ir_para_ia != null:
+		botao_ir_para_ia.disabled = carregando or carregando_banco_perguntas or importando_perguntas or ia_processando or ia_salvando
 
 func _has_bank_question(index: int) -> bool:
 	return index >= 0 and index < banco_perguntas.size()
@@ -1787,10 +1912,10 @@ func _update_ia_controls_state() -> void:
 		ia_tempo_input.editable = not controls_locked
 	if ia_botao_gerar != null:
 		ia_botao_gerar.disabled = controls_locked
-		ia_botao_gerar.text = "GERANDO..." if ia_processando else "GERAR COM IA"
+		ia_botao_gerar.text = "Gerando..." if ia_processando else "Gerar com IA"
 	if ia_botao_salvar != null:
 		ia_botao_salvar.disabled = controls_locked or _count_generated_questions_with_status(IA_STATUS_APPROVED) == 0
-		ia_botao_salvar.text = "SALVANDO APROVADAS..." if ia_salvando else "SALVAR PERGUNTAS APROVADAS"
+		ia_botao_salvar.text = "Salvando aprovadas..." if ia_salvando else "Salvar Perguntas Aprovadas"
 	if ia_botao_aprovar_todas != null:
 		ia_botao_aprovar_todas.disabled = controls_locked or perguntas_geradas.is_empty() or _count_generated_questions_with_status(IA_STATUS_APPROVED) == perguntas_geradas.size()
 	if ia_botao_rejeitar_todas != null:
@@ -1904,4 +2029,4 @@ func _on_botao_configuracao_pressed() -> void:
 
 func _show_status(message: String, color_value: Color) -> void:
 	label_status.text = message
-	label_status.modulate = color_value
+	label_status.add_theme_color_override("font_color", color_value)
