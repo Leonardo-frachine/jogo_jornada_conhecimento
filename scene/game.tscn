@@ -5,12 +5,12 @@
 [ext_resource type="Texture2D" uid="uid://g22aa6x6oi0o" path="res://imagens/Dado/Dado/dieWhite_border1.png" id="2_dbls1"]
 [ext_resource type="Texture2D" uid="uid://dfedo78kq2c7a" path="res://imagens/chao/token_hexagon_3d_orange.png" id="2_p1ry8"]
 [ext_resource type="Texture2D" uid="uid://dxmcllc74aksw" path="res://imagens/chao/token_hexagon_3d_black.png" id="3_17rxn"]
-[ext_resource type="Texture2D" uid="uid://c1elftruprn00" path="res://imagens/Fundo/fundogame.jpg" id="3_33cqm"]
 [ext_resource type="Texture2D" uid="uid://t5pa0i5xsg3b" path="res://imagens/chao/token_hexagon_3d_yellow.png" id="4_yq8tf"]
 [ext_resource type="Texture2D" uid="uid://dpailbob1eg3c" path="res://imagens/chao/token_hexagon_3d_purple.png" id="5_ym5sv"]
 [ext_resource type="Texture2D" uid="uid://c456bwc5yj2r1" path="res://imagens/chao/token_hexagon_3d_blue.png" id="6_5g16k"]
 [ext_resource type="Texture2D" uid="uid://cqw2od8y8ev4" path="res://imagens/chao/token_hexagon_3d_white.png" id="7_ym5sv"]
 [ext_resource type="Texture2D" uid="uid://c3esur46a71up" path="res://imagens/chao/token_hexagon_3d_red.png" id="8_sng2h"]
+[ext_resource type="Texture2D" uid="uid://bhyhgcbe8vldi" path="res://imagens/Fundo/fundo4k.png" id="12_5g16k"]
 [ext_resource type="Texture2D" uid="uid://cbpn68ac6bol8" path="res://imagens/configuracoes/configuracoes.png" id="18_ux4dc"]
 [ext_resource type="Script" uid="uid://crxkgvki2ihn4" path="res://scripts/game.gd" id="19_game"]
 
@@ -350,11 +350,11 @@ texture_normal = ExtResource("18_ux4dc")
 ignore_texture_size = true
 stretch_mode = 6
 
-[node name="BoardBackground" type="Sprite2D" parent="." unique_id=1929210026]
-z_index = -50
-position = Vector2(0, 7.999999)
-scale = Vector2(0.9905797, 0.9601064)
-texture = ExtResource("3_33cqm")
+[node name="BoardBackground" type="Sprite2D" parent="." unique_id=169479653]
+show_behind_parent = true
+position = Vector2(0, 8)
+scale = Vector2(0.7992937, 0.77213824)
+texture = ExtResource("12_5g16k")
 centered = false
 
 [node name="BoardCamera" type="Camera2D" parent="." unique_id=992534238]
