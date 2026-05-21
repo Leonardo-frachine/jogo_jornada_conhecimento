@@ -1,12 +1,15 @@
 extends CanvasLayer
 class_name SettingsOverlay
 
+const UITheme := preload("res://scripts/UITheme.gd")
+
 signal menu_opened
 signal menu_closed
 
 @onready var root: Control = $Root
 @onready var close_backdrop: Button = $Root/CloseBackdrop
 @onready var panel: PanelContainer = $Root/CenterContainer/Panel
+@onready var title_label: Label = $Root/CenterContainer/Panel/Margin/VBox/Header/Title
 
 var master_slider: HSlider
 var master_value: Label
@@ -37,6 +40,7 @@ func _ready() -> void:
 
 	_cache_controls()
 	_create_missing_controls_if_needed()
+	_apply_visual_refresh()
 	_setup_ranges()
 	_connect_signals()
 	_bind_feedback(reset_button)
@@ -55,6 +59,14 @@ func _ready() -> void:
 	if not get_viewport().size_changed.is_connected(_update_panel_bounds):
 		get_viewport().size_changed.connect(_update_panel_bounds)
 	call_deferred("_update_panel_bounds")
+
+func _apply_visual_refresh() -> void:
+	UITheme.apply_overlay_panel(panel)
+	UITheme.apply_font_tree(panel)
+	UITheme.apply_title(title_label, 30, title_label.get_theme_color("font_color"))
+	UITheme.apply_button(reset_button, UITheme.BUTTON_SURFACE, 17)
+	UITheme.apply_button(exit_button, UITheme.BUTTON_DANGER, 17)
+	UITheme.apply_button(close_button, UITheme.BUTTON_DANGER, 17)
 
 func _cache_controls() -> void:
 	master_slider = get_node_or_null("Root/CenterContainer/Panel/Margin/VBox/Scroll/Content/AudioSection/Margin/Rows/MasterRow/MasterSlider")
@@ -104,8 +116,7 @@ func _make_value_label() -> Label:
 	label.custom_minimum_size = Vector2(62, 0)
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	label.add_theme_font_size_override("font_size", 18)
-	label.add_theme_color_override("font_color", Color(0.96, 0.97, 0.98, 1.0))
+	UITheme.apply_subtitle(label, 18, Color(0.96, 0.97, 0.98, 1.0))
 	return label
 
 func _make_toggle_button(reference_button: Button) -> Button:
@@ -113,13 +124,7 @@ func _make_toggle_button(reference_button: Button) -> Button:
 	button.custom_minimum_size = Vector2(96, 38)
 	button.toggle_mode = true
 	button.text = "ON"
-	button.add_theme_color_override("font_color", reference_button.get_theme_color("font_color"))
-	button.add_theme_color_override("font_pressed_color", reference_button.get_theme_color("font_pressed_color"))
-	button.add_theme_color_override("font_hover_color", reference_button.get_theme_color("font_hover_color"))
-	button.add_theme_stylebox_override("normal", reference_button.get_theme_stylebox("normal"))
-	button.add_theme_stylebox_override("pressed", reference_button.get_theme_stylebox("pressed"))
-	button.add_theme_stylebox_override("hover", reference_button.get_theme_stylebox("hover"))
-	button.add_theme_stylebox_override("hover_pressed", reference_button.get_theme_stylebox("hover_pressed"))
+	UITheme.apply_toggle_button(button, true, 16)
 	return button
 
 func _setup_ranges() -> void:
@@ -212,6 +217,9 @@ func _refresh_ui() -> void:
 	music_toggle.text = "ON" if settings_manager.music_enabled else "OFF"
 	vfx_toggle.text = "ON" if settings_manager.vfx_enabled else "OFF"
 	subtitle_toggle.text = "ON" if settings_manager.subtitles_enabled else "OFF"
+	UITheme.apply_toggle_button(music_toggle, settings_manager.music_enabled, 16)
+	UITheme.apply_toggle_button(vfx_toggle, settings_manager.vfx_enabled, 16)
+	UITheme.apply_toggle_button(subtitle_toggle, settings_manager.subtitles_enabled, 16)
 
 func _on_master_slider_changed(value: float) -> void:
 	if settings_manager == null:

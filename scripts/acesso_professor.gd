@@ -1,17 +1,22 @@
 extends Control
 
+const UITheme := preload("res://scripts/UITheme.gd")
 const STATUS_INFO := Color(0.13, 0.22, 0.44, 1.0)
 const STATUS_OK := Color(0.18, 0.58, 0.26, 1.0)
 const STATUS_ERROR := Color(0.70, 0.17, 0.17, 1.0)
 
+@onready var painel_central: Panel = $PainelCentral
 @onready var titulo: Label = $PainelCentral/MarginContainer/VBoxContainer/Titulo
 @onready var subtitulo: Label = $PainelCentral/MarginContainer/VBoxContainer/Subtitulo
 @onready var botao_entrar: Button = $PainelCentral/MarginContainer/VBoxContainer/Modos/BotaoEntrar
 @onready var botao_cadastrar: Button = $PainelCentral/MarginContainer/VBoxContainer/Modos/BotaoCadastrar
 @onready var label_status: Label = $PainelCentral/MarginContainer/VBoxContainer/LabelStatus
 @onready var grupo_nome: VBoxContainer = $PainelCentral/MarginContainer/VBoxContainer/GrupoNome
+@onready var label_nome: Label = $PainelCentral/MarginContainer/VBoxContainer/GrupoNome/LabelNome
 @onready var input_nome: LineEdit = $PainelCentral/MarginContainer/VBoxContainer/GrupoNome/InputNome
+@onready var label_email: Label = $PainelCentral/MarginContainer/VBoxContainer/GrupoEmail/LabelEmail
 @onready var input_email: LineEdit = $PainelCentral/MarginContainer/VBoxContainer/GrupoEmail/InputEmail
+@onready var label_senha: Label = $PainelCentral/MarginContainer/VBoxContainer/GrupoSenha/LabelSenha
 @onready var input_senha: LineEdit = $PainelCentral/MarginContainer/VBoxContainer/GrupoSenha/InputSenha
 @onready var botao_acao: Button = $PainelCentral/MarginContainer/VBoxContainer/BotaoAcao
 @onready var botao_alternar: Button = $PainelCentral/MarginContainer/VBoxContainer/BotaoAlternar
@@ -25,6 +30,7 @@ func _ready() -> void:
 	SettingsManager.pause_tree_when_open = false
 	SettingsManager.close_menu()
 	ProfessorSession.clear_session()
+	_apply_visual_refresh()
 
 	botao_entrar.pressed.connect(func() -> void:
 		_set_modo(false)
@@ -42,6 +48,35 @@ func _ready() -> void:
 
 	_set_modo(false)
 
+func _apply_visual_refresh() -> void:
+	UITheme.apply_surface_panel(painel_central)
+	UITheme.apply_font_tree(painel_central)
+	UITheme.apply_title(titulo, 36)
+	UITheme.apply_subtitle(subtitulo, 16)
+	UITheme.apply_field_label(label_nome)
+	UITheme.apply_field_label(label_email)
+	UITheme.apply_field_label(label_senha)
+	UITheme.apply_subtitle(label_status, 14, STATUS_INFO)
+	UITheme.apply_line_edit(input_nome, 18)
+	UITheme.apply_line_edit(input_email, 18)
+	UITheme.apply_line_edit(input_senha, 18)
+	UITheme.apply_button(botao_acao, UITheme.BUTTON_PRIMARY, 20)
+	UITheme.apply_button(botao_alternar, UITheme.BUTTON_SURFACE, 17)
+	UITheme.apply_button(botao_voltar, UITheme.BUTTON_SECONDARY, 17)
+	_update_mode_button_styles()
+
+func _update_mode_button_styles() -> void:
+	UITheme.apply_button(
+		botao_entrar,
+		UITheme.BUTTON_TAB_ACTIVE if not modo_cadastro else UITheme.BUTTON_TAB_INACTIVE,
+		17
+	)
+	UITheme.apply_button(
+		botao_cadastrar,
+		UITheme.BUTTON_TAB_ACTIVE if modo_cadastro else UITheme.BUTTON_TAB_INACTIVE,
+		17
+	)
+
 func _set_modo(cadastro: bool) -> void:
 	modo_cadastro = cadastro
 	titulo.text = "Cadastro de Professor" if modo_cadastro else "Login do Professor"
@@ -49,9 +84,10 @@ func _set_modo(cadastro: bool) -> void:
 	grupo_nome.visible = modo_cadastro
 	botao_acao.text = "CRIAR CONTA" if modo_cadastro else "ENTRAR"
 	botao_alternar.text = "JA TENHO CONTA" if modo_cadastro else "QUERO ME CADASTRAR"
-	botao_entrar.disabled = not modo_cadastro
-	botao_cadastrar.disabled = modo_cadastro
+	botao_entrar.disabled = requisicao_em_andamento
+	botao_cadastrar.disabled = requisicao_em_andamento
 	label_status.text = ""
+	_update_mode_button_styles()
 
 	if modo_cadastro:
 		input_nome.grab_focus()
@@ -138,10 +174,11 @@ func _set_form_enabled(enabled: bool) -> void:
 	input_senha.editable = enabled
 	botao_acao.disabled = not enabled
 	botao_alternar.disabled = not enabled
-	botao_entrar.disabled = not enabled or not modo_cadastro
-	botao_cadastrar.disabled = not enabled or modo_cadastro
+	botao_entrar.disabled = not enabled
+	botao_cadastrar.disabled = not enabled
 	botao_voltar.disabled = not enabled
+	_update_mode_button_styles()
 
 func _show_status(message: String, color_value: Color) -> void:
 	label_status.text = message
-	label_status.modulate = color_value
+	label_status.add_theme_color_override("font_color", color_value)

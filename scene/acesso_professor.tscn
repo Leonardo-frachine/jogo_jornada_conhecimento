@@ -1,8 +1,7 @@
-[gd_scene load_steps=8 format=3 uid="uid://dviov2sxlx25b"]
+[gd_scene format=3 uid="uid://dviov2sxlx25b"]
 
-[ext_resource type="Script" path="res://scripts/acesso_professor.gd" id="1"]
+[ext_resource type="Script" uid="uid://cu1yxd88r62bg" path="res://scripts/acesso_professor.gd" id="1"]
 [ext_resource type="Texture2D" uid="uid://3ljo201dpbbx" path="res://imagens/fundo_tabuleiro/fundo_embacado.png" id="2"]
-[ext_resource type="Texture2D" uid="uid://bv2xmb27g64al" path="res://imagens/logo_jogo/logo_jogo.png" id="3"]
 [ext_resource type="FontFile" uid="uid://cnk767mck3js2" path="res://fonts/Fredoka-Bold.ttf" id="3_q43u4"]
 [ext_resource type="Texture2D" uid="uid://ctyknso0bfdn6" path="res://imagens/personagem/personagem_logo.png" id="4"]
 [ext_resource type="Texture2D" uid="uid://cbpn68ac6bol8" path="res://imagens/configuracoes/configuracoes.png" id="5"]
@@ -19,7 +18,7 @@ corner_radius_top_right = 30
 corner_radius_bottom_right = 30
 corner_radius_bottom_left = 30
 
-[node name="AcessoProfessor" type="Control"]
+[node name="AcessoProfessor" type="Control" unique_id=1958481278]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -28,7 +27,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1")
 
-[node name="Background" type="TextureRect" parent="."]
+[node name="Background" type="TextureRect" parent="." unique_id=1941678561]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -40,7 +39,7 @@ mouse_filter = 2
 texture = ExtResource("2")
 stretch_mode = 6
 
-[node name="PainelCentral" type="Panel" parent="."]
+[node name="PainelCentral" type="Panel" parent="." unique_id=690661299]
 custom_minimum_size = Vector2(500, 500)
 layout_mode = 1
 anchors_preset = 8
@@ -56,7 +55,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("1")
 
-[node name="MarginContainer" type="MarginContainer" parent="PainelCentral"]
+[node name="MarginContainer" type="MarginContainer" parent="PainelCentral" unique_id=1346946211]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -70,118 +69,106 @@ theme_override_constants/margin_top = 26
 theme_override_constants/margin_right = 30
 theme_override_constants/margin_bottom = 26
 
-[node name="VBoxContainer" type="VBoxContainer" parent="PainelCentral/MarginContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="PainelCentral/MarginContainer" unique_id=1451161326]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="Titulo" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer"]
+[node name="Titulo" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer" unique_id=54321660]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("3_q43u4")
 text = "Login do Professor"
 horizontal_alignment = 1
 
-[node name="Subtitulo" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer"]
+[node name="Subtitulo" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer" unique_id=183292451]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("3_q43u4")
 text = "Entre para acompanhar a sua turma."
 horizontal_alignment = 1
 autowrap_mode = 3
 
-[node name="Espacador" type="Control" parent="PainelCentral/MarginContainer/VBoxContainer"]
+[node name="Espacador" type="Control" parent="PainelCentral/MarginContainer/VBoxContainer" unique_id=724617887]
 custom_minimum_size = Vector2(0, 8)
 layout_mode = 2
 
-[node name="Modos" type="HBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer"]
+[node name="Modos" type="HBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer" unique_id=1054259385]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="BotaoEntrar" type="Button" parent="PainelCentral/MarginContainer/VBoxContainer/Modos"]
+[node name="BotaoEntrar" type="Button" parent="PainelCentral/MarginContainer/VBoxContainer/Modos" unique_id=1888369288]
 custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 size_flags_horizontal = 3
 text = "ENTRAR"
 
-[node name="BotaoCadastrar" type="Button" parent="PainelCentral/MarginContainer/VBoxContainer/Modos"]
+[node name="BotaoCadastrar" type="Button" parent="PainelCentral/MarginContainer/VBoxContainer/Modos" unique_id=1587427622]
 custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 size_flags_horizontal = 3
 text = "CADASTRAR"
 
-[node name="LabelStatus" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer"]
+[node name="LabelStatus" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer" unique_id=1827890377]
 layout_mode = 2
 horizontal_alignment = 1
 autowrap_mode = 3
 
-[node name="GrupoNome" type="VBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer"]
+[node name="GrupoNome" type="VBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer" unique_id=1943258240]
 layout_mode = 2
 theme_override_constants/separation = 6
 
-[node name="LabelNome" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer/GrupoNome"]
+[node name="LabelNome" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer/GrupoNome" unique_id=2072751384]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("3_q43u4")
 text = "Nome do Professor"
 
-[node name="InputNome" type="LineEdit" parent="PainelCentral/MarginContainer/VBoxContainer/GrupoNome"]
+[node name="InputNome" type="LineEdit" parent="PainelCentral/MarginContainer/VBoxContainer/GrupoNome" unique_id=2127062619]
 custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
 theme_override_fonts/font = ExtResource("3_q43u4")
 placeholder_text = "Digite o nome completo"
 
-[node name="GrupoEmail" type="VBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer"]
+[node name="GrupoEmail" type="VBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer" unique_id=1971919573]
 layout_mode = 2
 theme_override_constants/separation = 6
 
-[node name="LabelEmail" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer/GrupoEmail"]
+[node name="LabelEmail" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer/GrupoEmail" unique_id=438587729]
 layout_mode = 2
 text = "E-mail"
 
-[node name="InputEmail" type="LineEdit" parent="PainelCentral/MarginContainer/VBoxContainer/GrupoEmail"]
+[node name="InputEmail" type="LineEdit" parent="PainelCentral/MarginContainer/VBoxContainer/GrupoEmail" unique_id=851486511]
 custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
 placeholder_text = "Digite o e-mail"
 
-[node name="GrupoSenha" type="VBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer"]
+[node name="GrupoSenha" type="VBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer" unique_id=1214570863]
 layout_mode = 2
 theme_override_constants/separation = 6
 
-[node name="LabelSenha" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer/GrupoSenha"]
+[node name="LabelSenha" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer/GrupoSenha" unique_id=1983880751]
 layout_mode = 2
 text = "Senha"
 
-[node name="InputSenha" type="LineEdit" parent="PainelCentral/MarginContainer/VBoxContainer/GrupoSenha"]
+[node name="InputSenha" type="LineEdit" parent="PainelCentral/MarginContainer/VBoxContainer/GrupoSenha" unique_id=1219074108]
 custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
 placeholder_text = "Digite a senha"
 secret = true
 
-[node name="BotaoAcao" type="Button" parent="PainelCentral/MarginContainer/VBoxContainer"]
+[node name="BotaoAcao" type="Button" parent="PainelCentral/MarginContainer/VBoxContainer" unique_id=1300881770]
 custom_minimum_size = Vector2(0, 54)
 layout_mode = 2
 text = "ENTRAR"
 
-[node name="BotaoAlternar" type="Button" parent="PainelCentral/MarginContainer/VBoxContainer"]
+[node name="BotaoAlternar" type="Button" parent="PainelCentral/MarginContainer/VBoxContainer" unique_id=1256292016]
 custom_minimum_size = Vector2(0, 42)
 layout_mode = 2
 text = "QUERO ME CADASTRAR"
 
-[node name="BotaoVoltar" type="Button" parent="PainelCentral/MarginContainer/VBoxContainer"]
+[node name="BotaoVoltar" type="Button" parent="PainelCentral/MarginContainer/VBoxContainer" unique_id=1910494221]
 custom_minimum_size = Vector2(0, 42)
 layout_mode = 2
 text = "VOLTAR"
 
-[node name="Logo" type="TextureRect" parent="."]
-custom_minimum_size = Vector2(285, 35)
-layout_mode = 0
-offset_left = 504.0
-offset_top = -424.0
-offset_right = 879.0
-offset_bottom = 576.0
-mouse_filter = 2
-texture = ExtResource("3")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="Personagem" type="TextureRect" parent="."]
+[node name="Personagem" type="TextureRect" parent="." unique_id=1500603787]
 custom_minimum_size = Vector2(280, 320)
 layout_mode = 0
 offset_left = -42.0
@@ -194,7 +181,7 @@ expand_mode = 1
 stretch_mode = 5
 flip_h = true
 
-[node name="BotaoConfiguracao" type="TextureButton" parent="."]
+[node name="BotaoConfiguracao" type="TextureButton" parent="." unique_id=438299467]
 custom_minimum_size = Vector2(128, 128)
 layout_mode = 1
 anchors_preset = -1

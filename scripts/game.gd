@@ -1,5 +1,6 @@
 extends Node2D
 
+const UITheme := preload("res://scripts/UITheme.gd")
 const TOTAL_CASAS := 28
 const HUD_BG := Color(0.08, 0.10, 0.18, 0.90)
 const HUD_ACCENT := Color(0.96, 0.66, 0.16, 1.0)
@@ -244,7 +245,7 @@ func _build_hud() -> void:
 	feedback_label.size = Vector2(560, 42)
 	feedback_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	feedback_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	feedback_label.add_theme_font_size_override("font_size", 20)
+	UITheme.apply_font_only(feedback_label, 20)
 	feedback_label.add_theme_color_override("font_color", Color.WHITE)
 	hud_root.add_child(feedback_label)
 
@@ -262,34 +263,14 @@ func _create_action_button(text_value: String, callback: Callable) -> Button:
 	button.text = text_value
 	button.size = Vector2(214, 54)
 	button.focus_mode = Control.FOCUS_NONE
-	button.add_theme_font_size_override("font_size", 21)
-	button.add_theme_color_override("font_color", Color(0.08, 0.10, 0.18, 1.0))
-
-	var normal: StyleBoxFlat = StyleBoxFlat.new()
-	normal.bg_color = Color(1.0, 0.78, 0.22, 1.0)
-	normal.corner_radius_top_left = 18
-	normal.corner_radius_top_right = 18
-	normal.corner_radius_bottom_left = 18
-	normal.corner_radius_bottom_right = 18
-	normal.border_width_left = 2
-	normal.border_width_top = 2
-	normal.border_width_right = 2
-	normal.border_width_bottom = 2
-	normal.border_color = Color(0.12, 0.08, 0.03, 0.95)
-
-	var hover: StyleBoxFlat = normal.duplicate() as StyleBoxFlat
-	hover.bg_color = Color(1.0, 0.85, 0.36, 1.0)
-
-	button.add_theme_stylebox_override("normal", normal)
-	button.add_theme_stylebox_override("hover", hover)
-	button.add_theme_stylebox_override("pressed", hover)
+	UITheme.apply_button(button, UITheme.BUTTON_PRIMARY, 20)
 	button.pressed.connect(callback)
 	return button
 
 func _make_label(size: int, bold := false) -> Label:
 	var label: Label = Label.new()
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	label.add_theme_font_size_override("font_size", size)
+	UITheme.apply_font_only(label, size)
 	label.add_theme_color_override("font_color", Color.WHITE)
 
 	if bold:
@@ -355,7 +336,7 @@ func _build_question_ui() -> void:
 	dialog_title_label = Label.new()
 	dialog_title_label.text = "DESAFIO DO TABULEIRO"
 	dialog_title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	dialog_title_label.add_theme_font_size_override("font_size", 26)
+	UITheme.apply_font_only(dialog_title_label, 26)
 	dialog_title_label.add_theme_color_override("font_color", HUD_ACCENT)
 	vbox.add_child(dialog_title_label)
 
@@ -365,14 +346,14 @@ func _build_question_ui() -> void:
 	question_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	question_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	question_label.vertical_alignment = VERTICAL_ALIGNMENT_TOP
-	question_label.add_theme_font_size_override("font_size", 24)
+	UITheme.apply_font_only(question_label, 24)
 	question_label.add_theme_color_override("font_color", Color.WHITE)
 	vbox.add_child(question_label)
 
 	question_hint_label = Label.new()
 	question_hint_label.text = "Escolha a alternativa correta para seguir no tabuleiro."
 	question_hint_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	question_hint_label.add_theme_font_size_override("font_size", 15)
+	UITheme.apply_font_only(question_hint_label, 15)
 	question_hint_label.add_theme_color_override("font_color", Color(0.85, 0.90, 0.98, 0.88))
 	vbox.add_child(question_hint_label)
 
@@ -394,12 +375,9 @@ func _create_answer_button(answer_slot: int) -> Button:
 	var button: Button = Button.new()
 	button.custom_minimum_size = Vector2(0, 50)
 	button.focus_mode = Control.FOCUS_ALL
-	button.add_theme_font_size_override("font_size", 17)
+	button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	button.add_theme_constant_override("h_separation", 8)
-	button.add_theme_color_override("font_color", Color.WHITE)
-	button.add_theme_stylebox_override("normal", _make_answer_style(Color(0.17, 0.25, 0.42, 1.0)))
-	button.add_theme_stylebox_override("hover", _make_answer_style(Color(0.22, 0.32, 0.53, 1.0)))
-	button.add_theme_stylebox_override("pressed", _make_answer_style(Color(0.28, 0.40, 0.60, 1.0)))
+	UITheme.apply_button(button, UITheme.BUTTON_SECONDARY, 17)
 	button.pressed.connect(func() -> void:
 		_on_answer_button_pressed(answer_slot)
 	)

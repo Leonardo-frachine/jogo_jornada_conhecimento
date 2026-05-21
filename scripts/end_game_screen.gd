@@ -1,5 +1,6 @@
 extends Control
 
+const UITheme := preload("res://scripts/UITheme.gd")
 const ACCESS_SCENE_PATH := "res://scene/selecao_perfil.tscn"
 const LOADING_SCENE_PATH := "res://scene/loading_screen.tscn"
 const SCORE_ANIMATION_DURATION := 0.9
@@ -34,6 +35,7 @@ var _final_accuracy := 0
 func _ready() -> void:
 	SettingsManager.pause_tree_when_open = false
 	SettingsManager.close_menu()
+	_apply_visual_refresh()
 	_connect_buttons()
 	_apply_session_data()
 	_prepare_intro_state()
@@ -41,6 +43,25 @@ func _ready() -> void:
 	_animate_score_value()
 	animate_logo()
 	animate_character()
+
+func _apply_visual_refresh() -> void:
+	UITheme.apply_font_tree(painel_central)
+	UITheme.apply_title(title_label, 42, title_label.get_theme_color("font_color"))
+	if badge_text != null:
+		UITheme.apply_subtitle(badge_text, 17, badge_text.get_theme_color("font_color"))
+	if subtitle != null:
+		UITheme.apply_subtitle(subtitle, 18, subtitle.get_theme_color("font_color"))
+	UITheme.apply_font_only(result_value, 64)
+	UITheme.apply_font_only(performance_seal_text, 26)
+	UITheme.apply_font_only(performance_message, 20)
+	UITheme.apply_font_only(accuracy_value, 20)
+	UITheme.apply_font_only(level_value, 20)
+	UITheme.apply_font_only(answered_summary_value, 20)
+	UITheme.apply_font_only(answered_value, 34)
+	UITheme.apply_font_only(correct_value, 34)
+	UITheme.apply_font_only(wrong_value, 34)
+	UITheme.apply_button(botao_jogar_novamente, UITheme.BUTTON_PRIMARY, 20)
+	UITheme.apply_button(botao_menu_principal, UITheme.BUTTON_SECONDARY, 20)
 
 func _apply_session_data() -> void:
 	_final_score = GameState.score

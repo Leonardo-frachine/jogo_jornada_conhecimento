@@ -1,5 +1,6 @@
 extends Control
 
+const UITheme := preload("res://scripts/UITheme.gd")
 const STATUS_INFO := Color(0.13, 0.22, 0.44, 1.0)
 const STATUS_OK := Color(0.18, 0.58, 0.26, 1.0)
 const STATUS_ERROR := Color(0.70, 0.17, 0.17, 1.0)
@@ -27,13 +28,21 @@ const VIEW_DASHBOARD := "dashboard"
 const VIEW_STUDENTS := "students"
 const VIEW_QUESTIONS := "questions"
 
+@onready var painel_central: Panel = $PainelCentral
+@onready var margin_container: MarginContainer = $PainelCentral/MarginContainer
+@onready var main_vbox: VBoxContainer = $PainelCentral/MarginContainer/VBoxContainer
+@onready var titulo_painel: Label = $PainelCentral/MarginContainer/VBoxContainer/TituloPainel
 @onready var label_professor: Label = $PainelCentral/MarginContainer/VBoxContainer/Header/LabelProfessor
 @onready var label_sala_atual: Label = $PainelCentral/MarginContainer/VBoxContainer/Header/LabelSalaAtual
 @onready var label_status: Label = $PainelCentral/MarginContainer/VBoxContainer/LabelStatus
+@onready var scroll_container: ScrollContainer = $PainelCentral/MarginContainer/VBoxContainer/ScrollContainer
+@onready var conteudo_scroll: VBoxContainer = $PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo
+@onready var bloco_sala: PanelContainer = $PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/BlocoSala
 @onready var input_nome_sala: LineEdit = $PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/BlocoSala/VBoxSala/InputNomeSala
 @onready var botao_criar_sala: Button = $PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/BlocoSala/VBoxSala/AcoesSala/BotaoCriarSala
 @onready var seletor_salas: OptionButton = $PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/BlocoSala/VBoxSala/AcoesSala/SeletorSalas
 @onready var botao_atualizar: Button = $PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/BlocoSala/VBoxSala/AcoesSala/BotaoAtualizar
+@onready var navegacao_abas: HBoxContainer = $PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/NavegacaoAbas
 @onready var botao_aba_dashboard: Button = $PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/NavegacaoAbas/BotaoAbaDashboard
 @onready var botao_aba_alunos: Button = $PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/NavegacaoAbas/BotaoAbaAlunos
 @onready var botao_aba_perguntas: Button = $PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/NavegacaoAbas/BotaoAbaPerguntas
@@ -41,6 +50,7 @@ const VIEW_QUESTIONS := "questions"
 @onready var pagina_alunos: PanelContainer = $PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaAlunos
 @onready var pagina_perguntas: PanelContainer = $PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaPerguntas
 @onready var resumo_dashboard_grid: GridContainer = $PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaDashboard/VBoxDashboard/GridResumoDashboard
+@onready var secoes_dashboard: HBoxContainer = $PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaDashboard/VBoxDashboard/SecoesDashboard
 @onready var lista_materias_dashboard: VBoxContainer = $PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaDashboard/VBoxDashboard/SecoesDashboard/PainelMaterias/VBoxMaterias/ListaMaterias
 @onready var lista_dificuldades_dashboard: VBoxContainer = $PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaDashboard/VBoxDashboard/SecoesDashboard/PainelDificuldades/VBoxDificuldades/ListaDificuldades
 @onready var resumo_alunos: Label = $PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaAlunos/VBoxAlunos/ResumoAlunos
@@ -52,6 +62,7 @@ const VIEW_QUESTIONS := "questions"
 @onready var ia_area: VBoxContainer = $PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaPerguntas/VBoxPerguntas/IaArea
 @onready var botao_sair: Button = $PainelCentral/MarginContainer/VBoxContainer/Footer/BotaoSair
 @onready var botao_configuracao: TextureButton = $BotaoConfiguracao
+@onready var personagem: TextureRect = $Personagem
 
 var salas: Array[Dictionary] = []
 var carregando := false
@@ -91,6 +102,7 @@ func _ready() -> void:
 		get_tree().change_scene_to_file("res://scene/acesso_professor.tscn")
 		return
 
+	_configure_fullscreen_layout()
 	botao_criar_sala.pressed.connect(_on_botao_criar_sala_pressed)
 	botao_atualizar.pressed.connect(_on_botao_atualizar_pressed)
 	botao_importar.pressed.connect(_on_botao_importar_pressed)
@@ -114,6 +126,62 @@ func _ready() -> void:
 	call_deferred("_refresh_question_bank")
 	_load_rooms()
 
+func _configure_fullscreen_layout() -> void:
+	painel_central.set_anchors_preset(Control.PRESET_FULL_RECT)
+	scroll_container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll_container.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll_container.custom_minimum_size = Vector2.ZERO
+	conteudo_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	main_vbox.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	main_vbox.add_theme_constant_override("separation", 18)
+	titulo_painel.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	label_status.custom_minimum_size = Vector2(0, 24)
+
+	if personagem != null:
+		personagem.visible = false
+
+	_promote_primary_sections()
+
+	if not get_viewport().size_changed.is_connected(_update_responsive_layout):
+		get_viewport().size_changed.connect(_update_responsive_layout)
+	call_deferred("_update_responsive_layout")
+
+func _promote_primary_sections() -> void:
+	if bloco_sala != null and bloco_sala.get_parent() != main_vbox:
+		var scroll_index := main_vbox.get_children().find(scroll_container)
+		conteudo_scroll.remove_child(bloco_sala)
+		main_vbox.add_child(bloco_sala)
+		main_vbox.move_child(bloco_sala, scroll_index)
+
+	if navegacao_abas != null and navegacao_abas.get_parent() != main_vbox:
+		var scroll_index := main_vbox.get_children().find(scroll_container)
+		conteudo_scroll.remove_child(navegacao_abas)
+		main_vbox.add_child(navegacao_abas)
+		main_vbox.move_child(navegacao_abas, scroll_index)
+
+	if bloco_sala != null:
+		bloco_sala.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	if navegacao_abas != null:
+		navegacao_abas.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+
+func _update_responsive_layout() -> void:
+	var viewport_size: Vector2 = get_viewport().get_visible_rect().size
+	var horizontal_margin: int = 18 if viewport_size.x < 1180.0 else 28
+	var vertical_margin: int = 18 if viewport_size.y < 760.0 else 28
+
+	painel_central.offset_left = horizontal_margin
+	painel_central.offset_top = vertical_margin
+	painel_central.offset_right = -horizontal_margin
+	painel_central.offset_bottom = -vertical_margin
+
+	margin_container.add_theme_constant_override("margin_left", horizontal_margin)
+	margin_container.add_theme_constant_override("margin_top", vertical_margin)
+	margin_container.add_theme_constant_override("margin_right", horizontal_margin)
+	margin_container.add_theme_constant_override("margin_bottom", vertical_margin - 2)
+
+	resumo_dashboard_grid.columns = 2 if viewport_size.x < 1320.0 else 4
+	secoes_dashboard.alignment = BoxContainer.ALIGNMENT_BEGIN
+
 func _refresh_header() -> void:
 	label_professor.text = "Professor: %s" % ProfessorSession.professor_name
 	if ProfessorSession.has_current_room():
@@ -125,12 +193,18 @@ func _refresh_header() -> void:
 		label_sala_atual.text = "Sala ativa: nenhuma sala criada"
 
 func _setup_panel_layout() -> void:
+	UITheme.apply_page_shell(painel_central)
+	UITheme.apply_font_tree(painel_central)
 	_apply_root_panel_styles()
 	_apply_navigation_styles()
 	_apply_section_title_styles()
 	_apply_section_panel_styles()
 
 func _apply_root_panel_styles() -> void:
+	UITheme.apply_title(titulo_painel, 34, IA_COLOR_TEXT)
+	UITheme.apply_subtitle(label_professor, 16, IA_COLOR_TEXT)
+	UITheme.apply_subtitle(label_sala_atual, 15, IA_COLOR_MUTED)
+	UITheme.apply_subtitle(label_status, 14, STATUS_INFO)
 	_apply_input_palette(input_nome_sala)
 	_apply_button_palette(botao_criar_sala, IA_COLOR_ACCENT, IA_COLOR_ACCENT_DARK)
 	_apply_button_palette(botao_atualizar, STATUS_INFO, _shade_color(STATUS_INFO, 0.28))
@@ -147,7 +221,7 @@ func _apply_navigation_styles() -> void:
 func _apply_section_title_styles() -> void:
 	var title_paths: Array[String] = [
 		"PainelCentral/MarginContainer/VBoxContainer/TituloPainel",
-		"PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/BlocoSala/VBoxSala/TituloSala",
+		"PainelCentral/MarginContainer/VBoxContainer/BlocoSala/VBoxSala/TituloSala",
 		"PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaDashboard/VBoxDashboard/TituloDashboard",
 		"PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaDashboard/VBoxDashboard/SecoesDashboard/PainelMaterias/VBoxMaterias/TituloMaterias",
 		"PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaDashboard/VBoxDashboard/SecoesDashboard/PainelDificuldades/VBoxDificuldades/TituloDificuldades",
@@ -174,7 +248,7 @@ func _apply_section_title_styles() -> void:
 
 func _apply_section_panel_styles() -> void:
 	var panel_paths: Array[String] = [
-		"PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/BlocoSala",
+		"PainelCentral/MarginContainer/VBoxContainer/BlocoSala",
 		"PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaDashboard",
 		"PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaDashboard/VBoxDashboard/SecoesDashboard/PainelMaterias",
 		"PainelCentral/MarginContainer/VBoxContainer/ScrollContainer/Conteudo/PaginaDashboard/VBoxDashboard/SecoesDashboard/PainelDificuldades",
@@ -383,6 +457,9 @@ func _create_ia_surface_style(background: Color, border: Color, border_width: in
 	style.content_margin_top = vertical_padding
 	style.content_margin_right = horizontal_padding
 	style.content_margin_bottom = vertical_padding
+	style.shadow_color = Color(0.0, 0.0, 0.0, 0.08)
+	style.shadow_size = 6
+	style.shadow_offset = Vector2(0, 3)
 	return style
 
 func _tint_color(color_value: Color, amount: float) -> Color:
@@ -392,11 +469,12 @@ func _shade_color(color_value: Color, amount: float) -> Color:
 	return color_value.lerp(Color(0.0, 0.0, 0.0, color_value.a), clampf(amount, 0.0, 1.0))
 
 func _apply_button_palette(button: Button, background: Color, border: Color, font_color: Color = Color(1.0, 1.0, 1.0, 1.0)) -> void:
-	button.add_theme_stylebox_override("normal", _create_ia_surface_style(background, border, 2, 12, 14, 10))
-	button.add_theme_stylebox_override("hover", _create_ia_surface_style(_tint_color(background, 0.08), border, 2, 12, 14, 10))
-	button.add_theme_stylebox_override("pressed", _create_ia_surface_style(_shade_color(background, 0.10), border, 2, 12, 14, 10))
-	button.add_theme_stylebox_override("focus", _create_ia_surface_style(_tint_color(background, 0.04), border, 3, 12, 14, 10))
-	button.add_theme_stylebox_override("disabled", _create_ia_surface_style(_tint_color(background, 0.28), _tint_color(border, 0.25), 2, 12, 14, 10))
+	UITheme.apply_font_only(button, 17)
+	button.add_theme_stylebox_override("normal", _create_ia_surface_style(background, border, 2, 16, 16, 11))
+	button.add_theme_stylebox_override("hover", _create_ia_surface_style(_tint_color(background, 0.08), border, 2, 16, 16, 11))
+	button.add_theme_stylebox_override("pressed", _create_ia_surface_style(_shade_color(background, 0.10), border, 2, 16, 16, 11))
+	button.add_theme_stylebox_override("focus", _create_ia_surface_style(_tint_color(background, 0.04), border, 3, 16, 16, 11))
+	button.add_theme_stylebox_override("disabled", _create_ia_surface_style(_tint_color(background, 0.28), _tint_color(border, 0.25), 2, 16, 16, 11))
 	button.add_theme_color_override("font_color", font_color)
 	button.add_theme_color_override("font_hover_color", font_color)
 	button.add_theme_color_override("font_pressed_color", font_color)
@@ -422,6 +500,7 @@ func _clear_container(container: Node) -> void:
 		child.queue_free()
 
 func _apply_line_edit_palette(line_edit: LineEdit) -> void:
+	UITheme.apply_font_only(line_edit, 16)
 	line_edit.add_theme_stylebox_override("normal", _create_ia_surface_style(Color(1.0, 1.0, 1.0, 0.98), IA_COLOR_BORDER, 2, 10, 12, 10))
 	line_edit.add_theme_stylebox_override("focus", _create_ia_surface_style(Color(1.0, 1.0, 1.0, 1.0), IA_COLOR_ACCENT, 2, 10, 12, 10))
 	line_edit.add_theme_stylebox_override("read_only", _create_ia_surface_style(IA_COLOR_SURFACE_ALT, IA_COLOR_BORDER, 2, 10, 12, 10))
@@ -429,6 +508,7 @@ func _apply_line_edit_palette(line_edit: LineEdit) -> void:
 	line_edit.add_theme_color_override("font_placeholder_color", IA_COLOR_MUTED)
 
 func _apply_text_edit_palette(text_edit: TextEdit) -> void:
+	UITheme.apply_font_only(text_edit, 16)
 	text_edit.add_theme_stylebox_override("normal", _create_ia_surface_style(Color(1.0, 1.0, 1.0, 0.98), IA_COLOR_BORDER, 2, 10, 12, 10))
 	text_edit.add_theme_stylebox_override("focus", _create_ia_surface_style(Color(1.0, 1.0, 1.0, 1.0), IA_COLOR_ACCENT, 2, 10, 12, 10))
 	text_edit.add_theme_stylebox_override("read_only", _create_ia_surface_style(IA_COLOR_SURFACE_ALT, IA_COLOR_BORDER, 2, 10, 12, 10))

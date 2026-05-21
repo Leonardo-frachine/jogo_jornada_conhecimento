@@ -1,6 +1,13 @@
 extends Control
 
+const UITheme := preload("res://scripts/UITheme.gd")
+
+@onready var painel_central: Panel = $PainelCentral
+@onready var titulo: Label = $PainelCentral/MarginContainer/VBoxContainer/Titulo
+@onready var subtitulo: Label = $PainelCentral/MarginContainer/VBoxContainer/Subtitulo
+@onready var label_nome: Label = $PainelCentral/MarginContainer/VBoxContainer/LabelNome
 @onready var input_nome: LineEdit = $PainelCentral/MarginContainer/VBoxContainer/InputNome
+@onready var label_codigo: Label = $PainelCentral/MarginContainer/VBoxContainer/LabelCodigo
 @onready var input_codigo: LineEdit = $PainelCentral/MarginContainer/VBoxContainer/InputCodigo
 @onready var botao_jogar: Button = $PainelCentral/MarginContainer/VBoxContainer/BotoesAcao/BotaoJogar
 @onready var botao_voltar: Button = $PainelCentral/MarginContainer/VBoxContainer/BotoesAcao/BotaoVoltar
@@ -15,6 +22,7 @@ func _ready() -> void:
 	SettingsManager.close_menu()
 	_ensure_music_player()
 	_play_music()
+	_apply_visual_refresh()
 
 	botao_jogar.pressed.connect(_on_botao_jogar_pressed)
 	botao_voltar.pressed.connect(_on_botao_voltar_pressed)
@@ -22,6 +30,18 @@ func _ready() -> void:
 	input_nome.text_submitted.connect(_on_input_nome_submitted)
 	input_codigo.text_submitted.connect(_on_input_codigo_submitted)
 	input_nome.grab_focus()
+
+func _apply_visual_refresh() -> void:
+	UITheme.apply_surface_panel(painel_central)
+	UITheme.apply_font_tree(painel_central)
+	UITheme.apply_title(titulo, 38)
+	UITheme.apply_subtitle(subtitulo, 16)
+	UITheme.apply_field_label(label_nome)
+	UITheme.apply_field_label(label_codigo)
+	UITheme.apply_line_edit(input_nome, 18)
+	UITheme.apply_line_edit(input_codigo, 18)
+	UITheme.apply_button(botao_jogar, UITheme.BUTTON_PRIMARY, 20)
+	UITheme.apply_button(botao_voltar, UITheme.BUTTON_SECONDARY, 19)
 
 func _ensure_music_player() -> void:
 	music_player = get_node_or_null("MenuMusic")
