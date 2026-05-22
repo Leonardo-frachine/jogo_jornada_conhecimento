@@ -10,7 +10,7 @@
 [ext_resource type="Texture2D" uid="uid://c456bwc5yj2r1" path="res://imagens/chao/token_hexagon_3d_blue.png" id="6_5g16k"]
 [ext_resource type="Texture2D" uid="uid://cqw2od8y8ev4" path="res://imagens/chao/token_hexagon_3d_white.png" id="7_ym5sv"]
 [ext_resource type="Texture2D" uid="uid://c3esur46a71up" path="res://imagens/chao/token_hexagon_3d_red.png" id="8_sng2h"]
-[ext_resource type="Texture2D" uid="uid://3fhufmmhtvsm" path="res://imagens/Fundo/fundo4k.png" id="12_5g16k"]
+[ext_resource type="Texture2D" uid="uid://c1elftruprn00" path="res://imagens/Fundo/fundogame.jpg" id="12_5g16k"]
 [ext_resource type="Texture2D" uid="uid://cbpn68ac6bol8" path="res://imagens/configuracoes/configuracoes.png" id="18_ux4dc"]
 [ext_resource type="Script" uid="uid://crxkgvki2ihn4" path="res://scripts/game.gd" id="19_game"]
 
@@ -24,10 +24,26 @@ load_path = "res://.godot/imported/token_hexagon_3d_white.png-66aa395056ec9830a7
 load_path = "res://.godot/imported/token_hexagon_3d_red.png-70216fab1efe07dba5224a97e01f2af0.ctex"
 
 [node name="Game" type="Node2D" unique_id=1510036659]
+position = Vector2(273, 169)
 script = ExtResource("19_game")
 metadata/_edit_group_ = true
 
+[node name="BackgroundLayer" type="CanvasLayer" parent="." unique_id=1278486842]
+layer = -100
+
+[node name="Background" type="TextureRect" parent="BackgroundLayer" unique_id=1628415996]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("12_5g16k")
+expand_mode = 1
+stretch_mode = 6
+
 [node name="Casas" type="Node2D" parent="." unique_id=542650224]
+position = Vector2(-45, 59)
 
 [node name="StaticBody2D_P1" type="StaticBody2D" parent="Casas" unique_id=1957905363]
 position = Vector2(180, 612)
@@ -350,12 +366,167 @@ texture_normal = ExtResource("18_ux4dc")
 ignore_texture_size = true
 stretch_mode = 6
 
-[node name="BoardBackground" type="Sprite2D" parent="." unique_id=906848407]
-show_behind_parent = true
-position = Vector2(0, 8)
-scale = Vector2(0.799294, 0.772138)
-texture = ExtResource("12_5g16k")
-centered = false
+[node name="DialogBackdrop" type="ColorRect" parent="CanvasLayer" unique_id=2146682398]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.02, 0.02, 0.05, 0.58)
+
+[node name="JanelaPergunta" type="Panel" parent="CanvasLayer" unique_id=2142890990]
+visible = false
+
+[node name="Margin" type="MarginContainer" parent="CanvasLayer/JanelaPergunta" unique_id=2002319595]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 28
+theme_override_constants/margin_top = 22
+theme_override_constants/margin_right = 28
+theme_override_constants/margin_bottom = 22
+
+[node name="VBox" type="VBoxContainer" parent="CanvasLayer/JanelaPergunta/Margin" unique_id=505300189]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="DialogTitle" type="Label" parent="CanvasLayer/JanelaPergunta/Margin/VBox" unique_id=1011249176]
+layout_mode = 2
+text = "DESAFIO DO TABULEIRO"
+horizontal_alignment = 1
+
+[node name="QuestionLabel" type="Label" parent="CanvasLayer/JanelaPergunta/Margin/VBox" unique_id=1100644188]
+custom_minimum_size = Vector2(0, 84)
+layout_mode = 2
+size_flags_vertical = 3
+text = "Pergunta"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="QuestionHintLabel" type="Label" parent="CanvasLayer/JanelaPergunta/Margin/VBox" unique_id=596041305]
+layout_mode = 2
+text = "Escolha a alternativa correta para seguir no tabuleiro."
+horizontal_alignment = 1
+
+[node name="Answers" type="VBoxContainer" parent="CanvasLayer/JanelaPergunta/Margin/VBox" unique_id=1601937193]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 10
+
+[node name="ButtonA" type="Button" parent="CanvasLayer/JanelaPergunta/Margin/VBox/Answers" unique_id=525255026]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+text = "A) Alternativa A"
+alignment = 0
+
+[node name="ButtonB" type="Button" parent="CanvasLayer/JanelaPergunta/Margin/VBox/Answers" unique_id=1482122336]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+text = "B) Alternativa B"
+alignment = 0
+
+[node name="ButtonC" type="Button" parent="CanvasLayer/JanelaPergunta/Margin/VBox/Answers" unique_id=151419709]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+text = "C) Alternativa C"
+alignment = 0
+
+[node name="ButtonD" type="Button" parent="CanvasLayer/JanelaPergunta/Margin/VBox/Answers" unique_id=1632008404]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+text = "D) Alternativa D"
+alignment = 0
+
+[node name="HUD" type="CanvasLayer" parent="." unique_id=2078172305]
+layer = 20
+
+[node name="Root" type="Control" parent="HUD" unique_id=518974451]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="TopPanel" type="PanelContainer" parent="HUD/Root" unique_id=1663054027]
+custom_minimum_size = Vector2(520, 88)
+layout_mode = 0
+offset_right = 540.0
+offset_bottom = 96.0
+mouse_filter = 2
+
+[node name="Margin" type="MarginContainer" parent="HUD/Root/TopPanel" unique_id=515076551]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 14
+
+[node name="HBox" type="HBoxContainer" parent="HUD/Root/TopPanel/Margin" unique_id=2079671031]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 24
+
+[node name="Left" type="VBoxContainer" parent="HUD/Root/TopPanel/Margin/HBox" unique_id=917015835]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+theme_override_constants/separation = 6
+
+[node name="PlayerLabel" type="Label" parent="HUD/Root/TopPanel/Margin/HBox/Left" unique_id=502848632]
+layout_mode = 2
+text = "Jogador: Aluno"
+
+[node name="RoomLabel" type="Label" parent="HUD/Root/TopPanel/Margin/HBox/Left" unique_id=1973024659]
+layout_mode = 2
+text = "Sala: Sem codigo"
+
+[node name="SubtitleLabel" type="Label" parent="HUD/Root/TopPanel/Margin/HBox/Left" unique_id=2019906254]
+layout_mode = 2
+text = "Role o dado para abrir uma pergunta."
+
+[node name="Right" type="VBoxContainer" parent="HUD/Root/TopPanel/Margin/HBox" unique_id=494968360]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 4
+
+[node name="ScoreLabel" type="Label" parent="HUD/Root/TopPanel/Margin/HBox/Right" unique_id=1753910116]
+layout_mode = 2
+text = "Score: 0"
+
+[node name="LevelLabel" type="Label" parent="HUD/Root/TopPanel/Margin/HBox/Right" unique_id=2101986709]
+layout_mode = 2
+text = "Nivel: 1"
+
+[node name="ProgressLabel" type="Label" parent="HUD/Root/TopPanel/Margin/HBox/Right" unique_id=1205231366]
+layout_mode = 2
+text = "Casa: 0/28"
+
+[node name="AccuracyLabel" type="Label" parent="HUD/Root/TopPanel/Margin/HBox/Right" unique_id=467314804]
+layout_mode = 2
+text = "Acertos: 0%"
+
+[node name="FeedbackLabel" type="Label" parent="HUD/Root" unique_id=938120440]
+layout_mode = 0
+offset_top = 156.0
+offset_right = 560.0
+offset_bottom = 198.0
+text = "Role o dado para abrir uma pergunta."
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="RollButton" type="Button" parent="HUD/Root" unique_id=1474487045]
+layout_mode = 0
+offset_top = 640.0
+offset_right = 214.0
+offset_bottom = 694.0
+text = "ROLAR DADO"
 
 [node name="BoardCamera" type="Camera2D" parent="." unique_id=1535546678]
 position = Vector2(685, 371)

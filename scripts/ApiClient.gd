@@ -50,6 +50,9 @@ func fetch_room_dashboard(room_id: int) -> Dictionary:
 func fetch_room_answers(room_id: int) -> Dictionary:
 	return await _request_json(HTTPClient.METHOD_GET, "/salas/%d/respostas" % room_id)
 
+func delete_room(room_id: int) -> Dictionary:
+	return await _request_json(HTTPClient.METHOD_DELETE, "/salas/%d" % room_id)
+
 func fetch_questions() -> Dictionary:
 	return await _request_json(HTTPClient.METHOD_GET, "/perguntas")
 

@@ -163,7 +163,7 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_header")
 layout_mode = 2
 theme_override_colors/font_color = Color(0.960784, 0.968627, 0.980392, 1)
 theme_override_font_sizes/font_size = 30
-text = "CONFIGURACOES"
+text = "Configurações"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -211,6 +211,15 @@ clip_contents = true
 layout_mode = 2
 size_flags_horizontal = 3
 
+[node name="MasterValue" type="Label" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content/AudioSection/Margin/Rows/MasterRow"]
+custom_minimum_size = Vector2(62, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.960784, 0.968627, 0.980392, 1)
+theme_override_font_sizes/font_size = 18
+text = "85%"
+horizontal_alignment = 2
+vertical_alignment = 1
+
 [node name="SfxRow" type="HBoxContainer" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content/AudioSection/Margin/Rows"]
 layout_mode = 2
 theme_override_constants/separation = 12
@@ -227,6 +236,15 @@ vertical_alignment = 1
 [node name="SfxSlider" type="HSlider" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content/AudioSection/Margin/Rows/SfxRow"]
 layout_mode = 2
 size_flags_horizontal = 3
+
+[node name="SfxValue" type="Label" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content/AudioSection/Margin/Rows/SfxRow"]
+custom_minimum_size = Vector2(62, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.960784, 0.968627, 0.980392, 1)
+theme_override_font_sizes/font_size = 18
+text = "80%"
+horizontal_alignment = 2
+vertical_alignment = 1
 
 [node name="TogglesSection" type="PanelContainer" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content"]
 layout_mode = 2
@@ -272,6 +290,26 @@ text = "ON"
 layout_mode = 2
 theme_override_constants/separation = 12
 alignment = 1
+
+[node name="VfxText" type="Label" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content/TogglesSection/Margin/Rows/VfxRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.960784, 0.968627, 0.980392, 1)
+theme_override_font_sizes/font_size = 18
+text = "Efeitos Visuais"
+vertical_alignment = 1
+
+[node name="VfxToggle" type="Button" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content/TogglesSection/Margin/Rows/VfxRow"]
+custom_minimum_size = Vector2(96, 38)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_pressed_color = Color(0.0470588, 0.0627451, 0.0901961, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_toggle_off")
+theme_override_styles/hover = SubResource("StyleBoxFlat_toggle_off")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_toggle_on")
+toggle_mode = true
+text = "ON"
 
 [node name="SubtitleRow" type="HBoxContainer" parent="CenterContainer/Panel/Margin/VBox/Scroll/Content/TogglesSection/Margin/Rows"]
 layout_mode = 2

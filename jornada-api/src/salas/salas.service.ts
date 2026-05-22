@@ -235,6 +235,32 @@ export class SalasService {
     };
   }
 
+  async remover(id: number): Promise<{
+    mensagem: string;
+    salaId: number;
+    progressosRemovidos: number;
+  }> {
+    const sala = await this.salaRepository.findOne({
+      where: { id },
+    });
+
+    if (!sala) {
+      throw new NotFoundException('Sala nao encontrada.');
+    }
+
+    const deletedProgressResult = await this.progressoRepository.delete({
+      salaId: sala.id,
+    });
+
+    await this.salaRepository.delete(sala.id);
+
+    return {
+      mensagem: 'Sala e dados vinculados removidos com sucesso.',
+      salaId: sala.id,
+      progressosRemovidos: deletedProgressResult.affected ?? 0,
+    };
+  }
+
   private async gerarCodigoUnico(): Promise<string> {
     const caracteres = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 

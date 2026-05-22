@@ -1,0 +1,332 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/Basic_GUI_Bundle/Icons/Icon_Small_Blank_Menu.png" id="1"]
+[ext_resource type="Texture2D" path="res://assets/Basic_GUI_Bundle/Icons/Icon_Small_Blank_Home.png" id="2"]
+[ext_resource type="Texture2D" path="res://assets/Basic_GUI_Bundle/Icons/Icon_Small_Blank_Check.png" id="3"]
+[ext_resource type="Texture2D" path="res://assets/Basic_GUI_Bundle/Icons/Icon_Small_Blank_Info.png" id="4"]
+[ext_resource type="Texture2D" path="res://assets/Basic_GUI_Bundle/Icons/Icon_Small_WhiteOutline_Return.png" id="5"]
+[ext_resource type="Texture2D" path="res://imagens/icons/teacher.png" id="6"]
+[ext_resource type="Texture2D" path="res://imagens/configuracoes/configuracoes.png" id="7"]
+
+[node name="ProfessorSidebar" type="PanelContainer"]
+custom_minimum_size = Vector2(278, 0)
+size_flags_horizontal = 1
+size_flags_vertical = 3
+
+[node name="Margin" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 20
+
+[node name="VBox" type="VBoxContainer" parent="Margin"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 14
+
+[node name="TopRow" type="HBoxContainer" parent="Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="BrandIcon" type="TextureRect" parent="Margin/VBox/TopRow"]
+custom_minimum_size = Vector2(36, 36)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("6")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="BrandText" type="VBoxContainer" parent="Margin/VBox/TopRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 2
+
+[node name="BrandTitle" type="Label" parent="Margin/VBox/TopRow/BrandText"]
+layout_mode = 2
+text = "Jornada"
+
+[node name="BrandSubtitle" type="Label" parent="Margin/VBox/TopRow/BrandText"]
+layout_mode = 2
+text = "Professor"
+
+[node name="BotaoToggleSidebar" type="TextureButton" parent="Margin/VBox/TopRow"]
+custom_minimum_size = Vector2(36, 36)
+layout_mode = 2
+texture_normal = ExtResource("1")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="SidebarDescription" type="Label" parent="Margin/VBox"]
+layout_mode = 2
+autowrap_mode = 3
+text = "Acompanhe salas, atividades e perguntas em um unico painel."
+
+[node name="NavList" type="VBoxContainer" parent="Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="BotaoDashboard" type="Button" parent="Margin/VBox/NavList"]
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+size_flags_horizontal = 3
+text = ""
+
+[node name="Layout" type="HBoxContainer" parent="Margin/VBox/NavList/BotaoDashboard"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+offset_left = 14.0
+offset_top = 14.0
+offset_right = -14.0
+offset_bottom = -14.0
+mouse_filter = 2
+theme_override_constants/separation = 12
+
+[node name="Icon" type="TextureRect" parent="Margin/VBox/NavList/BotaoDashboard/Layout"]
+custom_minimum_size = Vector2(20, 20)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("2")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="Margin/VBox/NavList/BotaoDashboard/Layout"]
+layout_mode = 2
+mouse_filter = 2
+size_flags_horizontal = 3
+text = "Dashboard"
+
+[node name="BotaoGerenciarSala" type="Button" parent="Margin/VBox/NavList"]
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+size_flags_horizontal = 3
+text = ""
+
+[node name="Layout" type="HBoxContainer" parent="Margin/VBox/NavList/BotaoGerenciarSala"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+offset_left = 14.0
+offset_top = 14.0
+offset_right = -14.0
+offset_bottom = -14.0
+mouse_filter = 2
+theme_override_constants/separation = 12
+
+[node name="Icon" type="TextureRect" parent="Margin/VBox/NavList/BotaoGerenciarSala/Layout"]
+custom_minimum_size = Vector2(20, 20)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("6")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="Margin/VBox/NavList/BotaoGerenciarSala/Layout"]
+layout_mode = 2
+mouse_filter = 2
+size_flags_horizontal = 3
+text = "Gerenciar Sala"
+
+[node name="BotaoAcompanhamento" type="Button" parent="Margin/VBox/NavList"]
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+size_flags_horizontal = 3
+text = ""
+
+[node name="Layout" type="HBoxContainer" parent="Margin/VBox/NavList/BotaoAcompanhamento"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+offset_left = 14.0
+offset_top = 14.0
+offset_right = -14.0
+offset_bottom = -14.0
+mouse_filter = 2
+theme_override_constants/separation = 12
+
+[node name="Icon" type="TextureRect" parent="Margin/VBox/NavList/BotaoAcompanhamento/Layout"]
+custom_minimum_size = Vector2(20, 20)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("3")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="Margin/VBox/NavList/BotaoAcompanhamento/Layout"]
+layout_mode = 2
+mouse_filter = 2
+size_flags_horizontal = 3
+text = "Acompanhamento"
+
+[node name="BotaoBancoPerguntas" type="Button" parent="Margin/VBox/NavList"]
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+size_flags_horizontal = 3
+text = ""
+
+[node name="Layout" type="HBoxContainer" parent="Margin/VBox/NavList/BotaoBancoPerguntas"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+offset_left = 14.0
+offset_top = 14.0
+offset_right = -14.0
+offset_bottom = -14.0
+mouse_filter = 2
+theme_override_constants/separation = 12
+
+[node name="Icon" type="TextureRect" parent="Margin/VBox/NavList/BotaoBancoPerguntas/Layout"]
+custom_minimum_size = Vector2(20, 20)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("4")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="Margin/VBox/NavList/BotaoBancoPerguntas/Layout"]
+layout_mode = 2
+mouse_filter = 2
+size_flags_horizontal = 3
+text = "Banco de Perguntas"
+
+[node name="BotaoImportarPerguntas" type="Button" parent="Margin/VBox/NavList"]
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+size_flags_horizontal = 3
+text = ""
+
+[node name="Layout" type="HBoxContainer" parent="Margin/VBox/NavList/BotaoImportarPerguntas"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+offset_left = 14.0
+offset_top = 14.0
+offset_right = -14.0
+offset_bottom = -14.0
+mouse_filter = 2
+theme_override_constants/separation = 12
+
+[node name="Icon" type="TextureRect" parent="Margin/VBox/NavList/BotaoImportarPerguntas/Layout"]
+custom_minimum_size = Vector2(20, 20)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("5")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="Margin/VBox/NavList/BotaoImportarPerguntas/Layout"]
+layout_mode = 2
+mouse_filter = 2
+size_flags_horizontal = 3
+text = "Importar Perguntas"
+
+[node name="BotaoGerarIa" type="Button" parent="Margin/VBox/NavList"]
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+size_flags_horizontal = 3
+text = ""
+
+[node name="Layout" type="HBoxContainer" parent="Margin/VBox/NavList/BotaoGerarIa"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+offset_left = 14.0
+offset_top = 14.0
+offset_right = -14.0
+offset_bottom = -14.0
+mouse_filter = 2
+theme_override_constants/separation = 12
+
+[node name="Icon" type="TextureRect" parent="Margin/VBox/NavList/BotaoGerarIa/Layout"]
+custom_minimum_size = Vector2(20, 20)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("6")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="Margin/VBox/NavList/BotaoGerarIa/Layout"]
+layout_mode = 2
+mouse_filter = 2
+size_flags_horizontal = 3
+text = "Gerar com IA"
+
+[node name="BotaoConfiguracoes" type="Button" parent="Margin/VBox/NavList"]
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+size_flags_horizontal = 3
+text = ""
+
+[node name="Layout" type="HBoxContainer" parent="Margin/VBox/NavList/BotaoConfiguracoes"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+offset_left = 14.0
+offset_top = 14.0
+offset_right = -14.0
+offset_bottom = -14.0
+mouse_filter = 2
+theme_override_constants/separation = 12
+
+[node name="Icon" type="TextureRect" parent="Margin/VBox/NavList/BotaoConfiguracoes/Layout"]
+custom_minimum_size = Vector2(20, 20)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("7")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="Margin/VBox/NavList/BotaoConfiguracoes/Layout"]
+layout_mode = 2
+mouse_filter = 2
+size_flags_horizontal = 3
+text = "Configurações"
+
+[node name="Spacer" type="Control" parent="Margin/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="SidebarFooter" type="PanelContainer" parent="Margin/VBox"]
+layout_mode = 2
+
+[node name="FooterMargin" type="MarginContainer" parent="Margin/VBox/SidebarFooter"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="FooterText" type="VBoxContainer" parent="Margin/VBox/SidebarFooter/FooterMargin"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="FooterTitle" type="Label" parent="Margin/VBox/SidebarFooter/FooterMargin/FooterText"]
+layout_mode = 2
+text = "Sala em foco"
+
+[node name="FooterSubtitle" type="Label" parent="Margin/VBox/SidebarFooter/FooterMargin/FooterText"]
+layout_mode = 2
+autowrap_mode = 3
+text = "Selecione uma turma no topo para atualizar todo o conteudo."

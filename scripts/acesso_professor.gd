@@ -1,10 +1,11 @@
 extends Control
 
 const UITheme := preload("res://scripts/UITheme.gd")
-const STATUS_INFO := Color(0.13, 0.22, 0.44, 1.0)
-const STATUS_OK := Color(0.18, 0.58, 0.26, 1.0)
-const STATUS_ERROR := Color(0.70, 0.17, 0.17, 1.0)
+const STATUS_INFO := UITheme.STATUS_INFO
+const STATUS_OK := UITheme.STATUS_SUCCESS
+const STATUS_ERROR := UITheme.STATUS_ERROR
 
+@onready var background: TextureRect = $Background
 @onready var painel_central: Panel = $PainelCentral
 @onready var titulo: Label = $PainelCentral/MarginContainer/VBoxContainer/Titulo
 @onready var subtitulo: Label = $PainelCentral/MarginContainer/VBoxContainer/Subtitulo
@@ -21,6 +22,7 @@ const STATUS_ERROR := Color(0.70, 0.17, 0.17, 1.0)
 @onready var botao_acao: Button = $PainelCentral/MarginContainer/VBoxContainer/BotaoAcao
 @onready var botao_alternar: Button = $PainelCentral/MarginContainer/VBoxContainer/BotaoAlternar
 @onready var botao_voltar: Button = $PainelCentral/MarginContainer/VBoxContainer/BotaoVoltar
+@onready var personagem: TextureRect = $Personagem
 @onready var botao_configuracao: TextureButton = $BotaoConfiguracao
 
 var modo_cadastro := false
@@ -46,6 +48,10 @@ func _ready() -> void:
 	input_senha.text_submitted.connect(_on_input_senha_submitted)
 	input_nome.text_submitted.connect(_on_input_nome_submitted)
 
+	_update_layout()
+	if not get_viewport().size_changed.is_connected(_update_layout):
+		get_viewport().size_changed.connect(_update_layout)
+
 	_set_modo(false)
 
 func _apply_visual_refresh() -> void:
@@ -63,7 +69,42 @@ func _apply_visual_refresh() -> void:
 	UITheme.apply_button(botao_acao, UITheme.BUTTON_PRIMARY, 20)
 	UITheme.apply_button(botao_alternar, UITheme.BUTTON_SURFACE, 17)
 	UITheme.apply_button(botao_voltar, UITheme.BUTTON_SECONDARY, 17)
+	label_status.custom_minimum_size.y = 38.0
 	_update_mode_button_styles()
+
+func _update_layout() -> void:
+	var viewport_size: Vector2 = get_viewport_rect().size
+	var compact_width: bool = viewport_size.x < 1180.0
+	var compact_height: bool = viewport_size.y < 760.0
+	var panel_width: float = clampf(viewport_size.x * 0.38, 440.0, 540.0)
+	var panel_height: float = clampf(viewport_size.y - (96.0 if compact_height else 120.0), 560.0, 650.0)
+
+	painel_central.offset_left = -panel_width * 0.5
+	painel_central.offset_top = -panel_height * 0.5
+	painel_central.offset_right = panel_width * 0.5
+	painel_central.offset_bottom = panel_height * 0.5
+	painel_central.custom_minimum_size = Vector2(panel_width, panel_height)
+
+	if background != null:
+		background.size = viewport_size
+
+	if personagem != null:
+		personagem.visible = viewport_size.x >= 1180.0 and viewport_size.y >= 700.0
+		if personagem.visible:
+			var character_width: float = clampf(viewport_size.x * 0.23, 260.0, 360.0)
+			var character_height: float = character_width * 1.08
+			personagem.position = Vector2(maxf(24.0, viewport_size.x * 0.05), viewport_size.y - character_height - 14.0)
+			personagem.size = Vector2(character_width, character_height)
+
+	if botao_configuracao != null:
+		var settings_size: float = 72.0 if compact_width else 84.0
+		botao_configuracao.anchor_left = 0.0
+		botao_configuracao.anchor_top = 0.0
+		botao_configuracao.anchor_right = 0.0
+		botao_configuracao.anchor_bottom = 0.0
+		botao_configuracao.custom_minimum_size = Vector2(settings_size, settings_size)
+		botao_configuracao.size = Vector2(settings_size, settings_size)
+		botao_configuracao.position = Vector2(viewport_size.x - settings_size - 18.0, 18.0)
 
 func _update_mode_button_styles() -> void:
 	UITheme.apply_button(

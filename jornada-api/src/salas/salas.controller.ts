@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
+} from '@nestjs/common';
 import { CriarSalaDto } from './dto/criar-sala.dto';
 import { SalasService } from './salas.service';
 
@@ -34,5 +42,10 @@ export class SalasController {
   @Get(':id')
   buscarPorId(@Param('id', ParseIntPipe) id: number) {
     return this.salasService.buscarPorId(id);
+  }
+
+  @Delete(':id')
+  remover(@Param('id', ParseIntPipe) id: number) {
+    return this.salasService.remover(id);
   }
 }

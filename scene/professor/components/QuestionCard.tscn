@@ -1,0 +1,51 @@
+[gd_scene format=3]
+
+[node name="QuestionCard" type="PanelContainer"]
+size_flags_horizontal = 3
+
+[node name="Margin" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="Content" type="VBoxContainer" parent="Margin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="HeaderRow" type="HBoxContainer" parent="Margin/Content"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="HeaderText" type="VBoxContainer" parent="Margin/Content/HeaderRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="TitleLabel" type="Label" parent="Margin/Content/HeaderRow/HeaderText"]
+layout_mode = 2
+text = "Pergunta"
+
+[node name="SummaryLabel" type="Label" parent="Margin/Content/HeaderRow/HeaderText"]
+layout_mode = 2
+autowrap_mode = 3
+text = "Resumo"
+
+[node name="ToggleExpandButton" type="Button" parent="Margin/Content/HeaderRow"]
+custom_minimum_size = Vector2(124, 42)
+layout_mode = 2
+text = "Expandir"
+
+[node name="BadgeRow" type="HFlowContainer" parent="Margin/Content"]
+layout_mode = 2
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 8
+
+[node name="DetailContainer" type="VBoxContainer" parent="Margin/Content"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="ActionRow" type="HBoxContainer" parent="Margin/Content"]
+layout_mode = 2
+theme_override_constants/separation = 10

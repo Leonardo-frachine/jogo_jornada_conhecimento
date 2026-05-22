@@ -40,17 +40,17 @@ texture = ExtResource("2")
 stretch_mode = 6
 
 [node name="PainelCentral" type="Panel" parent="." unique_id=690661299]
-custom_minimum_size = Vector2(500, 500)
+custom_minimum_size = Vector2(520, 0)
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -250.0
-offset_top = -240.0
-offset_right = 250.0
-offset_bottom = 346.0
+offset_left = -260.0
+offset_top = -300.0
+offset_right = 260.0
+offset_bottom = 300.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("1")
@@ -60,8 +60,6 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = -84.0
-offset_bottom = 116.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/margin_left = 30
@@ -107,8 +105,10 @@ size_flags_horizontal = 3
 text = "CADASTRAR"
 
 [node name="LabelStatus" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer" unique_id=1827890377]
+custom_minimum_size = Vector2(0, 38)
 layout_mode = 2
 horizontal_alignment = 1
+vertical_alignment = 1
 autowrap_mode = 3
 
 [node name="GrupoNome" type="VBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer" unique_id=1943258240]

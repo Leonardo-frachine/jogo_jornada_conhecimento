@@ -8,10 +8,20 @@ const FEEDBACK_OK := Color(0.29, 0.85, 0.45, 0.95)
 const FEEDBACK_FAIL := Color(0.93, 0.33, 0.33, 0.95)
 const HUD_LAYER := 20
 const DIALOG_LAYER := 40
-const CAMERA_PADDING := 1.02
+const CAMERA_PADDING := 0.92
+const BOARD_MIN_ZOOM := 0.36
 const DIALOG_MAX_WIDTH := 840.0
 const DIALOG_MAX_HEIGHT := 560.0
 const ANSWER_SLOT_LABELS: Array[String] = ["A", "B", "C", "D"]
+const BOARD_HORIZONTAL_PADDING_RATIO := 0.015
+const BOARD_HORIZONTAL_PADDING_MIN := 12.0
+const BOARD_HORIZONTAL_PADDING_MAX := 28.0
+const BOARD_TOP_PADDING_RATIO := 0.05
+const BOARD_TOP_PADDING_MIN := 28.0
+const BOARD_TOP_PADDING_MAX := 52.0
+const BOARD_BOTTOM_PADDING_RATIO := 0.05
+const BOARD_BOTTOM_PADDING_MIN := 28.0
+const BOARD_BOTTOM_PADDING_MAX := 52.0
 
 enum TurnState {
 	WAITING_ROLL,
@@ -24,7 +34,27 @@ enum TurnState {
 @onready var canvas_layer: CanvasLayer = get_node_or_null("CanvasLayer") as CanvasLayer
 @onready var sprite_dado: Sprite2D = get_node_or_null("CanvasLayer/SpriteDado") as Sprite2D
 @onready var dialog_panel: Control = get_node_or_null("CanvasLayer/JanelaPergunta") as Control
-@onready var board_background: Sprite2D = get_node_or_null("BoardBackground") as Sprite2D
+@onready var dialog_backdrop: ColorRect = get_node_or_null("CanvasLayer/DialogBackdrop") as ColorRect
+@onready var dialog_title_label: Label = get_node_or_null("CanvasLayer/JanelaPergunta/Margin/VBox/DialogTitle") as Label
+@onready var question_label: Label = get_node_or_null("CanvasLayer/JanelaPergunta/Margin/VBox/QuestionLabel") as Label
+@onready var question_hint_label: Label = get_node_or_null("CanvasLayer/JanelaPergunta/Margin/VBox/QuestionHintLabel") as Label
+@onready var button_a: Button = get_node_or_null("CanvasLayer/JanelaPergunta/Margin/VBox/Answers/ButtonA") as Button
+@onready var button_b: Button = get_node_or_null("CanvasLayer/JanelaPergunta/Margin/VBox/Answers/ButtonB") as Button
+@onready var button_c: Button = get_node_or_null("CanvasLayer/JanelaPergunta/Margin/VBox/Answers/ButtonC") as Button
+@onready var button_d: Button = get_node_or_null("CanvasLayer/JanelaPergunta/Margin/VBox/Answers/ButtonD") as Button
+@onready var hud_canvas: CanvasLayer = get_node_or_null("HUD") as CanvasLayer
+@onready var hud_root: Control = get_node_or_null("HUD/Root") as Control
+@onready var top_panel: PanelContainer = get_node_or_null("HUD/Root/TopPanel") as PanelContainer
+@onready var roll_button: Button = get_node_or_null("HUD/Root/RollButton") as Button
+@onready var feedback_label: Label = get_node_or_null("HUD/Root/FeedbackLabel") as Label
+@onready var score_label: Label = get_node_or_null("HUD/Root/TopPanel/Margin/HBox/Right/ScoreLabel") as Label
+@onready var level_label: Label = get_node_or_null("HUD/Root/TopPanel/Margin/HBox/Right/LevelLabel") as Label
+@onready var progress_label: Label = get_node_or_null("HUD/Root/TopPanel/Margin/HBox/Right/ProgressLabel") as Label
+@onready var player_label: Label = get_node_or_null("HUD/Root/TopPanel/Margin/HBox/Left/PlayerLabel") as Label
+@onready var room_label: Label = get_node_or_null("HUD/Root/TopPanel/Margin/HBox/Left/RoomLabel") as Label
+@onready var accuracy_label: Label = get_node_or_null("HUD/Root/TopPanel/Margin/HBox/Right/AccuracyLabel") as Label
+@onready var subtitle_label: Label = get_node_or_null("HUD/Root/TopPanel/Margin/HBox/Left/SubtitleLabel") as Label
+@onready var screen_background: TextureRect = get_node_or_null("BackgroundLayer/Background") as TextureRect
 @onready var board_camera: Camera2D = get_node_or_null("BoardCamera") as Camera2D
 @onready var settings_button: TextureButton = get_node_or_null("CanvasLayer/BotaoConfiguracao") as TextureButton
 
@@ -41,30 +71,10 @@ var board_positions: Array[Vector2] = []
 var pending_target_house: int = 1
 var pending_correct_index: int = 0
 var current_roll: int = 0
+var rng_roll = RandomNumberGenerator.new()
 var accepting_roll: bool = true
 var turn_state: int = TurnState.WAITING_ROLL
 var answering_locked: bool = false
-
-var hud_canvas: CanvasLayer
-var hud_root: Control
-var roll_button: Button
-var feedback_label: Label
-var score_label: Label
-var level_label: Label
-var progress_label: Label
-var player_label: Label
-var room_label: Label
-var accuracy_label: Label
-var subtitle_label: Label
-
-var dialog_backdrop: ColorRect
-var dialog_title_label: Label
-var question_label: Label
-var question_hint_label: Label
-var button_a: Button
-var button_b: Button
-var button_c: Button
-var button_d: Button
 
 var music_player: AudioStreamPlayer
 var sfx_player: AudioStreamPlayer
@@ -72,16 +82,13 @@ var sfx_player: AudioStreamPlayer
 func _ready() -> void:
 	randomize()
 
-	if canvas_layer == null:
-		canvas_layer = CanvasLayer.new()
-		canvas_layer.name = "CanvasLayer"
-		add_child(canvas_layer)
-
 	SettingsManager.pause_tree_when_open = true
 	SettingsManager.close_menu()
-	canvas_layer.layer = DIALOG_LAYER
-
-	_ensure_dialog_panel()
+	if canvas_layer != null:
+		canvas_layer.layer = DIALOG_LAYER
+	if hud_canvas != null:
+		hud_canvas.layer = HUD_LAYER
+	_bind_scene_ui()
 	_build_board_positions()
 
 	if player != null:
@@ -93,8 +100,6 @@ func _ready() -> void:
 			player.movement_finished.connect(_on_movement_finished)
 
 	_create_audio_players()
-	_build_hud()
-	_build_question_ui()
 	_configure_camera()
 	_refresh_hud()
 	call_deferred("_apply_initial_layout")
@@ -106,19 +111,104 @@ func _ready() -> void:
 	if not get_viewport().size_changed.is_connected(_on_viewport_size_changed):
 		get_viewport().size_changed.connect(_on_viewport_size_changed)
 
+func _bind_scene_ui() -> void:
+	if hud_root != null:
+		hud_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	if top_panel != null:
+		top_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var panel_style: StyleBoxFlat = StyleBoxFlat.new()
+		panel_style.bg_color = HUD_BG
+		panel_style.corner_radius_top_left = 20
+		panel_style.corner_radius_top_right = 20
+		panel_style.corner_radius_bottom_left = 20
+		panel_style.corner_radius_bottom_right = 20
+		panel_style.border_width_left = 2
+		panel_style.border_width_top = 2
+		panel_style.border_width_right = 2
+		panel_style.border_width_bottom = 2
+		panel_style.border_color = HUD_ACCENT
+		panel_style.shadow_color = Color(0, 0, 0, 0.25)
+		panel_style.shadow_size = 8
+		top_panel.add_theme_stylebox_override("panel", panel_style)
+
+	for label in [player_label, room_label, subtitle_label]:
+		if label != null:
+			label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			UITheme.apply_font_only(label, 22 if label == player_label else (16 if label == room_label else 15))
+			label.add_theme_color_override("font_color", Color.WHITE)
+
+	for label in [score_label, level_label, progress_label, accuracy_label]:
+		if label != null:
+			label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			UITheme.apply_font_only(label, 15)
+			label.add_theme_color_override("font_color", Color.WHITE)
+
+	if feedback_label != null:
+		feedback_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		UITheme.apply_font_only(feedback_label, 20)
+		feedback_label.add_theme_color_override("font_color", Color.WHITE)
+
+	if roll_button != null:
+		roll_button.focus_mode = Control.FOCUS_NONE
+		UITheme.apply_button(roll_button, UITheme.BUTTON_PRIMARY, 20)
+		if not roll_button.pressed.is_connected(Callable(self, "roll_dice")):
+			roll_button.pressed.connect(Callable(self, "roll_dice"))
+
+	if settings_button != null:
+		if not settings_button.pressed.is_connected(Callable(self, "_on_settings_pressed")):
+			settings_button.pressed.connect(Callable(self, "_on_settings_pressed"))
+
+	if dialog_panel != null:
+		dialog_panel.mouse_filter = Control.MOUSE_FILTER_STOP
+		dialog_panel.focus_mode = Control.FOCUS_ALL
+		dialog_panel.visible = false
+		var dialog_style: StyleBoxFlat = StyleBoxFlat.new()
+		dialog_style.bg_color = Color(0.09, 0.12, 0.21, 0.97)
+		dialog_style.corner_radius_top_left = 28
+		dialog_style.corner_radius_top_right = 28
+		dialog_style.corner_radius_bottom_left = 28
+		dialog_style.corner_radius_bottom_right = 28
+		dialog_style.border_width_left = 3
+		dialog_style.border_width_top = 3
+		dialog_style.border_width_right = 3
+		dialog_style.border_width_bottom = 3
+		dialog_style.border_color = Color(1.0, 0.76, 0.25, 1.0)
+		dialog_style.shadow_color = Color(0, 0, 0, 0.35)
+		dialog_style.shadow_size = 14
+		dialog_panel.add_theme_stylebox_override("panel", dialog_style)
+
+	if dialog_title_label != null:
+		UITheme.apply_font_only(dialog_title_label, 26)
+		dialog_title_label.add_theme_color_override("font_color", HUD_ACCENT)
+
+	if question_label != null:
+		UITheme.apply_font_only(question_label, 24)
+		question_label.add_theme_color_override("font_color", Color.WHITE)
+
+	if question_hint_label != null:
+		UITheme.apply_font_only(question_hint_label, 15)
+		question_hint_label.add_theme_color_override("font_color", Color(0.85, 0.90, 0.98, 0.88))
+
+	_style_and_connect_answer_button(button_a, 0)
+	_style_and_connect_answer_button(button_b, 1)
+	_style_and_connect_answer_button(button_c, 2)
+	_style_and_connect_answer_button(button_d, 3)
+
+func _style_and_connect_answer_button(button: Button, answer_slot: int) -> void:
+	if button == null:
+		return
+	button.focus_mode = Control.FOCUS_ALL
+	button.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	button.add_theme_constant_override("h_separation", 8)
+	UITheme.apply_button(button, UITheme.BUTTON_SECONDARY, 17)
+	var callback := Callable(self, "_on_answer_button_pressed").bind(answer_slot)
+	if not button.pressed.is_connected(callback):
+		button.pressed.connect(callback)
+
 func _apply_initial_layout() -> void:
 	await get_tree().process_frame
 	_update_viewport_layout()
-
-func _ensure_dialog_panel() -> void:
-	if canvas_layer == null:
-		return
-
-	if dialog_panel == null:
-		dialog_panel = Panel.new()
-		dialog_panel.name = "JanelaPergunta"
-		dialog_panel.visible = false
-		canvas_layer.add_child(dialog_panel)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if get_tree().paused:
@@ -166,240 +256,8 @@ func _play_sfx(path: String) -> void:
 	sfx_player.stream = stream
 	sfx_player.play()
 
-func _build_hud() -> void:
-	hud_canvas = CanvasLayer.new()
-	hud_canvas.name = "HUD"
-	hud_canvas.layer = HUD_LAYER
-	add_child(hud_canvas)
-
-	hud_root = Control.new()
-	hud_root.name = "Root"
-	hud_root.set_anchors_preset(Control.PRESET_FULL_RECT)
-	hud_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	hud_canvas.add_child(hud_root)
-
-	var top_panel: PanelContainer = PanelContainer.new()
-	top_panel.name = "TopPanel"
-	top_panel.custom_minimum_size = Vector2(520, 88)
-	top_panel.size = Vector2(540, 96)
-	top_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-
-	var panel_style: StyleBoxFlat = StyleBoxFlat.new()
-	panel_style.bg_color = HUD_BG
-	panel_style.corner_radius_top_left = 20
-	panel_style.corner_radius_top_right = 20
-	panel_style.corner_radius_bottom_left = 20
-	panel_style.corner_radius_bottom_right = 20
-	panel_style.border_width_left = 2
-	panel_style.border_width_top = 2
-	panel_style.border_width_right = 2
-	panel_style.border_width_bottom = 2
-	panel_style.border_color = HUD_ACCENT
-	panel_style.shadow_color = Color(0, 0, 0, 0.25)
-	panel_style.shadow_size = 8
-	top_panel.add_theme_stylebox_override("panel", panel_style)
-	hud_root.add_child(top_panel)
-
-	var margin: MarginContainer = MarginContainer.new()
-	margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	margin.add_theme_constant_override("margin_left", 18)
-	margin.add_theme_constant_override("margin_top", 14)
-	margin.add_theme_constant_override("margin_right", 18)
-	margin.add_theme_constant_override("margin_bottom", 14)
-	top_panel.add_child(margin)
-
-	var hbox: HBoxContainer = HBoxContainer.new()
-	hbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	hbox.add_theme_constant_override("separation", 24)
-	margin.add_child(hbox)
-
-	var left: VBoxContainer = VBoxContainer.new()
-	left.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	left.add_theme_constant_override("separation", 6)
-	hbox.add_child(left)
-
-	player_label = _make_label(22, true)
-	room_label = _make_label(16)
-	subtitle_label = _make_label(15)
-	left.add_child(player_label)
-	left.add_child(room_label)
-	left.add_child(subtitle_label)
-
-	var right: VBoxContainer = VBoxContainer.new()
-	right.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	right.add_theme_constant_override("separation", 4)
-	hbox.add_child(right)
-
-	score_label = _make_label(15, true)
-	level_label = _make_label(15, true)
-	progress_label = _make_label(15, true)
-	accuracy_label = _make_label(15, true)
-	right.add_child(score_label)
-	right.add_child(level_label)
-	right.add_child(progress_label)
-	right.add_child(accuracy_label)
-
-	feedback_label = Label.new()
-	feedback_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	feedback_label.size = Vector2(560, 42)
-	feedback_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	feedback_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	UITheme.apply_font_only(feedback_label, 20)
-	feedback_label.add_theme_color_override("font_color", Color.WHITE)
-	hud_root.add_child(feedback_label)
-
-	roll_button = _create_action_button("ROLAR DADO", Callable(self, "roll_dice"))
-	hud_root.add_child(roll_button)
-
-	if settings_button and not settings_button.pressed.is_connected(_on_settings_pressed):
-		settings_button.pressed.connect(_on_settings_pressed)
-
 func _on_settings_pressed() -> void:
 	SettingsManager.open_menu()
-
-func _create_action_button(text_value: String, callback: Callable) -> Button:
-	var button: Button = Button.new()
-	button.text = text_value
-	button.size = Vector2(214, 54)
-	button.focus_mode = Control.FOCUS_NONE
-	UITheme.apply_button(button, UITheme.BUTTON_PRIMARY, 20)
-	button.pressed.connect(callback)
-	return button
-
-func _make_label(size: int, bold := false) -> Label:
-	var label: Label = Label.new()
-	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	UITheme.apply_font_only(label, size)
-	label.add_theme_color_override("font_color", Color.WHITE)
-
-	if bold:
-		label.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.25))
-
-	return label
-
-func _build_question_ui() -> void:
-	_ensure_dialog_panel()
-	if dialog_panel == null:
-		push_error("JanelaPergunta nao foi encontrada nem criada.")
-		return
-
-	for child in dialog_panel.get_children():
-		child.queue_free()
-
-	dialog_panel.mouse_filter = Control.MOUSE_FILTER_STOP
-	dialog_panel.focus_mode = Control.FOCUS_ALL
-	dialog_panel.visible = false
-
-	var panel_style: StyleBoxFlat = StyleBoxFlat.new()
-	panel_style.bg_color = Color(0.09, 0.12, 0.21, 0.97)
-	panel_style.corner_radius_top_left = 28
-	panel_style.corner_radius_top_right = 28
-	panel_style.corner_radius_bottom_left = 28
-	panel_style.corner_radius_bottom_right = 28
-	panel_style.border_width_left = 3
-	panel_style.border_width_top = 3
-	panel_style.border_width_right = 3
-	panel_style.border_width_bottom = 3
-	panel_style.border_color = Color(1.0, 0.76, 0.25, 1.0)
-	panel_style.shadow_color = Color(0, 0, 0, 0.35)
-	panel_style.shadow_size = 14
-	dialog_panel.add_theme_stylebox_override("panel", panel_style)
-
-	var existing_backdrop: ColorRect = canvas_layer.get_node_or_null("DialogBackdrop") as ColorRect
-	if existing_backdrop != null:
-		dialog_backdrop = existing_backdrop
-	else:
-		dialog_backdrop = ColorRect.new()
-		dialog_backdrop.name = "DialogBackdrop"
-		dialog_backdrop.visible = false
-		dialog_backdrop.set_anchors_preset(Control.PRESET_FULL_RECT)
-		dialog_backdrop.mouse_filter = Control.MOUSE_FILTER_STOP
-		dialog_backdrop.color = Color(0.02, 0.02, 0.05, 0.58)
-		canvas_layer.add_child(dialog_backdrop)
-
-	canvas_layer.move_child(dialog_backdrop, 0)
-
-	var margin: MarginContainer = MarginContainer.new()
-	margin.set_anchors_preset(Control.PRESET_FULL_RECT)
-	margin.add_theme_constant_override("margin_left", 28)
-	margin.add_theme_constant_override("margin_top", 22)
-	margin.add_theme_constant_override("margin_right", 28)
-	margin.add_theme_constant_override("margin_bottom", 22)
-	dialog_panel.add_child(margin)
-
-	var vbox: VBoxContainer = VBoxContainer.new()
-	vbox.set_anchors_preset(Control.PRESET_FULL_RECT)
-	vbox.add_theme_constant_override("separation", 14)
-	margin.add_child(vbox)
-
-	dialog_title_label = Label.new()
-	dialog_title_label.text = "DESAFIO DO TABULEIRO"
-	dialog_title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	UITheme.apply_font_only(dialog_title_label, 26)
-	dialog_title_label.add_theme_color_override("font_color", HUD_ACCENT)
-	vbox.add_child(dialog_title_label)
-
-	question_label = Label.new()
-	question_label.custom_minimum_size = Vector2(0, 84)
-	question_label.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	question_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	question_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	question_label.vertical_alignment = VERTICAL_ALIGNMENT_TOP
-	UITheme.apply_font_only(question_label, 24)
-	question_label.add_theme_color_override("font_color", Color.WHITE)
-	vbox.add_child(question_label)
-
-	question_hint_label = Label.new()
-	question_hint_label.text = "Escolha a alternativa correta para seguir no tabuleiro."
-	question_hint_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	UITheme.apply_font_only(question_hint_label, 15)
-	question_hint_label.add_theme_color_override("font_color", Color(0.85, 0.90, 0.98, 0.88))
-	vbox.add_child(question_hint_label)
-
-	var answers: VBoxContainer = VBoxContainer.new()
-	answers.add_theme_constant_override("separation", 10)
-	answers.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	vbox.add_child(answers)
-
-	button_a = _create_answer_button(0)
-	button_b = _create_answer_button(1)
-	button_c = _create_answer_button(2)
-	button_d = _create_answer_button(3)
-	answers.add_child(button_a)
-	answers.add_child(button_b)
-	answers.add_child(button_c)
-	answers.add_child(button_d)
-
-func _create_answer_button(answer_slot: int) -> Button:
-	var button: Button = Button.new()
-	button.custom_minimum_size = Vector2(0, 50)
-	button.focus_mode = Control.FOCUS_ALL
-	button.alignment = HORIZONTAL_ALIGNMENT_LEFT
-	button.add_theme_constant_override("h_separation", 8)
-	UITheme.apply_button(button, UITheme.BUTTON_SECONDARY, 17)
-	button.pressed.connect(func() -> void:
-		_on_answer_button_pressed(answer_slot)
-	)
-	return button
-
-func _make_answer_style(color_value: Color) -> StyleBoxFlat:
-	var style: StyleBoxFlat = StyleBoxFlat.new()
-	style.bg_color = color_value
-	style.corner_radius_top_left = 18
-	style.corner_radius_top_right = 18
-	style.corner_radius_bottom_left = 18
-	style.corner_radius_bottom_right = 18
-	style.border_width_left = 2
-	style.border_width_top = 2
-	style.border_width_right = 2
-	style.border_width_bottom = 2
-	style.border_color = Color(0.92, 0.95, 1.0, 0.20)
-	style.content_margin_left = 18
-	style.content_margin_right = 18
-	style.content_margin_top = 12
-	style.content_margin_bottom = 12
-	return style
 
 func _configure_camera() -> void:
 	if board_camera == null:
@@ -413,22 +271,37 @@ func _on_viewport_size_changed() -> void:
 	_update_viewport_layout()
 
 func _update_viewport_layout() -> void:
+	_layout_screen_background()
 	_layout_hud()
 	_layout_dialog()
 	_fit_board_to_view()
+
+func _layout_screen_background() -> void:
+	if screen_background == null:
+		return
+
+	var viewport_size: Vector2 = _get_layout_size()
+	screen_background.anchor_left = 0.0
+	screen_background.anchor_top = 0.0
+	screen_background.anchor_right = 0.0
+	screen_background.anchor_bottom = 0.0
+	screen_background.offset_left = 0.0
+	screen_background.offset_top = 0.0
+	screen_background.offset_right = viewport_size.x
+	screen_background.offset_bottom = viewport_size.y
 
 func _layout_hud() -> void:
 	if hud_root == null:
 		return
 
-	var viewport_size: Vector2 = get_viewport_rect().size
+	var viewport_size: Vector2 = _get_layout_size()
 	var top_panel: PanelContainer = hud_root.get_node_or_null("TopPanel") as PanelContainer
 
 	if top_panel:
 		top_panel.position = Vector2(16, 16)
 		top_panel.size = Vector2(
-			maxf(320.0, minf(540.0, viewport_size.x - 32.0)),
-			96.0
+			clampf(viewport_size.x * 0.34, 320.0, 680.0),
+			102.0
 		)
 
 	if feedback_label != null:
@@ -446,11 +319,22 @@ func _layout_hud() -> void:
 	if sprite_dado != null:
 		sprite_dado.position = Vector2(viewport_size.x - 86.0, 82.0)
 
+	if settings_button != null:
+		var settings_size: float = 62.0
+		settings_button.anchor_left = 0.0
+		settings_button.anchor_top = 0.0
+		settings_button.anchor_right = 0.0
+		settings_button.anchor_bottom = 0.0
+		settings_button.custom_minimum_size = Vector2(settings_size, settings_size)
+		settings_button.size = Vector2(settings_size, settings_size)
+		settings_button.position = Vector2(viewport_size.x - settings_size - 16.0, 14.0)
+		settings_button.scale = Vector2.ONE
+
 func _layout_dialog() -> void:
 	if dialog_panel == null:
 		return
 
-	var viewport_size: Vector2 = get_viewport_rect().size
+	var viewport_size: Vector2 = _get_layout_size()
 	var dialog_width: float = maxf(420.0, minf(DIALOG_MAX_WIDTH, viewport_size.x - 56.0))
 	var dialog_height: float = maxf(400.0, minf(DIALOG_MAX_HEIGHT, viewport_size.y - 40.0))
 
@@ -464,28 +348,77 @@ func _layout_dialog() -> void:
 	dialog_panel.offset_bottom = dialog_height * 0.5
 
 func _fit_board_to_view() -> void:
-	if board_camera == null or board_background == null or board_background.texture == null:
+	if board_camera == null:
 		return
 
-	var viewport_size: Vector2 = get_viewport_rect().size
+	var viewport_size: Vector2 = _get_layout_size()
 	if viewport_size.x <= 0.0 or viewport_size.y <= 0.0:
 		return
 
-	var texture_size: Vector2 = board_background.texture.get_size()
-	var scale_abs: Vector2 = Vector2(absf(board_background.scale.x), absf(board_background.scale.y))
-	var board_size: Vector2 = texture_size * scale_abs
-	if board_size.x <= 0.0 or board_size.y <= 0.0:
+	var board_rect: Rect2 = _build_board_focus_rect(viewport_size)
+	if board_rect.size.x <= 0.0 or board_rect.size.y <= 0.0:
+		if player != null:
+			board_camera.global_position = player.global_position
+		board_camera.zoom = Vector2.ONE * BOARD_MIN_ZOOM
 		return
 
-	var zoom_x: float = board_size.x / viewport_size.x
-	var zoom_y: float = board_size.y / viewport_size.y
-	var zoom_factor: float = maxf(zoom_x, zoom_y) * CAMERA_PADDING
+	var usable_viewport: Vector2 = Vector2(maxf(viewport_size.x - 32.0, 1.0), maxf(viewport_size.y - 32.0, 1.0))
+	var zoom_x: float = board_rect.size.x / usable_viewport.x
+	var zoom_y: float = board_rect.size.y / usable_viewport.y
+	var zoom_factor: float = maxf(maxf(zoom_x, zoom_y) * CAMERA_PADDING, BOARD_MIN_ZOOM)
 	board_camera.zoom = Vector2(zoom_factor, zoom_factor)
+	board_camera.global_position = board_rect.position + (board_rect.size * 0.5)
 
-	if board_background.centered:
-		board_camera.global_position = board_background.global_position
-	else:
-		board_camera.global_position = board_background.global_position + (board_size * 0.5)
+func _get_layout_size() -> Vector2:
+	return get_viewport_rect().size
+
+func _build_board_focus_rect(viewport_size: Vector2) -> Rect2:
+	var board_rect: Rect2 = _calculate_board_bounds()
+	if board_rect.size.x <= 0.0 or board_rect.size.y <= 0.0:
+		return board_rect
+
+	var horizontal_padding: float = clampf(
+		viewport_size.x * BOARD_HORIZONTAL_PADDING_RATIO,
+		BOARD_HORIZONTAL_PADDING_MIN,
+		BOARD_HORIZONTAL_PADDING_MAX
+	)
+	var top_padding: float = clampf(
+		viewport_size.y * BOARD_TOP_PADDING_RATIO,
+		BOARD_TOP_PADDING_MIN,
+		BOARD_TOP_PADDING_MAX
+	)
+	var bottom_padding: float = clampf(
+		viewport_size.y * BOARD_BOTTOM_PADDING_RATIO,
+		BOARD_BOTTOM_PADDING_MIN,
+		BOARD_BOTTOM_PADDING_MAX
+	)
+	board_rect.position -= Vector2(horizontal_padding, top_padding)
+	board_rect.size += Vector2(horizontal_padding * 2.0, top_padding + bottom_padding)
+	return board_rect
+
+func _calculate_board_bounds() -> Rect2:
+	var has_bounds: bool = false
+	var bounds: Rect2 = Rect2()
+
+	for position_value in board_positions:
+		var board_position: Vector2 = position_value
+		if not has_bounds:
+			bounds = Rect2(board_position, Vector2.ZERO)
+			has_bounds = true
+		else:
+			bounds = bounds.expand(board_position)
+
+	if player != null:
+		if not has_bounds:
+			bounds = Rect2(player.global_position, Vector2.ZERO)
+			has_bounds = true
+		else:
+			bounds = bounds.expand(player.global_position)
+
+	if not has_bounds:
+		return Rect2()
+
+	return bounds
 
 func _hide_dialog() -> void:
 	if dialog_panel != null:
@@ -541,7 +474,15 @@ func roll_dice() -> void:
 		return
 
 	_set_turn_state(TurnState.SHOWING_QUESTION)
-	current_roll = randi_range(1, 6)
+	rng_roll.randomize()
+	var rng_roll: float = rng_roll.randf() #gera um numero aleatorio entre 0 e 1
+	if rng_roll <= 0.1: current_roll = 6 #10%
+	elif rng_roll <= 0.2: current_roll= 5	#20%
+	elif rng_roll <= 0.3: current_roll= 4	#30%
+	elif rng_roll <= 0.4: current_roll= 3	#40%
+	elif rng_roll <= 0.5: current_roll= 2	#50%
+	else: current_roll= 1	 # >50%
+	
 	pending_target_house = mini(player.current_house + current_roll, TOTAL_CASAS)
 
 	if sprite_dado != null:
