@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: jornada-api
+    runtime: node
+    rootDir: jornada-api
+    plan: starter
+    region: virginia
+    buildCommand: npm install && npm run build
+    startCommand: npm run start:prod
+    healthCheckPath: /
+    disk:
+      name: jornada-api-data
+      mountPath: /opt/render/project/src/data
+      sizeGB: 1
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_PATH
+        value: /opt/render/project/src/data/jornada_conhecimento.sqlite
+      - key: DATABASE_SEED_PATH
+        value: /opt/render/project/src/jornada_conhecimento.sqlite
+      - key: DB_SYNCHRONIZE
+        value: "true"
+      - key: IA_ENABLED
+        value: "true"
+      - key: GEMINI_MODEL
+        value: gemini-2.5-flash
+      - key: GEMINI_API_KEY
+        sync: false
