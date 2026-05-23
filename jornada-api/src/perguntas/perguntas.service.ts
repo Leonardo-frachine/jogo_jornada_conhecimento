@@ -5,6 +5,8 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 import { DataSource, Repository } from 'typeorm';
 import * as XLSX from 'xlsx';
 import { Pergunta } from './pergunta.entity';
@@ -48,6 +50,7 @@ export class PerguntasService implements OnModuleInit {
   ) {}
 
   async onModuleInit(): Promise<void> {
+    await this.semearPerguntasSeNecessario();
     await this.normalizarIdsPerguntasSeNecessario();
   }
 
@@ -556,10 +559,42 @@ export class PerguntasService implements OnModuleInit {
     return `"${valor.replace(/"/g, '""')}"`;
   }
 
+  private async semearPerguntasSeNecessario(): Promise<void> {
+    if (process.env.NODE_ENV === 'test' || process.env.DB_SEED_DISABLED === 'true') {
+      return;
+    }
+
+    const totalPerguntas = await this.perguntaRepository.count();
+    if (totalPerguntas > 0) {
+      return;
+    }
+
+    const configuredSeedPath = process.env.DATABASE_SEED_SQL_PATH?.trim();
+    const seedPath = configuredSeedPath || path.join('sql', 'perguntas_teste_25.sql');
+    const resolvedSeedPath = path.resolve(seedPath);
+
+    if (!fs.existsSync(resolvedSeedPath)) {
+      return;
+    }
+
+    const seedSql = fs.readFileSync(resolvedSeedPath, 'utf-8').trim();
+    if (!seedSql) {
+      return;
+    }
+
+    await this.dataSource.query(seedSql);
+  }
+
   private async normalizarIdsPerguntasSeNecessario(): Promise<void> {
     const perguntas: Array<{ id: number }> = await this.dataSource.query(
       'SELECT id FROM perguntas ORDER BY id ASC',
     );
+
+    if (!this.usaBancoSqlite()) {
+      const maiorId = perguntas.at(-1)?.id ?? 0;
+      await this.resetarSequenciaPerguntas(maiorId);
+      return;
+    }
 
     if (perguntas.length === 0) {
       await this.resetarSequenciaPerguntas(0);
@@ -653,6 +688,21 @@ export class PerguntasService implements OnModuleInit {
     },
     seq: number,
   ): Promise<void> {
+    if (this.usaBancoPostgres()) {
+      if (seq > 0) {
+        await queryRunner.query(
+          "SELECT setval(pg_get_serial_sequence('perguntas', 'id'), $1, true)",
+          [seq],
+        );
+        return;
+      }
+
+      await queryRunner.query(
+        "SELECT setval(pg_get_serial_sequence('perguntas', 'id'), 1, false)",
+      );
+      return;
+    }
+
     const tabelas = (await queryRunner.query(
       "SELECT name FROM sqlite_master WHERE type = 'table' AND name = ?",
       ['sqlite_sequence'],
@@ -672,5 +722,16 @@ export class PerguntasService implements OnModuleInit {
         ['perguntas', seq],
       );
     }
+  }
+
+  private usaBancoSqlite(): boolean {
+    return (
+      this.dataSource.options.type === 'better-sqlite3' ||
+      this.dataSource.options.type === 'sqlite'
+    );
+  }
+
+  private usaBancoPostgres(): boolean {
+    return this.dataSource.options.type === 'postgres';
   }
 }
