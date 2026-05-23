@@ -9,6 +9,8 @@ const UITheme := preload("res://scripts/UITheme.gd")
 @onready var input_nome: LineEdit = $PainelCentral/MarginContainer/VBoxContainer/InputNome
 @onready var label_codigo: Label = $PainelCentral/MarginContainer/VBoxContainer/LabelCodigo
 @onready var input_codigo: LineEdit = $PainelCentral/MarginContainer/VBoxContainer/InputCodigo
+@onready var botao_personagem_1: Button = $PainelCentral/MarginContainer/VBoxContainer/PersonagensContainer/BotaoPersonagem1
+@onready var botao_personagem_2: Button = $PainelCentral/MarginContainer/VBoxContainer/PersonagensContainer/BotaoPersonagem2
 @onready var botao_jogar: Button = $PainelCentral/MarginContainer/VBoxContainer/BotoesAcao/BotaoJogar
 @onready var botao_voltar: Button = $PainelCentral/MarginContainer/VBoxContainer/BotoesAcao/BotaoVoltar
 @onready var botao_configuracao: TextureButton = $BotaoConfiguracao
@@ -16,6 +18,9 @@ const UITheme := preload("res://scripts/UITheme.gd")
 var nome_aluno: String = ""
 var codigo_sala: String = ""
 var music_player: AudioStreamPlayer
+var personagem_selecionado: int = 1
+var estilo_personagem_normal: StyleBox
+var estilo_personagem_selecionado: StyleBox
 
 func _ready() -> void:
 	SettingsManager.pause_tree_when_open = false
@@ -24,6 +29,7 @@ func _ready() -> void:
 	_play_music()
 	_apply_visual_refresh()
 
+	_preparar_botoes_personagem()
 	botao_jogar.pressed.connect(_on_botao_jogar_pressed)
 	botao_voltar.pressed.connect(_on_botao_voltar_pressed)
 	botao_configuracao.pressed.connect(_on_botao_configuracao_pressed)
@@ -42,6 +48,31 @@ func _apply_visual_refresh() -> void:
 	UITheme.apply_line_edit(input_codigo, 18)
 	UITheme.apply_button(botao_jogar, UITheme.BUTTON_PRIMARY, 20)
 	UITheme.apply_button(botao_voltar, UITheme.BUTTON_SECONDARY, 19)
+
+func _preparar_botoes_personagem() -> void:
+	estilo_personagem_selecionado = botao_personagem_1.get_theme_stylebox("normal").duplicate()
+	estilo_personagem_normal = botao_personagem_2.get_theme_stylebox("normal").duplicate()
+
+	botao_personagem_1.pressed.connect(_selecionar_personagem.bind(1))
+	botao_personagem_2.pressed.connect(_selecionar_personagem.bind(2))
+	_atualizar_selecao_personagem()
+
+func _selecionar_personagem(indice: int) -> void:
+	personagem_selecionado = indice
+	_atualizar_selecao_personagem()
+
+func _atualizar_selecao_personagem() -> void:
+	_aplicar_estilo_personagem(botao_personagem_1, personagem_selecionado == 1)
+	_aplicar_estilo_personagem(botao_personagem_2, personagem_selecionado == 2)
+
+func _aplicar_estilo_personagem(botao: Button, selecionado: bool) -> void:
+	var estilo_base: StyleBox = estilo_personagem_selecionado if selecionado else estilo_personagem_normal
+	var estilo_interacao: StyleBox = estilo_personagem_selecionado
+
+	botao.add_theme_stylebox_override("normal", estilo_base)
+	botao.add_theme_stylebox_override("hover", estilo_interacao)
+	botao.add_theme_stylebox_override("pressed", estilo_interacao)
+	botao.add_theme_stylebox_override("focus", estilo_base)
 
 func _ensure_music_player() -> void:
 	music_player = get_node_or_null("MenuMusic")

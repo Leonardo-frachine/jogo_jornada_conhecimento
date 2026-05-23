@@ -1,0 +1,6 @@
+res://scene/selecao_perfil.tscn
+res://scripts/selecao_perfil.gd
+res://scene/loading_screen.tscn
+res://scene/acesso_professor.tscn
+res://scene/tela_inicial.tscn
+res://scripts/acesso_professor.gd

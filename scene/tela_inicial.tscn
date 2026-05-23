@@ -5,6 +5,7 @@
 [ext_resource type="FontFile" uid="uid://cnk767mck3js2" path="res://fonts/Fredoka-Bold.ttf" id="3_hyw51"]
 [ext_resource type="Texture2D" uid="uid://ctyknso0bfdn6" path="res://imagens/personagem/personagem_logo.png" id="4"]
 [ext_resource type="Texture2D" uid="uid://cbpn68ac6bol8" path="res://imagens/configuracoes/configuracoes.png" id="5"]
+[ext_resource type="Texture2D" uid="uid://biav5vuc0aqh0" path="res://imagens/personagem/personagem_feminina2.png" id="6_8paku"]
 
 [sub_resource type="StyleBoxFlat" id="1"]
 bg_color = Color(1, 0.647059, 0, 1)
@@ -17,6 +18,36 @@ corner_radius_top_left = 30
 corner_radius_top_right = 30
 corner_radius_bottom_right = 30
 corner_radius_bottom_left = 30
+
+[sub_resource type="StyleBoxFlat" id="4"]
+bg_color = Color(1, 0.86, 0.32, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.12, 0.16, 0.27, 1)
+corner_radius_top_left = 28
+corner_radius_top_right = 28
+corner_radius_bottom_right = 28
+corner_radius_bottom_left = 28
+shadow_color = Color(0, 0, 0, 0.2)
+shadow_size = 10
+shadow_offset = Vector2(0, 4)
+
+[sub_resource type="StyleBoxFlat" id="3"]
+bg_color = Color(1, 0.964706, 0.866667, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.5, 0.32, 0.06, 1)
+corner_radius_top_left = 28
+corner_radius_top_right = 28
+corner_radius_bottom_right = 28
+corner_radius_bottom_left = 28
+shadow_color = Color(0, 0, 0, 0.16)
+shadow_size = 8
+shadow_offset = Vector2(0, 4)
 
 [sub_resource type="StyleBoxFlat" id="2"]
 bg_color = Color(1, 1, 1, 1)
@@ -51,17 +82,17 @@ texture = ExtResource("2")
 stretch_mode = 6
 
 [node name="PainelCentral" type="Panel" parent="." unique_id=113190086]
-custom_minimum_size = Vector2(460, 420)
+custom_minimum_size = Vector2(540, 660)
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -230.0
-offset_top = -210.0
-offset_right = 230.0
-offset_bottom = 210.0
+offset_left = -270.0
+offset_top = -330.0
+offset_right = 270.0
+offset_bottom = 330.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("1")
@@ -91,13 +122,75 @@ horizontal_alignment = 1
 [node name="Subtitulo" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer" unique_id=831141664]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("3_hyw51")
-text = "Preencha os dados para continuar no fluxo atual do jogo."
+text = "Preencha os dados e escolha seu personagem para continuar."
 horizontal_alignment = 1
 autowrap_mode = 3
 
 [node name="Espacador" type="Control" parent="PainelCentral/MarginContainer/VBoxContainer" unique_id=616358538]
-custom_minimum_size = Vector2(0, 8)
+custom_minimum_size = Vector2(0, 4)
 layout_mode = 2
+
+[node name="LabelPersonagem" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer" unique_id=1914257661]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.12, 0.16, 0.27, 1)
+theme_override_fonts/font = ExtResource("3_hyw51")
+text = "Selecione seu personagem"
+horizontal_alignment = 1
+
+[node name="PersonagensContainer" type="HBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer" unique_id=676595663]
+layout_mode = 2
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="BotaoPersonagem1" type="Button" parent="PainelCentral/MarginContainer/VBoxContainer/PersonagensContainer" unique_id=780668073]
+custom_minimum_size = Vector2(170, 145)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/normal = SubResource("4")
+theme_override_styles/pressed = SubResource("4")
+theme_override_styles/hover = SubResource("4")
+theme_override_styles/focus = SubResource("4")
+
+[node name="ImagemPersonagem1" type="TextureRect" parent="PainelCentral/MarginContainer/VBoxContainer/PersonagensContainer/BotaoPersonagem1" unique_id=184348694]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = 8.0
+offset_right = -12.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("4")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="BotaoPersonagem2" type="Button" parent="PainelCentral/MarginContainer/VBoxContainer/PersonagensContainer" unique_id=1759656262]
+custom_minimum_size = Vector2(170, 145)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/normal = SubResource("3")
+theme_override_styles/pressed = SubResource("4")
+theme_override_styles/hover = SubResource("4")
+theme_override_styles/focus = SubResource("4")
+
+[node name="ImagemPersonagem2" type="TextureRect" parent="PainelCentral/MarginContainer/VBoxContainer/PersonagensContainer/BotaoPersonagem2" unique_id=37474018]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = 8.0
+offset_right = -12.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("6_8paku")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="LabelNome" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer" unique_id=38524072]
 layout_mode = 2
@@ -140,19 +233,6 @@ theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_fonts/font = ExtResource("3_hyw51")
 theme_override_styles/normal = SubResource("2")
 text = "JOGAR"
-
-[node name="Personagem" type="TextureRect" parent="." unique_id=1447714997]
-custom_minimum_size = Vector2(280, 320)
-layout_mode = 0
-offset_left = -16.0
-offset_top = 244.0
-offset_right = 719.03
-offset_bottom = 574.0
-mouse_filter = 2
-texture = ExtResource("4")
-expand_mode = 1
-stretch_mode = 5
-flip_h = true
 
 [node name="BotaoConfiguracao" type="TextureButton" parent="." unique_id=1853276311]
 custom_minimum_size = Vector2(128, 128)

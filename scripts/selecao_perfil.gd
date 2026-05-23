@@ -3,6 +3,7 @@ extends Control
 const UITheme := preload("res://scripts/UITheme.gd")
 
 @onready var painel_central: Panel = $PainelCentral
+@onready var logo: TextureRect = $PainelCentral/MarginContainer/VBoxContainer/Logo
 @onready var titulo: Label = $PainelCentral/MarginContainer/VBoxContainer/Titulo
 @onready var subtitulo: Label = $PainelCentral/MarginContainer/VBoxContainer/Subtitulo
 @onready var botao_aluno: Button = $PainelCentral/MarginContainer/VBoxContainer/BotaoAluno
@@ -17,11 +18,16 @@ func _ready() -> void:
 	_ensure_music_player()
 	_play_music()
 	_apply_visual_refresh()
+	_update_responsive_layout()
 
 	botao_aluno.pressed.connect(_on_botao_aluno_pressed)
 	botao_professor.pressed.connect(_on_botao_professor_pressed)
 	botao_configuracao.pressed.connect(_on_botao_configuracao_pressed)
 	botao_aluno.grab_focus()
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_RESIZED and is_node_ready():
+		_update_responsive_layout()
 
 func _apply_visual_refresh() -> void:
 	UITheme.apply_surface_panel(painel_central)
@@ -30,6 +36,18 @@ func _apply_visual_refresh() -> void:
 	UITheme.apply_subtitle(subtitulo, 16)
 	UITheme.apply_button(botao_aluno, UITheme.BUTTON_PRIMARY, 19)
 	UITheme.apply_button(botao_professor, UITheme.BUTTON_SECONDARY, 19)
+
+func _update_responsive_layout() -> void:
+	var viewport_size := get_viewport_rect().size
+	var panel_width := clampf(viewport_size.x * 0.86, 360.0, 500.0)
+	var panel_height := clampf(viewport_size.y * 0.82, 470.0, 560.0)
+
+	painel_central.offset_left = -panel_width * 0.5
+	painel_central.offset_right = panel_width * 0.5
+	painel_central.offset_top = -panel_height * 0.5
+	painel_central.offset_bottom = panel_height * 0.5
+	painel_central.custom_minimum_size = Vector2(panel_width, panel_height)
+	logo.custom_minimum_size = Vector2(0.0, clampf(panel_height * 0.34, 150.0, 200.0))
 
 func _ensure_music_player() -> void:
 	music_player = get_node_or_null("MenuMusic")

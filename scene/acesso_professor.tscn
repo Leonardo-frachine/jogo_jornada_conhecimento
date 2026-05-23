@@ -3,7 +3,6 @@
 [ext_resource type="Script" uid="uid://cu1yxd88r62bg" path="res://scripts/acesso_professor.gd" id="1"]
 [ext_resource type="Texture2D" uid="uid://3ljo201dpbbx" path="res://imagens/fundo_tabuleiro/fundo_embacado.png" id="2"]
 [ext_resource type="FontFile" uid="uid://cnk767mck3js2" path="res://fonts/Fredoka-Bold.ttf" id="3_q43u4"]
-[ext_resource type="Texture2D" uid="uid://ctyknso0bfdn6" path="res://imagens/personagem/personagem_logo.png" id="4"]
 [ext_resource type="Texture2D" uid="uid://cbpn68ac6bol8" path="res://imagens/configuracoes/configuracoes.png" id="5"]
 
 [sub_resource type="StyleBoxFlat" id="1"]
@@ -40,17 +39,17 @@ texture = ExtResource("2")
 stretch_mode = 6
 
 [node name="PainelCentral" type="Panel" parent="." unique_id=690661299]
-custom_minimum_size = Vector2(520, 0)
+custom_minimum_size = Vector2(580, 660)
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -260.0
-offset_top = -300.0
-offset_right = 260.0
-offset_bottom = 300.0
+offset_left = -290.0
+offset_top = -330.0
+offset_right = 290.0
+offset_bottom = 330.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("1")
@@ -167,19 +166,6 @@ text = "QUERO ME CADASTRAR"
 custom_minimum_size = Vector2(0, 42)
 layout_mode = 2
 text = "VOLTAR"
-
-[node name="Personagem" type="TextureRect" parent="." unique_id=1500603787]
-custom_minimum_size = Vector2(280, 320)
-layout_mode = 0
-offset_left = -42.0
-offset_top = 204.0
-offset_right = 693.03
-offset_bottom = 534.0
-mouse_filter = 2
-texture = ExtResource("4")
-expand_mode = 1
-stretch_mode = 5
-flip_h = true
 
 [node name="BotaoConfiguracao" type="TextureButton" parent="." unique_id=438299467]
 custom_minimum_size = Vector2(128, 128)

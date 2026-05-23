@@ -3,7 +3,6 @@
 [ext_resource type="Script" uid="uid://bfwsvfskpw02o" path="res://scripts/loading_screen.gd" id="1"]
 [ext_resource type="Texture2D" uid="uid://3ljo201dpbbx" path="res://imagens/fundo_tabuleiro/fundo_embacado.png" id="2"]
 [ext_resource type="Texture2D" uid="uid://bv2xmb27g64al" path="res://imagens/logo_jogo/logo_jogo.png" id="3"]
-[ext_resource type="Texture2D" uid="uid://ctyknso0bfdn6" path="res://imagens/personagem/personagem_logo.png" id="4"]
 [ext_resource type="Texture2D" uid="uid://cbpn68ac6bol8" path="res://imagens/configuracoes/configuracoes.png" id="5"]
 
 [sub_resource type="StyleBoxFlat" id="1"]
@@ -20,30 +19,6 @@ corner_radius_bottom_left = 30
 shadow_color = Color(0, 0, 0, 0.3)
 shadow_size = 16
 
-[sub_resource type="StyleBoxFlat" id="2"]
-bg_color = Color(0.160784, 0.211765, 0.333333, 0.95)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.980392, 0.835294, 0.356863, 0.85)
-corner_radius_top_left = 20
-corner_radius_top_right = 20
-corner_radius_bottom_right = 20
-corner_radius_bottom_left = 20
-
-[sub_resource type="StyleBoxFlat" id="3"]
-bg_color = Color(0.2, 0.25, 0.4, 0.9)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.980392, 0.835294, 0.356863, 0.7)
-corner_radius_top_left = 16
-corner_radius_top_right = 16
-corner_radius_bottom_right = 16
-corner_radius_bottom_left = 16
-
 [sub_resource type="StyleBoxFlat" id="4"]
 bg_color = Color(0.15, 0.18, 0.28, 0.85)
 border_width_left = 1
@@ -57,15 +32,35 @@ corner_radius_bottom_right = 12
 corner_radius_bottom_left = 12
 
 [sub_resource type="StyleBoxFlat" id="5"]
-bg_color = Color(0.4, 0.7, 1.0, 0.8)
-border_width_left = 0
-border_width_top = 0
-border_width_right = 0
-border_width_bottom = 0
+bg_color = Color(0.4, 0.7, 1, 0.8)
 corner_radius_top_left = 8
 corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="3"]
+bg_color = Color(0.2, 0.25, 0.4, 0.9)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.980392, 0.835294, 0.356863, 0.7)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="StyleBoxFlat" id="2"]
+bg_color = Color(0.160784, 0.211765, 0.333333, 0.95)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.980392, 0.835294, 0.356863, 0.85)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
 
 [node name="LoadingScreen" type="Control" unique_id=1412677204]
 layout_mode = 3
@@ -129,12 +124,12 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="Titulo" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer" unique_id=463761491]
+custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.1, 0.1, 0.15, 1)
 theme_override_font_sizes/font_size = 28
 text = "Preparando a Jornada"
 horizontal_alignment = 1
-custom_minimum_size = Vector2(0, 40)
 
 [node name="Subtitle" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer" unique_id=1680765162]
 layout_mode = 2
@@ -153,7 +148,6 @@ custom_minimum_size = Vector2(0, 24)
 layout_mode = 2
 theme_override_styles/background = SubResource("4")
 theme_override_styles/fill = SubResource("5")
-value = 0.0
 show_percentage = false
 
 [node name="StepsContainer" type="HBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer/ProgressSection" unique_id=1800000003]
@@ -267,19 +261,6 @@ theme_override_font_sizes/font_size = 13
 text = "As perguntas e o progresso da partida estao sendo preparados."
 horizontal_alignment = 1
 autowrap_mode = 3
-
-[node name="Personagem" type="TextureRect" parent="." unique_id=417572918]
-custom_minimum_size = Vector2(240, 280)
-layout_mode = 0
-offset_left = -109.0
-offset_top = 214.0
-offset_right = 545.0
-offset_bottom = 882.0
-mouse_filter = 2
-texture = ExtResource("4")
-expand_mode = 1
-stretch_mode = 5
-flip_h = true
 
 [node name="BotaoConfiguracao" type="TextureButton" parent="." unique_id=1756371998]
 custom_minimum_size = Vector2(128, 128)

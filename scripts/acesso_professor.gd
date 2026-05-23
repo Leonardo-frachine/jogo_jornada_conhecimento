@@ -22,7 +22,7 @@ const STATUS_ERROR := UITheme.STATUS_ERROR
 @onready var botao_acao: Button = $PainelCentral/MarginContainer/VBoxContainer/BotaoAcao
 @onready var botao_alternar: Button = $PainelCentral/MarginContainer/VBoxContainer/BotaoAlternar
 @onready var botao_voltar: Button = $PainelCentral/MarginContainer/VBoxContainer/BotaoVoltar
-@onready var personagem: TextureRect = $Personagem
+@onready var personagem: TextureRect = get_node_or_null("Personagem") as TextureRect
 @onready var botao_configuracao: TextureButton = $BotaoConfiguracao
 
 var modo_cadastro := false
@@ -76,8 +76,8 @@ func _update_layout() -> void:
 	var viewport_size: Vector2 = get_viewport_rect().size
 	var compact_width: bool = viewport_size.x < 1180.0
 	var compact_height: bool = viewport_size.y < 760.0
-	var panel_width: float = clampf(viewport_size.x * 0.38, 440.0, 540.0)
-	var panel_height: float = clampf(viewport_size.y - (96.0 if compact_height else 120.0), 560.0, 650.0)
+	var panel_width: float = clampf(viewport_size.x * 0.42, 480.0, 600.0)
+	var panel_height: float = clampf(viewport_size.y - (72.0 if compact_height else 96.0), 600.0, 700.0)
 
 	painel_central.offset_left = -panel_width * 0.5
 	painel_central.offset_top = -panel_height * 0.5
