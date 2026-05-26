@@ -539,7 +539,18 @@ layout_mode = 2
 autowrap_mode = 3
 text = "Aguardando arquivo."
 
-[node name="BotaoImportar" type="Button" parent="SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/ImportarPerguntasPage/ImportarIntroCard/ImportarIntroMargin/ImportarIntroVBox"]
+[node name="ImportarActions" type="GridContainer" parent="SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/ImportarPerguntasPage/ImportarIntroCard/ImportarIntroMargin/ImportarIntroVBox"]
+layout_mode = 2
+theme_override_constants/h_separation = 10
+theme_override_constants/v_separation = 10
+columns = 2
+
+[node name="BotaoBaixarModelo" type="Button" parent="SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/ImportarPerguntasPage/ImportarIntroCard/ImportarIntroMargin/ImportarIntroVBox/ImportarActions"]
+custom_minimum_size = Vector2(220, 44)
+layout_mode = 2
+text = "Baixar Modelo"
+
+[node name="BotaoImportar" type="Button" parent="SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/ImportarPerguntasPage/ImportarIntroCard/ImportarIntroMargin/ImportarIntroVBox/ImportarActions"]
 custom_minimum_size = Vector2(220, 44)
 layout_mode = 2
 text = "Selecionar Planilha"
