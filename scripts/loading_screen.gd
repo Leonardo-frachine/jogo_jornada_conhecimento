@@ -140,4 +140,4 @@ func _show_startup_error(message: String) -> void:
 	dialog.dialog_text = message
 	dialog.popup_centered()
 	await dialog.confirmed
-	get_tree().change_scene_to_file("res://scene/selecao_perfil.tscn")
+	get_tree().change_scene_to_file("res://scene/tela_inicial.tscn")

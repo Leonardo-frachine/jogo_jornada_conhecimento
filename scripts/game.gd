@@ -335,14 +335,18 @@ func _layout_hud() -> void:
 		sprite_dado.position = Vector2(viewport_size.x - 86.0, 82.0)
 
 	if settings_button != null:
-		var settings_size: float = 62.0
+		var settings_size: float = 128.0
+		var settings_margin: float = 18.0
 		settings_button.anchor_left = 0.0
 		settings_button.anchor_top = 0.0
 		settings_button.anchor_right = 0.0
 		settings_button.anchor_bottom = 0.0
 		settings_button.custom_minimum_size = Vector2(settings_size, settings_size)
 		settings_button.size = Vector2(settings_size, settings_size)
-		settings_button.position = Vector2(viewport_size.x - settings_size - 16.0, 14.0)
+		settings_button.position = Vector2(
+			viewport_size.x - settings_size - settings_margin,
+			viewport_size.y - settings_size - settings_margin
+		)
 		settings_button.scale = Vector2.ONE
 
 func _layout_dialog() -> void:

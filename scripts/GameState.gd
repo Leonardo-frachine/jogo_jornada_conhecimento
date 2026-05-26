@@ -59,7 +59,7 @@ var fallback_question_bank: Dictionary = {
 
 func start_session(name: String, code: String) -> void:
 	player_name = name.strip_edges()
-	room_code = code.strip_edges()
+	room_code = code.strip_edges().to_upper()
 	player_id = 0
 	resolved_room_id = 0
 	backend_ready = false
@@ -83,6 +83,18 @@ func prepare_session() -> Dictionary:
 	used_question_ids.clear()
 	current_question.clear()
 
+	if not room_code.is_empty():
+		_emit_session_status("Validando sala informada...")
+		var room_response: Dictionary = await ApiClient.fetch_room_by_code(room_code)
+		if not room_response.get("ok", false):
+			return _session_failure("Codigo de sala invalido ou sala nao cadastrada. Confira o codigo informado e tente novamente.")
+
+		var room_data: Dictionary = room_response.get("data", {})
+		resolved_room_id = int(room_data.get("id", 0))
+		room_code = str(room_data.get("codigo", room_code)).strip_edges().to_upper()
+		if resolved_room_id <= 0:
+			return _session_failure("A sala informada nao possui um identificador valido no servidor.")
+
 	_emit_session_status("Conectando ao backend...")
 	var player_response: Dictionary = await ApiClient.create_player(player_name)
 	if not player_response.get("ok", false):
@@ -92,16 +104,6 @@ func prepare_session() -> Dictionary:
 	player_id = int(created_player.get("id", 0))
 	if player_id <= 0:
 		return _session_failure("A API nao retornou um identificador valido para o jogador.")
-
-	if not room_code.is_empty():
-		_emit_session_status("Validando sala informada...")
-		var room_response: Dictionary = await ApiClient.fetch_room_by_code(room_code)
-		if room_response.get("ok", false):
-			var room_data: Dictionary = room_response.get("data", {})
-			resolved_room_id = int(room_data.get("id", 0))
-			room_code = str(room_data.get("codigo", room_code)).strip_edges()
-		else:
-			sync_warning = "Sala nao localizada no painel do professor. O jogo seguira sem vinculo de sala."
 
 	_emit_session_status("Carregando perguntas da API...")
 	var questions_response: Dictionary = await ApiClient.fetch_questions()
