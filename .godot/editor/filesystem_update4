@@ -1,1 +1,4 @@
 res://scripts/painel_professor.gd
+res://scripts/game.gd
+res://scripts/selecao_perfil.gd
+res://scripts/tela_inicial.gd

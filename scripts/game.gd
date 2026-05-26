@@ -100,12 +100,14 @@ func _ready() -> void:
 			player.movement_finished.connect(_on_movement_finished)
 
 	_create_audio_players()
+	if not SettingsManager.settings_changed.is_connected(_on_settings_changed):
+		SettingsManager.settings_changed.connect(_on_settings_changed)
 	_configure_camera()
 	_refresh_hud()
 	call_deferred("_apply_initial_layout")
 	_hide_dialog()
 	_set_turn_state(TurnState.WAITING_ROLL)
-	_play_music()
+	_sync_music_state()
 	_show_feedback("Role o dado para abrir uma pergunta.", FEEDBACK_OK)
 
 	if not get_viewport().size_changed.is_connected(_on_viewport_size_changed):
@@ -244,6 +246,19 @@ func _create_audio_players() -> void:
 func _play_music() -> void:
 	if music_player and music_player.stream and SettingsManager.music_enabled and not music_player.playing:
 		music_player.play()
+
+func _sync_music_state() -> void:
+	if music_player == null or music_player.stream == null:
+		return
+	if SettingsManager.music_enabled:
+		if not music_player.playing:
+			music_player.play()
+	else:
+		if music_player.playing:
+			music_player.stop()
+
+func _on_settings_changed() -> void:
+	_sync_music_state()
 
 func _play_sfx(path: String) -> void:
 	if sfx_player == null:
