@@ -1,6 +1,6 @@
-res://scene/selecao_perfil.tscn
+res://scripts/painel_professor.gd
+res://scripts/game.gd
 res://scripts/selecao_perfil.gd
-res://scene/loading_screen.tscn
-res://scene/acesso_professor.tscn
-res://scene/tela_inicial.tscn
-res://scripts/acesso_professor.gd
+res://scripts/tela_inicial.gd
+res://scripts/GameState.gd
+res://scripts/loading_screen.gd

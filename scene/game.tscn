@@ -10,7 +10,7 @@
 [ext_resource type="Texture2D" uid="uid://c456bwc5yj2r1" path="res://imagens/chao/token_hexagon_3d_blue.png" id="6_5g16k"]
 [ext_resource type="Texture2D" uid="uid://cqw2od8y8ev4" path="res://imagens/chao/token_hexagon_3d_white.png" id="7_ym5sv"]
 [ext_resource type="Texture2D" uid="uid://c3esur46a71up" path="res://imagens/chao/token_hexagon_3d_red.png" id="8_sng2h"]
-[ext_resource type="Texture2D" uid="uid://c1elftruprn00" path="res://imagens/Fundo/fundogame.jpg" id="12_5g16k"]
+[ext_resource type="Texture2D" uid="uid://c1elftruprn00" path="res://imagens/Fundo/fundogame.png" id="12_5g16k"]
 [ext_resource type="Texture2D" uid="uid://cbpn68ac6bol8" path="res://imagens/configuracoes/configuracoes.png" id="18_ux4dc"]
 [ext_resource type="Script" uid="uid://crxkgvki2ihn4" path="res://scripts/game.gd" id="19_game"]
 

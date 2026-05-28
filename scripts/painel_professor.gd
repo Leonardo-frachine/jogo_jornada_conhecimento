@@ -30,6 +30,8 @@ const COLOR_SIDEBAR_TEXT := UITheme.PROFESSOR_SIDEBAR_TEXT
 const COLOR_SIDEBAR_MUTED := UITheme.PROFESSOR_SIDEBAR_MUTED
 const COLOR_GLOW_PRIMARY := UITheme.APP_GLOW_PRIMARY
 const COLOR_GLOW_SECONDARY := UITheme.APP_GLOW_SECONDARY
+const TEMPLATE_SPREADSHEET_RESOURCE_PATH := "res://planilha importacao.xlsx"
+const TEMPLATE_SPREADSHEET_FILENAME := "planilha importacao.xlsx"
 
 const IA_STATUS_PENDING := "pendente"
 const IA_STATUS_APPROVED := "aprovada"
@@ -139,7 +141,8 @@ const PAGE_META := {
 @onready var lista_banco_perguntas: VBoxContainer = $SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/BancoPerguntasPage/ListaBancoPerguntas
 
 @onready var importar_feedback: Label = $SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/ImportarPerguntasPage/ImportarIntroCard/ImportarIntroMargin/ImportarIntroVBox/ImportarFeedback
-@onready var botao_importar: Button = $SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/ImportarPerguntasPage/ImportarIntroCard/ImportarIntroMargin/ImportarIntroVBox/BotaoImportar
+@onready var botao_baixar_modelo: Button = $SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/ImportarPerguntasPage/ImportarIntroCard/ImportarIntroMargin/ImportarIntroVBox/ImportarActions/BotaoBaixarModelo
+@onready var botao_importar: Button = $SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/ImportarPerguntasPage/ImportarIntroCard/ImportarIntroMargin/ImportarIntroVBox/ImportarActions/BotaoImportar
 
 @onready var ia_tema_input: LineEdit = $SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/GerarIAPage/IaFormCard/IaFormMargin/IaFormGrid/IaTemaInput
 @onready var ia_materia_input: LineEdit = $SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/GerarIAPage/IaFormCard/IaFormMargin/IaFormGrid/IaMateriaInput
@@ -165,6 +168,7 @@ var ia_processando := false
 var ia_salvando := false
 var sidebar_expanded := true
 var import_dialog: FileDialog
+var template_download_dialog: FileDialog
 
 var current_view := VIEW_DASHBOARD
 var dashboard_payload: Dictionary = {}
@@ -230,6 +234,7 @@ func _connect_signals() -> void:
 	filtro_dificuldade_perguntas.item_selected.connect(_on_question_filter_changed)
 
 	botao_importar.pressed.connect(_on_botao_importar_pressed)
+	botao_baixar_modelo.pressed.connect(_on_botao_baixar_modelo_pressed)
 
 	ia_botao_gerar.pressed.connect(_on_botao_gerar_ia_pressed)
 	ia_botao_salvar.pressed.connect(_on_botao_salvar_aprovadas_pressed)
@@ -347,6 +352,7 @@ func _apply_theme() -> void:
 	_apply_button_palette(botao_atualizar_perguntas, STATUS_INFO, _shade_color(STATUS_INFO, 0.24))
 	_apply_button_palette(botao_expandir_todas, COLOR_SURFACE_ALT, COLOR_BORDER, COLOR_TEXT)
 	_apply_button_palette(botao_recolher_todas, COLOR_SURFACE_ALT, COLOR_BORDER, COLOR_TEXT)
+	_apply_button_palette(botao_baixar_modelo, COLOR_SURFACE_ALT, COLOR_BORDER, COLOR_TEXT)
 	_apply_button_palette(botao_importar, COLOR_ACCENT, COLOR_ACCENT_DARK)
 	_apply_button_palette(ia_botao_gerar, COLOR_ACCENT, COLOR_ACCENT_DARK)
 	_apply_button_palette(ia_botao_salvar, STATUS_OK, _shade_color(STATUS_OK, 0.22))
@@ -526,6 +532,21 @@ func _ensure_import_dialog() -> void:
 
 	if not import_dialog.file_selected.is_connected(_on_import_file_selected):
 		import_dialog.file_selected.connect(_on_import_file_selected)
+
+	template_download_dialog = get_node_or_null("TemplateDownloadDialog")
+	if template_download_dialog == null:
+		template_download_dialog = FileDialog.new()
+		template_download_dialog.name = "TemplateDownloadDialog"
+		template_download_dialog.access = FileDialog.ACCESS_FILESYSTEM
+		template_download_dialog.file_mode = FileDialog.FILE_MODE_SAVE_FILE
+		template_download_dialog.use_native_dialog = true
+		template_download_dialog.title = "Salvar modelo de planilha"
+		template_download_dialog.current_file = TEMPLATE_SPREADSHEET_FILENAME
+		template_download_dialog.add_filter("*.xlsx", "Planilhas Excel")
+		add_child(template_download_dialog)
+
+	if not template_download_dialog.file_selected.is_connected(_on_template_download_file_selected):
+		template_download_dialog.file_selected.connect(_on_template_download_file_selected)
 
 func _fetch_rooms(refresh_dashboard_after_load: bool) -> void:
 	if carregando:
@@ -1300,7 +1321,9 @@ func _update_question_bank_controls_state() -> void:
 	botao_atualizar_perguntas.text = "Atualizando..." if carregando_banco_perguntas else "Atualizar Banco"
 	botao_expandir_todas.disabled = banco_perguntas.is_empty()
 	botao_recolher_todas.disabled = banco_perguntas.is_empty()
+	botao_baixar_modelo.disabled = carregando or importando_perguntas
 	botao_importar.disabled = carregando or carregando_banco_perguntas or importando_perguntas
+	botao_baixar_modelo.text = "Preparando..." if carregando or importando_perguntas else "Baixar Modelo"
 	botao_importar.text = "Importando..." if importando_perguntas else "Selecionar Planilha"
 
 func _update_question_count_badge() -> void:
@@ -1323,6 +1346,42 @@ func _on_botao_importar_pressed() -> void:
 		return
 	_set_import_feedback("Selecione uma planilha .csv ou .xlsx para importar perguntas.", STATUS_INFO)
 	import_dialog.popup_centered_ratio(0.72)
+
+func _on_botao_baixar_modelo_pressed() -> void:
+	if carregando or importando_perguntas or template_download_dialog == null:
+		return
+	if not FileAccess.file_exists(TEMPLATE_SPREADSHEET_RESOURCE_PATH):
+		_set_import_feedback("O modelo de planilha nao foi encontrado no projeto.", STATUS_ERROR)
+		_show_status("O modelo de planilha nao foi encontrado no projeto.", STATUS_ERROR)
+		return
+	_set_import_feedback("Escolha onde salvar o modelo de planilha.", STATUS_INFO)
+	template_download_dialog.current_file = TEMPLATE_SPREADSHEET_FILENAME
+	template_download_dialog.popup_centered_ratio(0.72)
+
+func _on_template_download_file_selected(path: String) -> void:
+	var source_file := FileAccess.open(TEMPLATE_SPREADSHEET_RESOURCE_PATH, FileAccess.READ)
+	if source_file == null:
+		_set_import_feedback("Nao foi possivel abrir o modelo de planilha.", STATUS_ERROR)
+		_show_status("Nao foi possivel abrir o modelo de planilha.", STATUS_ERROR)
+		return
+
+	var content: PackedByteArray = source_file.get_buffer(source_file.get_length())
+	source_file.close()
+	if content.is_empty():
+		_set_import_feedback("O modelo de planilha esta vazio ou indisponivel.", STATUS_ERROR)
+		_show_status("O modelo de planilha esta vazio ou indisponivel.", STATUS_ERROR)
+		return
+
+	var target_file := FileAccess.open(path, FileAccess.WRITE)
+	if target_file == null:
+		_set_import_feedback("Nao foi possivel salvar o modelo no local escolhido.", STATUS_ERROR)
+		_show_status("Nao foi possivel salvar o modelo no local escolhido.", STATUS_ERROR)
+		return
+
+	target_file.store_buffer(content)
+	target_file.close()
+	_set_import_feedback("Modelo salvo com sucesso em %s." % path.get_file(), STATUS_OK)
+	_show_status("Modelo de planilha salvo com sucesso.", STATUS_OK)
 
 func _on_import_file_selected(path: String) -> void:
 	if importando_perguntas:

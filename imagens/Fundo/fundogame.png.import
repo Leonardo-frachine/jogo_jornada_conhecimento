@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dhjokjdp7bn7k"
-path="res://.godot/imported/fundogame.jpg-f3e297bf75ddfad9068b47a2757a0d09.ctex"
+uid="uid://b17x576082u88"
+path="res://.godot/imported/fundogame.png-96a904a3ad5a65a9074bde8ec046eb0e.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://imagens/Fundo/fundogame.jpg"
-dest_files=["res://.godot/imported/fundogame.jpg-f3e297bf75ddfad9068b47a2757a0d09.ctex"]
+source_file="res://imagens/Fundo/fundogame.png"
+dest_files=["res://.godot/imported/fundogame.png-96a904a3ad5a65a9074bde8ec046eb0e.ctex"]
 
 [params]
 

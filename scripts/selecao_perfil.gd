@@ -16,7 +16,9 @@ func _ready() -> void:
 	SettingsManager.pause_tree_when_open = false
 	SettingsManager.close_menu()
 	_ensure_music_player()
-	_play_music()
+	if not SettingsManager.settings_changed.is_connected(_on_settings_changed):
+		SettingsManager.settings_changed.connect(_on_settings_changed)
+	_sync_music_state()
 	_apply_visual_refresh()
 	_update_responsive_layout()
 
@@ -65,6 +67,19 @@ func _play_music() -> void:
 		return
 	if SettingsManager.music_enabled and not music_player.playing:
 		music_player.play()
+
+func _sync_music_state() -> void:
+	if music_player == null or music_player.stream == null:
+		return
+	if SettingsManager.music_enabled:
+		if not music_player.playing:
+			music_player.play()
+	else:
+		if music_player.playing:
+			music_player.stop()
+
+func _on_settings_changed() -> void:
+	_sync_music_state()
 
 func _on_botao_aluno_pressed() -> void:
 	get_tree().change_scene_to_file("res://scene/tela_inicial.tscn")
