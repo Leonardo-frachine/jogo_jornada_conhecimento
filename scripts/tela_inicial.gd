@@ -123,7 +123,7 @@ func _on_botao_jogar_pressed() -> void:
 		return
 
 	SettingsManager.close_menu()
-	GameState.start_session(nome_aluno, codigo_sala)
+	GameState.start_session(nome_aluno, codigo_sala, personagem_selecionado)
 	get_tree().change_scene_to_file("res://scene/loading_screen.tscn")
 
 func validar_campos() -> bool:

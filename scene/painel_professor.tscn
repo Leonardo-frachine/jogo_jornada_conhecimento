@@ -130,6 +130,7 @@ columns = 2
 
 [node name="PainelMaterias" type="PanelContainer" parent="SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/DashboardPage/DashboardBodyGrid"]
 layout_mode = 2
+size_flags_horizontal = 3
 
 [node name="MateriasMargin" type="MarginContainer" parent="SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/DashboardPage/DashboardBodyGrid/PainelMaterias"]
 layout_mode = 2
@@ -157,6 +158,7 @@ theme_override_constants/separation = 10
 
 [node name="PainelDificuldades" type="PanelContainer" parent="SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/DashboardPage/DashboardBodyGrid"]
 layout_mode = 2
+size_flags_horizontal = 3
 
 [node name="DificuldadesMargin" type="MarginContainer" parent="SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/DashboardPage/DashboardBodyGrid/PainelDificuldades"]
 layout_mode = 2
@@ -191,6 +193,7 @@ columns = 1
 
 [node name="PainelAtividades" type="PanelContainer" parent="SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/DashboardPage/DashboardSecondaryGrid"]
 layout_mode = 2
+size_flags_horizontal = 3
 
 [node name="AtividadesMargin" type="MarginContainer" parent="SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/DashboardPage/DashboardSecondaryGrid/PainelAtividades"]
 layout_mode = 2

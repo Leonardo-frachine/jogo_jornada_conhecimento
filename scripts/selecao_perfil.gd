@@ -41,15 +41,15 @@ func _apply_visual_refresh() -> void:
 
 func _update_responsive_layout() -> void:
 	var viewport_size := get_viewport_rect().size
-	var panel_width := clampf(viewport_size.x * 0.86, 360.0, 500.0)
-	var panel_height := clampf(viewport_size.y * 0.82, 470.0, 560.0)
+	var panel_width := clampf(viewport_size.x * 0.86, 380.0, 520.0)
+	var panel_height := clampf(viewport_size.y * 0.84, 520.0, 640.0)
 
 	painel_central.offset_left = -panel_width * 0.5
 	painel_central.offset_right = panel_width * 0.5
 	painel_central.offset_top = -panel_height * 0.5
 	painel_central.offset_bottom = panel_height * 0.5
 	painel_central.custom_minimum_size = Vector2(panel_width, panel_height)
-	logo.custom_minimum_size = Vector2(0.0, clampf(panel_height * 0.34, 150.0, 200.0))
+	logo.custom_minimum_size = Vector2(0.0, clampf(panel_height * 0.42, 220.0, 285.0))
 
 func _ensure_music_player() -> void:
 	music_player = get_node_or_null("MenuMusic")

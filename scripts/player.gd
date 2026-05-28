@@ -6,10 +6,13 @@ signal movement_finished
 var board_positions: Array[Vector2] = []
 var current_house: int = 1
 var moving := false
+var idle_sprite_scale := Vector2(0.085, 0.1)
+var walk_sprite_scale := Vector2(0.095, 0.115)
 
 @onready var sprite: AnimatedSprite2D = $CollisionShape2D/AnimatedSprite2D
 
 func setup(positions: Array[Vector2]) -> void:
+	_apply_selected_character()
 	board_positions = positions
 	current_house = 1
 	if board_positions.size() > 0:
@@ -36,9 +39,32 @@ func _move_to_position(target_position: Vector2) -> void:
 	_play_walk()
 	var tween := create_tween()
 	tween.tween_property(self, "global_position", target_position, 0.28).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-	tween.parallel().tween_property(sprite, "scale", Vector2(0.095, 0.115), 0.14)
-	tween.tween_property(sprite, "scale", Vector2(0.085, 0.1), 0.14)
+	tween.parallel().tween_property(sprite, "scale", walk_sprite_scale, 0.14)
+	tween.tween_property(sprite, "scale", idle_sprite_scale, 0.14)
 	await tween.finished
+
+func _apply_selected_character() -> void:
+	if sprite == null:
+		return
+
+	var texture_path := GameState.get_selected_character_texture_path()
+	var texture := load(texture_path) as Texture2D
+	if texture == null:
+		return
+
+	var frames := SpriteFrames.new()
+	if not frames.has_animation("idle"):
+		frames.add_animation("idle")
+	frames.add_frame("idle", texture)
+	frames.set_animation_loop("idle", true)
+	frames.set_animation_speed("idle", 5.0)
+	sprite.sprite_frames = frames
+	sprite.animation = &"idle"
+
+	var scale_ratio := 1536.0 / maxf(float(texture.get_width()), 1.0)
+	idle_sprite_scale = Vector2(0.085, 0.1) * scale_ratio
+	walk_sprite_scale = Vector2(0.095, 0.115) * scale_ratio
+	sprite.scale = idle_sprite_scale
 
 func _play_walk() -> void:
 	if sprite == null:

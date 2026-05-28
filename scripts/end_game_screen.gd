@@ -108,13 +108,15 @@ func _prepare_intro_state() -> void:
 	metrics_row.modulate = Color(1, 1, 1, 0)
 	buttons_row.modulate = Color(1, 1, 1, 0)
 	buttons_row.scale = Vector2(0.96, 0.96)
-	character.modulate = Color(1, 1, 1, 0)
+	if character != null:
+		character.modulate = Color(1, 1, 1, 0)
 
 func _play_intro_animation() -> void:
 	var tween := create_tween()
 	tween.tween_property(painel_central, "modulate", Color.WHITE, 0.24)
 	tween.parallel().tween_property(painel_central, "scale", Vector2.ONE, 0.34).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	tween.parallel().tween_property(character, "modulate", Color.WHITE, 0.30)
+	if character != null:
+		tween.parallel().tween_property(character, "modulate", Color.WHITE, 0.30)
 	tween.chain().tween_property(content_row, "modulate", Color.WHITE, 0.18)
 	tween.parallel().tween_property(content_row, "scale", Vector2.ONE, 0.18).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	tween.chain().tween_property(metrics_row, "modulate", Color.WHITE, 0.16)

@@ -7,7 +7,7 @@ extends Control
 @onready var dot_1: Label = $PainelCentral/MarginContainer/VBoxContainer/LoadingCard/LoadingCenter/LoadingRow/Dot1
 @onready var dot_2: Label = $PainelCentral/MarginContainer/VBoxContainer/LoadingCard/LoadingCenter/LoadingRow/Dot2
 @onready var dot_3: Label = $PainelCentral/MarginContainer/VBoxContainer/LoadingCard/LoadingCenter/LoadingRow/Dot3
-@onready var personagem: TextureRect = $Personagem
+@onready var personagem: TextureRect = get_node_or_null("Personagem") as TextureRect
 @onready var progress_bar: ProgressBar = $PainelCentral/MarginContainer/VBoxContainer/ProgressSection/ProgressBar
 @onready var step_1: Panel = $PainelCentral/MarginContainer/VBoxContainer/ProgressSection/StepsContainer/Step1
 @onready var step_2: Panel = $PainelCentral/MarginContainer/VBoxContainer/ProgressSection/StepsContainer/Step2
@@ -78,6 +78,9 @@ func animate_loading_card() -> void:
 	tween.tween_property(loading_card, "scale", base_scale, 0.7).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 
 func animate_character() -> void:
+	if personagem == null:
+		return
+
 	var base_y = personagem.position.y
 	var tween = create_tween()
 	tween.set_loops()

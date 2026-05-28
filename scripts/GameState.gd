@@ -3,9 +3,15 @@ extends Node
 signal session_preparation_updated(message: String)
 
 const TOTAL_CASAS := 28
+const CHARACTER_TEXTURE_PATHS := {
+	1: "res://imagens/Player/personagem.png",
+	2: "res://imagens/personagem/personagem_feminina2.png",
+}
 
 var player_name: String = ""
 var room_code: String = ""
+var selected_character_index: int = 1
+var selected_character_texture_path: String = str(CHARACTER_TEXTURE_PATHS[1])
 var score: int = 0
 var xp: int = 0
 var level: int = 1
@@ -57,9 +63,12 @@ var fallback_question_bank: Dictionary = {
 	28: {"text": "Voce chegou a ultima casa. Pronto para concluir a jornada?", "options": ["Sim", "Nao", "Talvez"], "correct": 0}
 }
 
-func start_session(name: String, code: String) -> void:
+func start_session(name: String, code: String, character_index: int = 0) -> void:
 	player_name = name.strip_edges()
 	room_code = code.strip_edges().to_upper()
+	if character_index > 0:
+		selected_character_index = character_index if CHARACTER_TEXTURE_PATHS.has(character_index) else 1
+		selected_character_texture_path = str(CHARACTER_TEXTURE_PATHS[selected_character_index])
 	player_id = 0
 	resolved_room_id = 0
 	backend_ready = false
@@ -71,6 +80,9 @@ func start_session(name: String, code: String) -> void:
 	current_question.clear()
 	reset_run_stats()
 	last_feedback = "Preparando a partida de %s..." % player_name
+
+func get_selected_character_texture_path() -> String:
+	return selected_character_texture_path
 
 func prepare_session() -> Dictionary:
 	session_prepared = false

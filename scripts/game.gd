@@ -10,8 +10,15 @@ const HUD_LAYER := 20
 const DIALOG_LAYER := 40
 const CAMERA_PADDING := 0.92
 const BOARD_MIN_ZOOM := 0.36
-const DIALOG_MAX_WIDTH := 840.0
-const DIALOG_MAX_HEIGHT := 560.0
+const DIALOG_MAX_WIDTH := 980.0
+const DIALOG_MAX_HEIGHT := 720.0
+const QUESTION_BASE_HEIGHT := 84.0
+const QUESTION_TALL_HEIGHT := 126.0
+const QUESTION_EXTRA_TALL_HEIGHT := 156.0
+const ANSWER_BASE_HEIGHT := 52.0
+const ANSWER_TALL_HEIGHT := 78.0
+const ANSWER_EXTRA_TALL_HEIGHT := 104.0
+const ANSWER_ULTRA_TALL_HEIGHT := 128.0
 const ANSWER_SLOT_LABELS: Array[String] = ["A", "B", "C", "D"]
 const BOARD_HORIZONTAL_PADDING_RATIO := 0.015
 const BOARD_HORIZONTAL_PADDING_MIN := 12.0
@@ -22,6 +29,39 @@ const BOARD_TOP_PADDING_MAX := 52.0
 const BOARD_BOTTOM_PADDING_RATIO := 0.05
 const BOARD_BOTTOM_PADDING_MIN := 28.0
 const BOARD_BOTTOM_PADDING_MAX := 52.0
+const BOARD_PATH_SHADOW_NAME := "BoardPathShadow"
+const BOARD_PATH_LINE_NAME := "BoardPathLine"
+const BOARD_HOUSE_SPRITE_SCALE := Vector2(0.18, 0.135)
+const BOARD_PATH_SCREEN_POINTS: Array[Vector2] = [
+	Vector2(0.22, 0.83),
+	Vector2(0.30, 0.80),
+	Vector2(0.38, 0.76),
+	Vector2(0.46, 0.71),
+	Vector2(0.54, 0.66),
+	Vector2(0.62, 0.60),
+	Vector2(0.70, 0.55),
+	Vector2(0.78, 0.51),
+	Vector2(0.84, 0.47),
+	Vector2(0.82, 0.40),
+	Vector2(0.75, 0.36),
+	Vector2(0.67, 0.33),
+	Vector2(0.59, 0.32),
+	Vector2(0.51, 0.34),
+	Vector2(0.43, 0.39),
+	Vector2(0.36, 0.45),
+	Vector2(0.28, 0.52),
+	Vector2(0.19, 0.55),
+	Vector2(0.12, 0.48),
+	Vector2(0.09, 0.40),
+	Vector2(0.08, 0.31),
+	Vector2(0.12, 0.23),
+	Vector2(0.22, 0.21),
+	Vector2(0.34, 0.21),
+	Vector2(0.48, 0.21),
+	Vector2(0.62, 0.21),
+	Vector2(0.76, 0.21),
+	Vector2(0.82, 0.18),
+]
 
 enum TurnState {
 	WAITING_ROLL,
@@ -38,6 +78,7 @@ enum TurnState {
 @onready var dialog_title_label: Label = get_node_or_null("CanvasLayer/JanelaPergunta/Margin/VBox/DialogTitle") as Label
 @onready var question_label: Label = get_node_or_null("CanvasLayer/JanelaPergunta/Margin/VBox/QuestionLabel") as Label
 @onready var question_hint_label: Label = get_node_or_null("CanvasLayer/JanelaPergunta/Margin/VBox/QuestionHintLabel") as Label
+@onready var answers_container: VBoxContainer = get_node_or_null("CanvasLayer/JanelaPergunta/Margin/VBox/Answers") as VBoxContainer
 @onready var button_a: Button = get_node_or_null("CanvasLayer/JanelaPergunta/Margin/VBox/Answers/ButtonA") as Button
 @onready var button_b: Button = get_node_or_null("CanvasLayer/JanelaPergunta/Margin/VBox/Answers/ButtonB") as Button
 @onready var button_c: Button = get_node_or_null("CanvasLayer/JanelaPergunta/Margin/VBox/Answers/ButtonC") as Button
@@ -68,6 +109,7 @@ var dice_textures: Array[Texture2D] = [
 ]
 
 var board_positions: Array[Vector2] = []
+var board_local_positions: Array[Vector2] = []
 var pending_target_house: int = 1
 var pending_correct_index: int = 0
 var current_roll: int = 0
@@ -89,6 +131,7 @@ func _ready() -> void:
 	if hud_canvas != null:
 		hud_canvas.layer = HUD_LAYER
 	_bind_scene_ui()
+	_layout_board_path()
 	_build_board_positions()
 
 	if player != null:
@@ -187,10 +230,12 @@ func _bind_scene_ui() -> void:
 	if question_label != null:
 		UITheme.apply_font_only(question_label, 24)
 		question_label.add_theme_color_override("font_color", Color.WHITE)
+		question_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 
 	if question_hint_label != null:
 		UITheme.apply_font_only(question_hint_label, 15)
 		question_hint_label.add_theme_color_override("font_color", Color(0.85, 0.90, 0.98, 0.88))
+		question_hint_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 
 	_style_and_connect_answer_button(button_a, 0)
 	_style_and_connect_answer_button(button_b, 1)
@@ -202,6 +247,10 @@ func _style_and_connect_answer_button(button: Button, answer_slot: int) -> void:
 		return
 	button.focus_mode = Control.FOCUS_ALL
 	button.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	button.set("autowrap_mode", TextServer.AUTOWRAP_WORD_SMART)
+	button.text_overrun_behavior = TextServer.OVERRUN_NO_TRIMMING
+	button.clip_text = false
+	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	button.add_theme_constant_override("h_separation", 8)
 	UITheme.apply_button(button, UITheme.BUTTON_SECONDARY, 17)
 	var callback := Callable(self, "_on_answer_button_pressed").bind(answer_slot)
@@ -223,13 +272,80 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _build_board_positions() -> void:
 	board_positions.clear()
+	board_local_positions.clear()
 	if casas_root == null:
 		return
 
 	for i in range(1, TOTAL_CASAS + 1):
 		var casa: Node = casas_root.get_node_or_null("StaticBody2D_P%d" % i)
-		if casa:
-			board_positions.append(casa.global_position)
+		var casa_2d := casa as Node2D
+		if casa_2d:
+			board_positions.append(casa_2d.global_position)
+			board_local_positions.append(casa_2d.position)
+
+	_refresh_board_path_visual()
+
+func _refresh_board_path_visual() -> void:
+	var casas_node := casas_root as Node2D
+	if casas_node == null or board_local_positions.size() < 2:
+		return
+
+	for old_path_name in [BOARD_PATH_SHADOW_NAME, BOARD_PATH_LINE_NAME]:
+		var old_path := casas_node.get_node_or_null(old_path_name)
+		if old_path != null:
+			casas_node.remove_child(old_path)
+			old_path.free()
+
+	var shadow := _create_board_path_line(
+		BOARD_PATH_SHADOW_NAME,
+		Color(0.18, 0.11, 0.04, 0.28),
+		20.0,
+		-20
+	)
+	var path_line := _create_board_path_line(
+		BOARD_PATH_LINE_NAME,
+		Color(1.0, 0.78, 0.22, 0.72),
+		9.0,
+		-19
+	)
+	casas_node.add_child(shadow)
+	casas_node.add_child(path_line)
+
+func _create_board_path_line(line_name: String, color_value: Color, width: float, z_value: int) -> Line2D:
+	var line := Line2D.new()
+	line.name = line_name
+	line.width = width
+	line.default_color = color_value
+	line.z_index = z_value
+	line.antialiased = true
+	for point in board_local_positions:
+		line.add_point(point)
+	return line
+
+func _layout_board_path() -> void:
+	if casas_root == null:
+		return
+
+	var viewport_size := _get_layout_size()
+	if viewport_size.x <= 0.0 or viewport_size.y <= 0.0:
+		return
+
+	for index in range(mini(TOTAL_CASAS, BOARD_PATH_SCREEN_POINTS.size())):
+		var casa := casas_root.get_node_or_null("StaticBody2D_P%d" % (index + 1)) as Node2D
+		if casa == null:
+			continue
+
+		var normalized_point := BOARD_PATH_SCREEN_POINTS[index]
+		casa.global_position = Vector2(
+			normalized_point.x * viewport_size.x,
+			normalized_point.y * viewport_size.y
+		)
+		_apply_house_visual_size(casa)
+
+func _apply_house_visual_size(casa: Node2D) -> void:
+	var sprite := casa.get_node_or_null("Sprite2D") as Sprite2D
+	if sprite != null:
+		sprite.scale = BOARD_HOUSE_SPRITE_SCALE
 
 func _create_audio_players() -> void:
 	music_player = AudioStreamPlayer.new()
@@ -289,6 +405,8 @@ func _update_viewport_layout() -> void:
 	_layout_screen_background()
 	_layout_hud()
 	_layout_dialog()
+	_layout_board_path()
+	_build_board_positions()
 	_fit_board_to_view()
 
 func _layout_screen_background() -> void:
@@ -355,7 +473,7 @@ func _layout_dialog() -> void:
 
 	var viewport_size: Vector2 = _get_layout_size()
 	var dialog_width: float = maxf(420.0, minf(DIALOG_MAX_WIDTH, viewport_size.x - 56.0))
-	var dialog_height: float = maxf(400.0, minf(DIALOG_MAX_HEIGHT, viewport_size.y - 40.0))
+	var dialog_height: float = maxf(430.0, minf(DIALOG_MAX_HEIGHT, viewport_size.y - 24.0))
 
 	dialog_panel.anchor_left = 0.5
 	dialog_panel.anchor_top = 0.5
@@ -374,19 +492,8 @@ func _fit_board_to_view() -> void:
 	if viewport_size.x <= 0.0 or viewport_size.y <= 0.0:
 		return
 
-	var board_rect: Rect2 = _build_board_focus_rect(viewport_size)
-	if board_rect.size.x <= 0.0 or board_rect.size.y <= 0.0:
-		if player != null:
-			board_camera.global_position = player.global_position
-		board_camera.zoom = Vector2.ONE * BOARD_MIN_ZOOM
-		return
-
-	var usable_viewport: Vector2 = Vector2(maxf(viewport_size.x - 32.0, 1.0), maxf(viewport_size.y - 32.0, 1.0))
-	var zoom_x: float = board_rect.size.x / usable_viewport.x
-	var zoom_y: float = board_rect.size.y / usable_viewport.y
-	var zoom_factor: float = maxf(maxf(zoom_x, zoom_y) * CAMERA_PADDING, BOARD_MIN_ZOOM)
-	board_camera.zoom = Vector2(zoom_factor, zoom_factor)
-	board_camera.global_position = board_rect.position + (board_rect.size * 0.5)
+	board_camera.zoom = Vector2.ONE
+	board_camera.global_position = viewport_size * 0.5
 
 func _get_layout_size() -> Vector2:
 	return get_viewport_rect().size
@@ -544,10 +651,59 @@ func _present_question(house_index: int) -> void:
 		else:
 			button.hide()
 
+	_fit_question_content(question_label.text, buttons)
 	_show_dialog()
 
 	if SettingsManager.subtitles_enabled:
 		subtitle_label.text = "Leia a pergunta e escolha a resposta correta."
+
+func _fit_question_content(question_text: String, buttons: Array[Button]) -> void:
+	var question_length := question_text.length()
+	var longest_answer_length := 0
+	for button in buttons:
+		if button != null and button.visible:
+			longest_answer_length = maxi(longest_answer_length, button.text.length())
+
+	var question_font_size := 24
+	var question_height := QUESTION_BASE_HEIGHT
+	if question_length > 170:
+		question_font_size = 19
+		question_height = QUESTION_EXTRA_TALL_HEIGHT
+	elif question_length > 110:
+		question_font_size = 21
+		question_height = QUESTION_TALL_HEIGHT
+
+	if question_label != null:
+		UITheme.apply_font_only(question_label, question_font_size)
+		question_label.custom_minimum_size.y = question_height
+
+	var answer_font_size := 17
+	var answer_height := ANSWER_BASE_HEIGHT
+	if longest_answer_length > 150:
+		answer_font_size = 15
+		answer_height = ANSWER_ULTRA_TALL_HEIGHT
+	elif longest_answer_length > 105:
+		answer_font_size = 16
+		answer_height = ANSWER_EXTRA_TALL_HEIGHT
+	elif longest_answer_length > 70:
+		answer_font_size = 16
+		answer_height = ANSWER_TALL_HEIGHT
+
+	for button in buttons:
+		if button == null:
+			continue
+		button.custom_minimum_size.y = answer_height
+		UITheme.apply_button(button, UITheme.BUTTON_SECONDARY, answer_font_size)
+		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		button.set("autowrap_mode", TextServer.AUTOWRAP_WORD_SMART)
+		button.text_overrun_behavior = TextServer.OVERRUN_NO_TRIMMING
+		button.clip_text = false
+
+	if answers_container != null:
+		answers_container.add_theme_constant_override("separation", 6 if answer_height > ANSWER_TALL_HEIGHT else 8)
+		var vbox := answers_container.get_parent() as VBoxContainer
+		if vbox != null:
+			vbox.add_theme_constant_override("separation", 9 if answer_height > ANSWER_BASE_HEIGHT else 14)
 
 func _update_question_hint(question: Dictionary) -> void:
 	var hints: Array[String] = []

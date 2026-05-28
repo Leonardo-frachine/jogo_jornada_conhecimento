@@ -191,6 +191,7 @@ func _ready() -> void:
 	_connect_signals()
 	_bind_settings_overlay_signals()
 	_apply_theme()
+	_prepare_dashboard_layout()
 	_setup_ia_form()
 	_update_responsive_layout()
 	_set_current_view(VIEW_DASHBOARD)
@@ -240,6 +241,14 @@ func _connect_signals() -> void:
 	ia_botao_salvar.pressed.connect(_on_botao_salvar_aprovadas_pressed)
 	ia_botao_aprovar_todas.pressed.connect(_on_botao_aprovar_todas_pressed)
 	ia_botao_rejeitar_todas.pressed.connect(_on_botao_rejeitar_todas_pressed)
+
+func _prepare_dashboard_layout() -> void:
+	var painel_atividades := dashboard_secondary_grid.get_node_or_null("PainelAtividades") as Control
+	if painel_atividades != null and painel_atividades.get_parent() != dashboard_body_grid:
+		dashboard_secondary_grid.remove_child(painel_atividades)
+		dashboard_body_grid.add_child(painel_atividades)
+
+	dashboard_secondary_grid.visible = dashboard_secondary_grid.get_child_count() > 0
 
 func _load_initial_data() -> void:
 	await _fetch_rooms(true)
@@ -390,7 +399,7 @@ func _update_responsive_layout() -> void:
 	content_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	content_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
 	metrics_grid.columns = 1 if content_width < 700.0 else (2 if content_width < 1080.0 else (3 if content_width < 1420.0 else 4))
-	dashboard_body_grid.columns = 1 if content_width < 1040.0 else 2
+	dashboard_body_grid.columns = 1 if content_width < 900.0 else (2 if content_width < 1320.0 else 3)
 	dashboard_secondary_grid.columns = 1
 	gerenciar_sala_grid.columns = 1
 	acoes_sala.columns = 1 if content_width < 900.0 else 3
