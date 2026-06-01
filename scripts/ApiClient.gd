@@ -1,6 +1,6 @@
 extends Node
 
-const DEFAULT_BASE_URL := "http://127.0.0.1:4000"
+const DEFAULT_BASE_URL := "http://192.168.1.100:4000"
 const BASE_URL_SETTING := "application/config/api_base_url"
 const REQUEST_TIMEOUT_SECONDS := 10.0
 const IMPORT_REQUEST_TIMEOUT_SECONDS := 30.0
