@@ -1,8 +1,2 @@
-res://scripts/end_game_screen.gd
-res://scripts/loading_screen.gd
-res://scripts/game.gd
-res://scripts/GameState.gd
-res://scripts/player.gd
-res://scripts/tela_inicial.gd
-res://scripts/selecao_perfil.gd
-res://scripts/painel_professor.gd
+res://scripts/ApiClient.gd
+res://scene/professor/components/ProfessorHeader.tscn

@@ -1,66 +1,66 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://cywk05igbl57g"]
 
-[node name="ProfessorHeader" type="PanelContainer"]
+[node name="ProfessorHeader" type="PanelContainer" unique_id=2127447112]
 custom_minimum_size = Vector2(0, 116)
 
-[node name="Margin" type="MarginContainer" parent="."]
+[node name="Margin" type="MarginContainer" parent="." unique_id=450301326]
 layout_mode = 2
 theme_override_constants/margin_left = 20
 theme_override_constants/margin_top = 18
 theme_override_constants/margin_right = 20
 theme_override_constants/margin_bottom = 18
 
-[node name="HeaderLayout" type="HBoxContainer" parent="Margin"]
+[node name="HeaderLayout" type="HBoxContainer" parent="Margin" unique_id=1294728996]
 layout_mode = 2
 theme_override_constants/separation = 16
 
-[node name="TitleColumn" type="VBoxContainer" parent="Margin/HeaderLayout"]
+[node name="TitleColumn" type="VBoxContainer" parent="Margin/HeaderLayout" unique_id=161736860]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 6
 
-[node name="PageTitle" type="Label" parent="Margin/HeaderLayout/TitleColumn"]
+[node name="PageTitle" type="Label" parent="Margin/HeaderLayout/TitleColumn" unique_id=1132088989]
 layout_mode = 2
 text = "Dashboard"
 
-[node name="PageSubtitle" type="Label" parent="Margin/HeaderLayout/TitleColumn"]
+[node name="PageSubtitle" type="Label" parent="Margin/HeaderLayout/TitleColumn" unique_id=824750953]
 layout_mode = 2
 text = "Professor:"
 
-[node name="StatusLabel" type="Label" parent="Margin/HeaderLayout/TitleColumn"]
+[node name="StatusLabel" type="Label" parent="Margin/HeaderLayout/TitleColumn" unique_id=232166565]
 layout_mode = 2
-autowrap_mode = 3
 text = "Painel pronto."
+autowrap_mode = 3
 
-[node name="Actions" type="HBoxContainer" parent="Margin/HeaderLayout"]
+[node name="Actions" type="HBoxContainer" parent="Margin/HeaderLayout" unique_id=2005403603]
 layout_mode = 2
-alignment = 2
 theme_override_constants/separation = 12
+alignment = 2
 
-[node name="CurrentRoomBadge" type="PanelContainer" parent="Margin/HeaderLayout/Actions"]
+[node name="CurrentRoomBadge" type="PanelContainer" parent="Margin/HeaderLayout/Actions" unique_id=176859476]
 layout_mode = 2
 
-[node name="CurrentRoomMargin" type="MarginContainer" parent="Margin/HeaderLayout/Actions/CurrentRoomBadge"]
+[node name="CurrentRoomMargin" type="MarginContainer" parent="Margin/HeaderLayout/Actions/CurrentRoomBadge" unique_id=1129328216]
 layout_mode = 2
 theme_override_constants/margin_left = 12
 theme_override_constants/margin_top = 8
 theme_override_constants/margin_right = 12
 theme_override_constants/margin_bottom = 8
 
-[node name="CurrentRoomLabel" type="Label" parent="Margin/HeaderLayout/Actions/CurrentRoomBadge/CurrentRoomMargin"]
+[node name="CurrentRoomLabel" type="Label" parent="Margin/HeaderLayout/Actions/CurrentRoomBadge/CurrentRoomMargin" unique_id=782155241]
 layout_mode = 2
 text = "Sem sala ativa"
 
-[node name="SeletorSalas" type="OptionButton" parent="Margin/HeaderLayout/Actions"]
+[node name="SeletorSalas" type="OptionButton" parent="Margin/HeaderLayout/Actions" unique_id=984592596]
 custom_minimum_size = Vector2(250, 44)
 layout_mode = 2
 
-[node name="BotaoAtualizarSala" type="Button" parent="Margin/HeaderLayout/Actions"]
+[node name="BotaoAtualizarSala" type="Button" parent="Margin/HeaderLayout/Actions" unique_id=356723222]
 custom_minimum_size = Vector2(132, 44)
 layout_mode = 2
 text = "Atualizar"
 
-[node name="BotaoSair" type="Button" parent="Margin/HeaderLayout/Actions"]
+[node name="BotaoSair" type="Button" parent="Margin/HeaderLayout/Actions" unique_id=898127581]
 custom_minimum_size = Vector2(154, 44)
 layout_mode = 2
 text = "Sair do Painel"

@@ -9,7 +9,8 @@ async function bootstrap() {
   configureApp(app);
 
   const port = Number(process.env.PORT ?? 3000);
-  await app.listen(port);
+  const host = process.env.HOST?.trim() || '0.0.0.0';
+  await app.listen(port, host);
 }
 
 bootstrap().catch((error) => {
