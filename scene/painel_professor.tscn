@@ -670,33 +670,39 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/h_separation = 12
 theme_override_constants/v_separation = 12
-columns = 2
+columns = 1
 
 [node name="IaTemaInput" type="LineEdit" parent="SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/GerarIAPage/IaFormCard/IaFormMargin/IaFormGrid"]
-custom_minimum_size = Vector2(0, 44)
+custom_minimum_size = Vector2(420, 44)
 layout_mode = 2
+size_flags_horizontal = 3
 placeholder_text = "Tema"
 
 [node name="IaMateriaInput" type="LineEdit" parent="SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/GerarIAPage/IaFormCard/IaFormMargin/IaFormGrid"]
 custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
+size_flags_horizontal = 3
 placeholder_text = "Materia"
 
 [node name="IaDificuldadeSelect" type="OptionButton" parent="SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/GerarIAPage/IaFormCard/IaFormMargin/IaFormGrid"]
 custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
+size_flags_horizontal = 3
 
 [node name="IaQuantidadeInput" type="SpinBox" parent="SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/GerarIAPage/IaFormCard/IaFormMargin/IaFormGrid"]
 custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
+size_flags_horizontal = 3
 
 [node name="IaPontuacaoInput" type="SpinBox" parent="SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/GerarIAPage/IaFormCard/IaFormMargin/IaFormGrid"]
 custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
+size_flags_horizontal = 3
 
 [node name="IaTempoInput" type="SpinBox" parent="SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/GerarIAPage/IaFormCard/IaFormMargin/IaFormGrid"]
 custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
+size_flags_horizontal = 3
 
 [node name="IaActionsGrid" type="GridContainer" parent="SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/GerarIAPage"]
 layout_mode = 2
