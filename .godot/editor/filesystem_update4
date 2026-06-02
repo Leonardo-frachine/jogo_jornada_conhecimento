@@ -1,1 +1,2 @@
 res://scripts/ApiClient.gd
+res://scene/professor/components/ProfessorHeader.tscn
