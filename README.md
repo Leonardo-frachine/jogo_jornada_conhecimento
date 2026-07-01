@@ -170,6 +170,16 @@ O projeto busca:
 
 ---
 
+---
+## 📥 Download do Jogo
+
+A versão atual do Jornada do Conhecimento está disponível para download no link abaixo:
+
+👉 https://bit.ly/4emHDlo
+
+Por meio desse arquivo, é possível acessar a versão executável do jogo e testar as principais funcionalidades desenvolvidas até o momento, incluindo a dinâmica do tabuleiro, perguntas, pontuação e interação do jogador com a jornada de aprendizado.
+---
+
 ## 📌 Status do Projeto
 
 🚧 Em desenvolvimento  
