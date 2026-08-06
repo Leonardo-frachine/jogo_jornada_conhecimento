@@ -1,6 +1,6 @@
 extends Node
 
-const DEFAULT_BASE_URL := "http://2.25.163.65:3000" #Inserir IP para rodar o Back-end
+const DEFAULT_BASE_URL := "http://127.0.0.1:3000" # Backend local padrao
 const BASE_URL_SETTING := "application/config/api_base_url"
 const REQUEST_TIMEOUT_SECONDS := 10.0
 const IMPORT_REQUEST_TIMEOUT_SECONDS := 30.0
