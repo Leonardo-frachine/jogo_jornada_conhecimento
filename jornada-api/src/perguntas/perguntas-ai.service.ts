@@ -10,11 +10,12 @@ import { validateSync } from 'class-validator';
 import { GerarPerguntasIaDto } from './dto/gerar-perguntas-ia.dto';
 import { SalvarPerguntaGeradaDto } from './dto/salvar-perguntas-geradas.dto';
 
+const ALTERNATIVE_LETTERS = ['A', 'B', 'C', 'D'] as const;
+type AlternativeLetter = (typeof ALTERNATIVE_LETTERS)[number];
+
 @Injectable()
 export class PerguntasAiService {
-  async gerarPerguntas(
-    gerarPerguntasIaDto: GerarPerguntasIaDto,
-  ): Promise<{
+  async gerarPerguntas(gerarPerguntasIaDto: GerarPerguntasIaDto): Promise<{
     total: number;
     perguntas: SalvarPerguntaGeradaDto[];
   }> {
@@ -99,6 +100,11 @@ export class PerguntasAiService {
       '- Cada pergunta deve ter exatamente 4 alternativas.',
       '- Apenas uma alternativa deve estar correta.',
       '- respostaCorreta deve ser somente "A", "B", "C" ou "D".',
+      '- Varie a posicao da resposta correta entre A, B, C e D.',
+      '- Crie alternativas incorretas plausiveis, relacionadas ao mesmo assunto e com nivel de detalhe semelhante ao da correta.',
+      '- Nao use alternativas absurdas, obviamente falsas ou duplicadas.',
+      '- Evite pistas visuais: a correta nao deve ser sistematicamente a alternativa mais longa, mais detalhada ou com o maior numero.',
+      '- Em perguntas numericas, use distratores proximos e verossimeis, sem tornar a maior opcao automaticamente correta.',
       `- materia deve ser "${gerarPerguntasIaDto.materia}".`,
       `- dificuldade deve ser "${gerarPerguntasIaDto.dificuldade}".`,
       `- pontuacao deve ser ${gerarPerguntasIaDto.pontuacao}.`,
@@ -208,9 +214,12 @@ export class PerguntasAiService {
       );
     }
 
-    return parsedResponse.map((question, index) =>
+    const perguntasValidadas = parsedResponse.map((question, index) =>
       this.validarPerguntaGerada(question, gerarPerguntasIaDto, index),
     );
+
+    this.validarAusenciaDePadraoObvio(perguntasValidadas);
+    return this.distribuirRespostasCorretas(perguntasValidadas);
   }
 
   private validarPerguntaGerada(
@@ -239,8 +248,9 @@ export class PerguntasAiService {
       alternativaB: this.extrairTextoCampo(rawQuestion.alternativaB),
       alternativaC: this.extrairTextoCampo(rawQuestion.alternativaC),
       alternativaD: this.extrairTextoCampo(rawQuestion.alternativaD),
-      respostaCorreta: this.extrairTextoCampo(rawQuestion.respostaCorreta)
-        .toUpperCase(),
+      respostaCorreta: this.extrairTextoCampo(
+        rawQuestion.respostaCorreta,
+      ).toUpperCase(),
       materia: gerarPerguntasIaDto.materia,
       dificuldade: gerarPerguntasIaDto.dificuldade,
       pontuacao: gerarPerguntasIaDto.pontuacao,
@@ -262,7 +272,177 @@ export class PerguntasAiService {
       );
     }
 
+    this.validarAlternativasDistintas(instance, index);
+
     return instance;
+  }
+
+  private validarAlternativasDistintas(
+    pergunta: SalvarPerguntaGeradaDto,
+    index: number,
+  ): void {
+    const alternativas = [
+      pergunta.alternativaA,
+      pergunta.alternativaB,
+      pergunta.alternativaC,
+      pergunta.alternativaD,
+    ].map((alternativa) => alternativa.trim().toLocaleLowerCase('pt-BR'));
+
+    if (new Set(alternativas).size !== ALTERNATIVE_LETTERS.length) {
+      throw new BadGatewayException(
+        `A pergunta gerada na posicao ${index + 1} possui alternativas duplicadas.`,
+      );
+    }
+  }
+
+  private validarAusenciaDePadraoObvio(
+    perguntas: SalvarPerguntaGeradaDto[],
+  ): void {
+    if (perguntas.length < 2) {
+      return;
+    }
+
+    const corretaSempreMaiorNumero = perguntas.every((pergunta) => {
+      const alternativas = this.obterAlternativas(pergunta);
+      const numeros = alternativas.map((alternativa) =>
+        this.extrairNumeroComparavel(alternativa),
+      );
+
+      if (numeros.some((numero) => numero === null)) {
+        return false;
+      }
+
+      const valores = numeros as number[];
+      const indiceCorreto = ALTERNATIVE_LETTERS.indexOf(
+        pergunta.respostaCorreta as AlternativeLetter,
+      );
+      const maiorValor = Math.max(...valores);
+      return (
+        valores[indiceCorreto] === maiorValor &&
+        valores.filter((valor) => valor === maiorValor).length === 1
+      );
+    });
+
+    const corretaSempreTextoMaisLongo = perguntas.every((pergunta) => {
+      const comprimentos = this.obterAlternativas(pergunta).map(
+        (alternativa) => alternativa.trim().length,
+      );
+      const indiceCorreto = ALTERNATIVE_LETTERS.indexOf(
+        pergunta.respostaCorreta as AlternativeLetter,
+      );
+      const maiorComprimento = Math.max(...comprimentos);
+      return (
+        comprimentos[indiceCorreto] === maiorComprimento &&
+        comprimentos.filter((comprimento) => comprimento === maiorComprimento)
+          .length === 1
+      );
+    });
+
+    if (corretaSempreMaiorNumero || corretaSempreTextoMaisLongo) {
+      throw new BadGatewayException(
+        'A IA gerou alternativas com um padrao previsivel. Gere novamente para obter opcoes mais equilibradas.',
+      );
+    }
+  }
+
+  private obterAlternativas(pergunta: SalvarPerguntaGeradaDto): string[] {
+    return [
+      pergunta.alternativaA,
+      pergunta.alternativaB,
+      pergunta.alternativaC,
+      pergunta.alternativaD,
+    ];
+  }
+
+  private extrairNumeroComparavel(alternativa: string): number | null {
+    const valorNormalizado = alternativa
+      .trim()
+      .replace(/\s/g, '')
+      .replace(',', '.')
+      .replace(/%$/, '');
+
+    if (!/^-?\d+(?:\.\d+)?$/.test(valorNormalizado)) {
+      return null;
+    }
+
+    const numero = Number(valorNormalizado);
+    return Number.isFinite(numero) ? numero : null;
+  }
+
+  private distribuirRespostasCorretas(
+    perguntas: SalvarPerguntaGeradaDto[],
+  ): SalvarPerguntaGeradaDto[] {
+    const posicoesCorretas = this.criarPosicoesCorretasBalanceadas(
+      perguntas.length,
+    );
+
+    return perguntas.map((pergunta, index) =>
+      this.reordenarAlternativas(pergunta, posicoesCorretas[index]),
+    );
+  }
+
+  private criarPosicoesCorretasBalanceadas(quantidade: number): number[] {
+    const posicoes: number[] = [];
+
+    while (posicoes.length < quantidade) {
+      const bloco = this.embaralhar([0, 1, 2, 3]);
+      const ultimaPosicao = posicoes.at(-1);
+
+      if (ultimaPosicao !== undefined && bloco[0] === ultimaPosicao) {
+        const indiceTroca = bloco.findIndex(
+          (posicao) => posicao !== ultimaPosicao,
+        );
+        [bloco[0], bloco[indiceTroca]] = [bloco[indiceTroca], bloco[0]];
+      }
+
+      const quantidadeRestante = quantidade - posicoes.length;
+      posicoes.push(...bloco.slice(0, quantidadeRestante));
+    }
+
+    return posicoes;
+  }
+
+  private reordenarAlternativas(
+    pergunta: SalvarPerguntaGeradaDto,
+    posicaoCorreta: number,
+  ): SalvarPerguntaGeradaDto {
+    const alternativas: Record<AlternativeLetter, string> = {
+      A: pergunta.alternativaA,
+      B: pergunta.alternativaB,
+      C: pergunta.alternativaC,
+      D: pergunta.alternativaD,
+    };
+    const letraCorreta = pergunta.respostaCorreta as AlternativeLetter;
+    const respostaCorreta = alternativas[letraCorreta];
+    const distratores = this.embaralhar(
+      ALTERNATIVE_LETTERS.filter((letra) => letra !== letraCorreta).map(
+        (letra) => alternativas[letra],
+      ),
+    );
+    const alternativasReordenadas = [...distratores];
+    alternativasReordenadas.splice(posicaoCorreta, 0, respostaCorreta);
+
+    pergunta.alternativaA = alternativasReordenadas[0];
+    pergunta.alternativaB = alternativasReordenadas[1];
+    pergunta.alternativaC = alternativasReordenadas[2];
+    pergunta.alternativaD = alternativasReordenadas[3];
+    pergunta.respostaCorreta = ALTERNATIVE_LETTERS[posicaoCorreta];
+
+    return pergunta;
+  }
+
+  private embaralhar<T>(valores: readonly T[]): T[] {
+    const resultado = [...valores];
+
+    for (let index = resultado.length - 1; index > 0; index -= 1) {
+      const indiceAleatorio = Math.floor(Math.random() * (index + 1));
+      [resultado[index], resultado[indiceAleatorio]] = [
+        resultado[indiceAleatorio],
+        resultado[index],
+      ];
+    }
+
+    return resultado;
   }
 
   private extrairTextoCampo(value: unknown): string {

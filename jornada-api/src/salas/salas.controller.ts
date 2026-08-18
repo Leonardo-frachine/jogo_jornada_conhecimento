@@ -39,6 +39,16 @@ export class SalasController {
     return this.salasService.listarRespostas(id);
   }
 
+  @Get(':id/alunos')
+  listarAlunos(@Param('id', ParseIntPipe) id: number) {
+    return this.salasService.listarAlunos(id);
+  }
+
+  @Get(':id/ranking')
+  obterRanking(@Param('id', ParseIntPipe) id: number) {
+    return this.salasService.obterRanking(id);
+  }
+
   @Get(':id')
   buscarPorId(@Param('id', ParseIntPipe) id: number) {
     return this.salasService.buscarPorId(id);

@@ -51,6 +51,8 @@ func _ready() -> void:
 	_update_layout()
 	if not get_viewport().size_changed.is_connected(_update_layout):
 		get_viewport().size_changed.connect(_update_layout)
+	if not SettingsManager.font_scale_changed.is_connected(_on_font_scale_changed):
+		SettingsManager.font_scale_changed.connect(_on_font_scale_changed)
 
 	_set_modo(false)
 
@@ -74,10 +76,11 @@ func _apply_visual_refresh() -> void:
 
 func _update_layout() -> void:
 	var viewport_size: Vector2 = get_viewport_rect().size
+	var font_scale: float = SettingsManager.font_scale
 	var compact_width: bool = viewport_size.x < 1180.0
 	var compact_height: bool = viewport_size.y < 760.0
-	var panel_width: float = clampf(viewport_size.x * 0.42, 480.0, 600.0)
-	var panel_height: float = clampf(viewport_size.y - (72.0 if compact_height else 96.0), 600.0, 700.0)
+	var panel_width: float = clampf(viewport_size.x * 0.46, 480.0, 600.0 + 120.0 * (font_scale - 1.0))
+	var panel_height: float = clampf(viewport_size.y - (32.0 if compact_height else 72.0), 600.0, 700.0 + 120.0 * (font_scale - 1.0))
 
 	painel_central.offset_left = -panel_width * 0.5
 	painel_central.offset_top = -panel_height * 0.5
@@ -105,6 +108,10 @@ func _update_layout() -> void:
 		botao_configuracao.custom_minimum_size = Vector2(settings_size, settings_size)
 		botao_configuracao.size = Vector2(settings_size, settings_size)
 		botao_configuracao.position = Vector2(viewport_size.x - settings_size - 18.0, 18.0)
+
+func _on_font_scale_changed(_value: float) -> void:
+	_apply_visual_refresh()
+	call_deferred("_update_layout")
 
 func _update_mode_button_styles() -> void:
 	UITheme.apply_button(

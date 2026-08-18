@@ -19,6 +19,13 @@ func setup(positions: Array[Vector2]) -> void:
 		global_position = board_positions[0]
 	_play_idle()
 
+func update_board_positions(positions: Array[Vector2]) -> void:
+	board_positions = positions
+	if moving or board_positions.is_empty():
+		return
+	current_house = clampi(current_house, 1, board_positions.size())
+	global_position = board_positions[current_house - 1]
+
 func move_to_house(target_house: int) -> void:
 	if moving:
 		return
@@ -26,9 +33,11 @@ func move_to_house(target_house: int) -> void:
 		movement_finished.emit()
 		return
 
+	target_house = clampi(target_house, 1, board_positions.size())
 	moving = true
-	while current_house < target_house:
-		current_house += 1
+	var direction := 1 if target_house > current_house else -1
+	while current_house != target_house:
+		current_house += direction
 		await _move_to_position(board_positions[current_house - 1])
 		step_reached.emit(current_house)
 	moving = false

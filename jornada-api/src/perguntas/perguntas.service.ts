@@ -9,6 +9,8 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { DataSource, Repository } from 'typeorm';
 import * as XLSX from 'xlsx';
+import { Progresso } from '../progresso/progresso.entity';
+import { Sala } from '../salas/sala.entity';
 import { Pergunta } from './pergunta.entity';
 import { AtualizarPerguntaDto } from './dto/atualizar-pergunta.dto';
 import { CriarPerguntaDto } from './dto/criar-pergunta.dto';
@@ -46,25 +48,32 @@ export class PerguntasService implements OnModuleInit {
   constructor(
     @InjectRepository(Pergunta)
     private readonly perguntaRepository: Repository<Pergunta>,
+    @InjectRepository(Sala)
+    private readonly salaRepository: Repository<Sala>,
     private readonly dataSource: DataSource,
   ) {}
 
   async onModuleInit(): Promise<void> {
     await this.semearPerguntasSeNecessario();
     await this.normalizarIdsPerguntasSeNecessario();
+    await this.migrarPerguntasLegadasPorSala();
   }
 
   async criar(criarPerguntaDto: CriarPerguntaDto): Promise<Pergunta> {
     this.validarCamposObrigatorios(criarPerguntaDto);
+    const sala = await this.validarSalaExistente(criarPerguntaDto.salaId);
 
     const pergunta = this.perguntaRepository.create(
-      this.montarDadosPergunta(criarPerguntaDto),
+      this.montarDadosPergunta(criarPerguntaDto, sala),
     );
 
     return this.perguntaRepository.save(pergunta);
   }
 
-  async salvarGeradas(perguntasDto: SalvarPerguntaGeradaDto[]): Promise<{
+  async salvarGeradas(
+    perguntasDto: SalvarPerguntaGeradaDto[],
+    salaId: number,
+  ): Promise<{
     total: number;
     perguntas: Pergunta[];
   }> {
@@ -74,8 +83,11 @@ export class PerguntasService implements OnModuleInit {
       );
     }
 
+    const sala = await this.validarSalaExistente(salaId);
     const perguntas = perguntasDto.map((perguntaDto) =>
-      this.perguntaRepository.create(this.montarDadosPergunta(perguntaDto)),
+      this.perguntaRepository.create(
+        this.montarDadosPergunta(perguntaDto, sala),
+      ),
     );
 
     const perguntasSalvas = await this.perguntaRepository.save(perguntas);
@@ -86,17 +98,19 @@ export class PerguntasService implements OnModuleInit {
     };
   }
 
-  async listar(): Promise<Pergunta[]> {
+  async listar(salaId: number): Promise<Pergunta[]> {
+    await this.validarSalaExistente(salaId);
     return this.perguntaRepository.find({
+      where: { salaId, ativa: true },
       order: {
         id: 'ASC',
       },
     });
   }
 
-  async buscarPorId(id: number): Promise<Pergunta> {
+  async buscarPorId(id: number, salaId: number): Promise<Pergunta> {
     const pergunta = await this.perguntaRepository.findOne({
-      where: { id },
+      where: { id, salaId, ativa: true },
     });
 
     if (!pergunta) {
@@ -106,11 +120,14 @@ export class PerguntasService implements OnModuleInit {
     return pergunta;
   }
 
-  async buscarAleatoria(): Promise<Pergunta> {
-    const perguntas = await this.perguntaRepository.find();
+  async buscarAleatoria(salaId: number): Promise<Pergunta> {
+    await this.validarSalaExistente(salaId);
+    const perguntas = await this.perguntaRepository.find({
+      where: { salaId, ativa: true },
+    });
 
     if (perguntas.length === 0) {
-      throw new NotFoundException('Nenhuma pergunta cadastrada.');
+      throw new NotFoundException('Nenhuma pergunta cadastrada nesta sala.');
     }
 
     const indiceAleatorio = Math.floor(Math.random() * perguntas.length);
@@ -120,9 +137,10 @@ export class PerguntasService implements OnModuleInit {
 
   async atualizar(
     id: number,
+    salaId: number,
     atualizarPerguntaDto: AtualizarPerguntaDto,
   ): Promise<Pergunta> {
-    const pergunta = await this.buscarPorId(id);
+    const pergunta = await this.buscarPorId(id, salaId);
 
     if (Object.keys(atualizarPerguntaDto).length === 0) {
       throw new BadRequestException(
@@ -135,26 +153,52 @@ export class PerguntasService implements OnModuleInit {
     return this.perguntaRepository.save(pergunta);
   }
 
-  async remover(id: number): Promise<{ id: number; removido: true }> {
-    const pergunta = await this.buscarPorId(id);
+  async remover(
+    id: number,
+    salaId: number,
+  ): Promise<{ id: number; removido: true }> {
+    const pergunta = await this.buscarPorId(id, salaId);
 
-    await this.perguntaRepository.remove(pergunta);
-    await this.resetarSequenciaPerguntasSeBancoVazio();
+    pergunta.ativa = false;
+    await this.perguntaRepository.save(pergunta);
 
     return { id, removido: true };
   }
 
-  async importarCsv(csv: string): Promise<{
+  async removerTodasDaSala(salaId: number): Promise<{
+    salaId: number;
+    total: number;
+    removido: true;
+  }> {
+    await this.validarSalaExistente(salaId);
+    const resultado = await this.perguntaRepository.update(
+      { salaId, ativa: true },
+      { ativa: false },
+    );
+
+    return {
+      salaId,
+      total: resultado.affected ?? 0,
+      removido: true,
+    };
+  }
+
+  async importarCsv(
+    csv: string,
+    salaId: number,
+  ): Promise<{
     total: number;
     perguntas: Pergunta[];
   }> {
     const linhas = this.parseCsv(csv);
-    return this.importarLinhasTabulares(linhas, false);
+    const sala = await this.validarSalaExistente(salaId);
+    return this.importarLinhasTabulares(linhas, false, sala);
   }
 
   async importarPlanilha(
     fileName: string,
     contentBase64: string,
+    salaId: number,
   ): Promise<{
     total: number;
     perguntas: Pergunta[];
@@ -167,7 +211,8 @@ export class PerguntasService implements OnModuleInit {
         ? this.parseCsv(arquivo.toString('utf-8'))
         : this.parseXlsx(arquivo);
 
-    const resultado = await this.importarLinhasTabulares(linhas, true);
+    const sala = await this.validarSalaExistente(salaId);
+    const resultado = await this.importarLinhasTabulares(linhas, true, sala);
 
     return {
       ...resultado,
@@ -175,8 +220,8 @@ export class PerguntasService implements OnModuleInit {
     };
   }
 
-  async exportarCsv(): Promise<string> {
-    const perguntas = await this.listar();
+  async exportarCsv(salaId: number): Promise<string> {
+    const perguntas = await this.listar(salaId);
     const cabecalho = [
       'Titulo',
       'Descricao',
@@ -215,7 +260,19 @@ export class PerguntasService implements OnModuleInit {
     ].join('\n');
   }
 
-  private validarCamposObrigatorios(dto: CriarPerguntaDto): void {
+  async validarSalaExistente(salaId: number): Promise<Sala> {
+    const sala = await this.salaRepository.findOne({
+      where: { id: salaId },
+    });
+
+    if (!sala) {
+      throw new NotFoundException('Sala nao encontrada.');
+    }
+
+    return sala;
+  }
+
+  private validarCamposObrigatorios(dto: PerguntaPersistivel): void {
     if (
       !dto.enunciado ||
       !dto.alternativaA ||
@@ -230,8 +287,13 @@ export class PerguntasService implements OnModuleInit {
     }
   }
 
-  private montarDadosPergunta(dto: PerguntaPersistivel): Partial<Pergunta> {
+  private montarDadosPergunta(
+    dto: PerguntaPersistivel,
+    sala: Sala,
+  ): Partial<Pergunta> {
     return {
+      salaId: sala.id,
+      sala,
       titulo: dto.titulo,
       enunciado: dto.enunciado,
       alternativaA: dto.alternativaA,
@@ -243,6 +305,7 @@ export class PerguntasService implements OnModuleInit {
       dificuldade: dto.dificuldade,
       pontuacao: dto.pontuacao ?? this.calcularPontuacaoPadrao(dto.dificuldade),
       tempoLimite: dto.tempoLimite ?? null,
+      ativa: true,
     };
   }
 
@@ -261,6 +324,7 @@ export class PerguntasService implements OnModuleInit {
   private async importarLinhasTabulares(
     linhas: string[][],
     strictSpreadsheetValidation: boolean,
+    sala: Sala,
   ): Promise<{
     total: number;
     perguntas: Pergunta[];
@@ -288,6 +352,7 @@ export class PerguntasService implements OnModuleInit {
           linha,
           indice + 2,
           strictSpreadsheetValidation,
+          sala,
         ),
       );
 
@@ -312,6 +377,7 @@ export class PerguntasService implements OnModuleInit {
     linha: string[],
     numeroLinha: number,
     strictSpreadsheetValidation: boolean,
+    sala: Sala,
   ): Partial<Pergunta> {
     const valor = (nomes: string[]): string | undefined => {
       for (const nome of nomes) {
@@ -339,10 +405,9 @@ export class PerguntasService implements OnModuleInit {
       1,
     );
 
-    const pergunta: CriarPerguntaDto = {
+    const pergunta: PerguntaPersistivel = {
       titulo: valor(['titulo']),
-      enunciado:
-        valor(['enunciado', 'descricao']) ?? valor(['titulo']) ?? '',
+      enunciado: valor(['enunciado', 'descricao']) ?? valor(['titulo']) ?? '',
       alternativaA: valor(['alternativaa', 'a']) ?? '',
       alternativaB: valor(['alternativab', 'b']) ?? '',
       alternativaC: valor(['alternativac', 'c']) ?? '',
@@ -351,8 +416,7 @@ export class PerguntasService implements OnModuleInit {
         valor(['respostacorreta', 'corretaad', 'correta']) ?? ''
       ).toUpperCase(),
       materia: valor(['materia', 'disciplina']) ?? '',
-      dificuldade:
-        valor(['dificuldade', 'dificuldade16'])?.trim() ?? '',
+      dificuldade: valor(['dificuldade', 'dificuldade16'])?.trim() ?? '',
       pontuacao,
       tempoLimite,
     };
@@ -369,7 +433,7 @@ export class PerguntasService implements OnModuleInit {
       );
     }
 
-    return this.montarDadosPergunta(pergunta);
+    return this.montarDadosPergunta(pergunta, sala);
   }
 
   private validarCabecalhoPlanilha(cabecalho: string[]): void {
@@ -385,7 +449,7 @@ export class PerguntasService implements OnModuleInit {
   }
 
   private validarCamposObrigatoriosPlanilha(
-    dto: CriarPerguntaDto,
+    dto: PerguntaPersistivel,
     numeroLinha: number,
   ): void {
     const camposAusentes: string[] = [];
@@ -437,7 +501,11 @@ export class PerguntasService implements OnModuleInit {
     }
 
     const numero = Number(valor);
-    if (!Number.isFinite(numero) || !Number.isInteger(numero) || numero < minimo) {
+    if (
+      !Number.isFinite(numero) ||
+      !Number.isInteger(numero) ||
+      numero < minimo
+    ) {
       throw new BadRequestException(
         `Valor invalido para ${campo} na linha ${numeroLinha}.`,
       );
@@ -559,8 +627,72 @@ export class PerguntasService implements OnModuleInit {
     return `"${valor.replace(/"/g, '""')}"`;
   }
 
+  private async migrarPerguntasLegadasPorSala(): Promise<void> {
+    await this.dataSource.transaction(async (manager) => {
+      const perguntaRepository = manager.getRepository(Pergunta);
+      const salaRepository = manager.getRepository(Sala);
+      const progressoRepository = manager.getRepository(Progresso);
+      const totalPerguntasComSala = await perguntaRepository
+        .createQueryBuilder('pergunta')
+        .where('pergunta.salaId IS NOT NULL')
+        .getCount();
+
+      if (totalPerguntasComSala > 0) {
+        return;
+      }
+
+      const perguntasLegadas = await perguntaRepository
+        .createQueryBuilder('pergunta')
+        .where('pergunta.salaId IS NULL')
+        .orderBy('pergunta.id', 'ASC')
+        .getMany();
+      const salas = await salaRepository.find({ order: { id: 'ASC' } });
+
+      if (perguntasLegadas.length === 0 || salas.length === 0) {
+        return;
+      }
+
+      const copias = salas.flatMap((sala) =>
+        perguntasLegadas.map((pergunta) =>
+          perguntaRepository.create({
+            salaId: sala.id,
+            sala,
+            titulo: pergunta.titulo,
+            enunciado: pergunta.enunciado,
+            alternativaA: pergunta.alternativaA,
+            alternativaB: pergunta.alternativaB,
+            alternativaC: pergunta.alternativaC,
+            alternativaD: pergunta.alternativaD,
+            respostaCorreta: pergunta.respostaCorreta,
+            materia: pergunta.materia,
+            dificuldade: pergunta.dificuldade,
+            pontuacao: pergunta.pontuacao,
+            tempoLimite: pergunta.tempoLimite,
+            ativa: pergunta.ativa,
+          }),
+        ),
+      );
+
+      await perguntaRepository.save(copias);
+
+      for (const pergunta of perguntasLegadas) {
+        const possuiHistorico =
+          (await progressoRepository.count({
+            where: { perguntaId: pergunta.id },
+          })) > 0;
+
+        if (!possuiHistorico) {
+          await perguntaRepository.remove(pergunta);
+        }
+      }
+    });
+  }
+
   private async semearPerguntasSeNecessario(): Promise<void> {
-    if (process.env.NODE_ENV === 'test' || process.env.DB_SEED_DISABLED === 'true') {
+    if (
+      process.env.NODE_ENV === 'test' ||
+      process.env.DB_SEED_DISABLED === 'true'
+    ) {
       return;
     }
 
@@ -570,7 +702,8 @@ export class PerguntasService implements OnModuleInit {
     }
 
     const configuredSeedPath = process.env.DATABASE_SEED_SQL_PATH?.trim();
-    const seedPath = configuredSeedPath || path.join('sql', 'perguntas_teste_25.sql');
+    const seedPath =
+      configuredSeedPath || path.join('sql', 'perguntas_teste_25.sql');
     const resolvedSeedPath = path.resolve(seedPath);
 
     if (!fs.existsSync(resolvedSeedPath)) {
@@ -660,14 +793,6 @@ export class PerguntasService implements OnModuleInit {
       } finally {
         await queryRunner.release();
       }
-    }
-  }
-
-  private async resetarSequenciaPerguntasSeBancoVazio(): Promise<void> {
-    const totalPerguntas = await this.perguntaRepository.count();
-
-    if (totalPerguntas === 0) {
-      await this.resetarSequenciaPerguntas(0);
     }
   }
 

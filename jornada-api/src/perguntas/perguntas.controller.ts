@@ -9,6 +9,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { GerarPerguntasIaDto } from './dto/gerar-perguntas-ia.dto';
 import { PerguntasService } from './perguntas.service';
@@ -33,7 +34,10 @@ export class PerguntasController {
 
   @Post('importar-csv')
   importarCsv(@Body() importarPerguntasCsvDto: ImportarPerguntasCsvDto) {
-    return this.perguntasService.importarCsv(importarPerguntasCsvDto.csv);
+    return this.perguntasService.importarCsv(
+      importarPerguntasCsvDto.csv,
+      importarPerguntasCsvDto.salaId,
+    );
   }
 
   @Post('importar-planilha')
@@ -43,11 +47,15 @@ export class PerguntasController {
     return this.perguntasService.importarPlanilha(
       importarPerguntasPlanilhaDto.fileName,
       importarPerguntasPlanilhaDto.contentBase64,
+      importarPerguntasPlanilhaDto.salaId,
     );
   }
 
   @Post('gerar-ia')
-  gerarComIa(@Body() gerarPerguntasIaDto: GerarPerguntasIaDto) {
+  async gerarComIa(@Body() gerarPerguntasIaDto: GerarPerguntasIaDto) {
+    await this.perguntasService.validarSalaExistente(
+      gerarPerguntasIaDto.salaId,
+    );
     return this.perguntasAiService.gerarPerguntas(gerarPerguntasIaDto);
   }
 
@@ -59,41 +67,54 @@ export class PerguntasController {
       }),
     )
     perguntasGeradas: SalvarPerguntaGeradaDto[],
+    @Query('salaId', ParseIntPipe) salaId: number,
   ) {
-    return this.perguntasService.salvarGeradas(perguntasGeradas);
+    return this.perguntasService.salvarGeradas(perguntasGeradas, salaId);
   }
 
   @Get()
-  listar() {
-    return this.perguntasService.listar();
+  listar(@Query('salaId', ParseIntPipe) salaId: number) {
+    return this.perguntasService.listar(salaId);
   }
 
   @Get('exportar-csv')
   @Header('Content-Type', 'text/csv; charset=utf-8')
-  exportarCsv() {
-    return this.perguntasService.exportarCsv();
+  exportarCsv(@Query('salaId', ParseIntPipe) salaId: number) {
+    return this.perguntasService.exportarCsv(salaId);
   }
 
   @Get('aleatoria')
-  buscarAleatoria() {
-    return this.perguntasService.buscarAleatoria();
+  buscarAleatoria(@Query('salaId', ParseIntPipe) salaId: number) {
+    return this.perguntasService.buscarAleatoria(salaId);
   }
 
   @Get(':id')
-  buscarPorId(@Param('id', ParseIntPipe) id: number) {
-    return this.perguntasService.buscarPorId(id);
+  buscarPorId(
+    @Param('id', ParseIntPipe) id: number,
+    @Query('salaId', ParseIntPipe) salaId: number,
+  ) {
+    return this.perguntasService.buscarPorId(id, salaId);
   }
 
   @Patch(':id')
   atualizar(
     @Param('id', ParseIntPipe) id: number,
+    @Query('salaId', ParseIntPipe) salaId: number,
     @Body() atualizarPerguntaDto: AtualizarPerguntaDto,
   ) {
-    return this.perguntasService.atualizar(id, atualizarPerguntaDto);
+    return this.perguntasService.atualizar(id, salaId, atualizarPerguntaDto);
   }
 
   @Delete(':id')
-  remover(@Param('id', ParseIntPipe) id: number) {
-    return this.perguntasService.remover(id);
+  remover(
+    @Param('id', ParseIntPipe) id: number,
+    @Query('salaId', ParseIntPipe) salaId: number,
+  ) {
+    return this.perguntasService.remover(id, salaId);
+  }
+
+  @Delete()
+  removerTodas(@Query('salaId', ParseIntPipe) salaId: number) {
+    return this.perguntasService.removerTodasDaSala(salaId);
   }
 }

@@ -10,6 +10,11 @@ import { Jogador } from '../jogadores/jogador.entity';
 import { Pergunta } from '../perguntas/pergunta.entity';
 import { CriarProgressoDto } from './dto/criar-progresso.dto';
 import { Sala } from '../salas/sala.entity';
+import { PARTIDA_STATUS, PartidaStatus } from '../jogadores/partida-status';
+
+type ProgressoComPontuacaoTotal = Progresso & {
+  pontuacaoTotal: number;
+};
 
 @Injectable()
 export class ProgressoService {
@@ -21,9 +26,18 @@ export class ProgressoService {
     private readonly jogadorRepository: Repository<Jogador>,
   ) {}
 
-  async criar(criarProgressoDto: CriarProgressoDto): Promise<Progresso> {
-    const { jogadorId, perguntaId, acertou, fase, salaId, salaCodigo } =
-      criarProgressoDto;
+  async criar(
+    criarProgressoDto: CriarProgressoDto,
+  ): Promise<ProgressoComPontuacaoTotal> {
+    const {
+      jogadorId,
+      perguntaId,
+      acertou,
+      fase,
+      salaId,
+      salaCodigo,
+      casaAtual,
+    } = criarProgressoDto;
 
     if (!jogadorId || !perguntaId || fase === undefined) {
       throw new BadRequestException('Dados do progresso incompletos.');
@@ -44,7 +58,7 @@ export class ProgressoService {
       }
 
       const pergunta = await perguntaRepository.findOne({
-        where: { id: perguntaId },
+        where: { id: perguntaId, ativa: true },
       });
 
       if (!pergunta) {
@@ -64,7 +78,49 @@ export class ProgressoService {
           })) ?? null;
       }
 
-      const pontos = acertou ? this.calcularPontuacao(pergunta, fase) : 0;
+      if ((salaId || salaCodigo) && !sala) {
+        throw new NotFoundException('Sala nao encontrada.');
+      }
+
+      if (jogador.salaId && sala && jogador.salaId !== sala.id) {
+        throw new BadRequestException(
+          'O jogador nao pertence a sala informada.',
+        );
+      }
+
+      if (jogador.salaId && !sala) {
+        sala =
+          (await salaRepository.findOne({
+            where: { id: jogador.salaId },
+          })) ?? null;
+      }
+
+      if (!jogador.salaId && sala) {
+        jogador.salaId = sala.id;
+        jogador.sala = sala;
+      }
+
+      if (!sala) {
+        throw new BadRequestException(
+          'O progresso precisa estar vinculado a uma sala.',
+        );
+      }
+
+      if (!pergunta.salaId || pergunta.salaId !== sala.id) {
+        throw new BadRequestException(
+          'A pergunta nao pertence a sala informada.',
+        );
+      }
+
+      const pontuacaoPergunta = this.calcularPontuacao(pergunta, fase);
+      const pontos = acertou
+        ? pontuacaoPergunta
+        : -Math.round(pontuacaoPergunta / 2);
+      const casaAtualNormalizada = Math.max(
+        1,
+        Number(casaAtual ?? jogador.casaAtual ?? 1),
+      );
+      const statusPartidaNormalizado = this.normalizarStatusDeResposta();
 
       const progresso = progressoRepository.create({
         jogadorId,
@@ -72,6 +128,8 @@ export class ProgressoService {
         salaId: sala?.id ?? null,
         acertou,
         fase,
+        casaAtual: casaAtualNormalizada,
+        statusPartida: statusPartidaNormalizado,
         pontuacaoGanha: pontos,
         jogador,
         pergunta,
@@ -80,15 +138,27 @@ export class ProgressoService {
 
       const progressoSalvo = await progressoRepository.save(progresso);
 
-      jogador.pontuacao += pontos;
+      await jogadorRepository.update(jogador.id, {
+        salaId: sala?.id ?? jogador.salaId ?? null,
+        faseAtual: Math.max(jogador.faseAtual, fase),
+        casaAtual: Math.max(jogador.casaAtual ?? 1, casaAtualNormalizada),
+        statusPartida:
+          jogador.statusPartida === PARTIDA_STATUS.FINALIZADO
+            ? PARTIDA_STATUS.FINALIZADO
+            : statusPartidaNormalizado,
+      });
+      await jogadorRepository.increment(
+        { id: jogador.id },
+        'pontuacao',
+        pontos,
+      );
+      const jogadorAtualizado = await jogadorRepository.findOneByOrFail({
+        id: jogador.id,
+      });
 
-      if (fase > jogador.faseAtual) {
-        jogador.faseAtual = fase;
-      }
-
-      await jogadorRepository.save(jogador);
-
-      return progressoSalvo;
+      return Object.assign(progressoSalvo, {
+        pontuacaoTotal: jogadorAtualizado.pontuacao,
+      });
     });
   }
 
@@ -151,12 +221,16 @@ export class ProgressoService {
     });
     const registros = await this.progressoRepository.find();
 
-    return jogadores.map((jogador) =>
-      this.montarResumoJogador(
-        jogador,
-        registros.filter((registro) => registro.jogadorId === jogador.id),
-      ),
-    );
+    return jogadores
+      .map((jogador) =>
+        this.montarResumoJogador(
+          jogador,
+          registros.filter((registro) => registro.jogadorId === jogador.id),
+        ),
+      )
+      .sort(
+        (a, b) => b.pontuacao - a.pontuacao || a.nome.localeCompare(b.nome),
+      );
   }
 
   async relatorioPorJogador(jogadorId: number): Promise<{
@@ -208,6 +282,10 @@ export class ProgressoService {
     return Math.max(1, fase) * 100;
   }
 
+  private normalizarStatusDeResposta(): PartidaStatus {
+    return PARTIDA_STATUS.JOGANDO;
+  }
+
   private montarResumoJogador(
     jogador: Jogador,
     respostas: Progresso[],
@@ -223,7 +301,6 @@ export class ProgressoService {
   } {
     const acertos = respostas.filter((resposta) => resposta.acertou).length;
     const total = respostas.length;
-
     return {
       jogadorId: jogador.id,
       nome: jogador.nome,

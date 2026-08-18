@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 import { Professor } from '../professores/professor.entity';
 import { Progresso } from '../progresso/progresso.entity';
+import { Pergunta } from '../perguntas/pergunta.entity';
 
 @Entity('salas')
 export class Sala {
@@ -35,6 +36,9 @@ export class Sala {
 
   @OneToMany(() => Progresso, (progresso) => progresso.sala)
   progressos: Progresso[];
+
+  @OneToMany(() => Pergunta, (pergunta) => pergunta.sala)
+  perguntas: Pergunta[];
 
   @CreateDateColumn()
   criadoEm: Date;

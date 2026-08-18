@@ -10,6 +10,11 @@ import {
 import { trimString } from '../../common/transformers';
 
 export class GerarPerguntasIaDto {
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  salaId: number;
+
   @Transform(trimString)
   @IsString()
   @IsNotEmpty()

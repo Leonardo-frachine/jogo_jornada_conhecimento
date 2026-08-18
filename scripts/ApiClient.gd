@@ -14,10 +14,15 @@ func _ready() -> void:
 func set_base_url(value: String) -> void:
 	base_url = _normalize_base_url(value)
 
-func create_player(name: String) -> Dictionary:
-	return await _request_json(HTTPClient.METHOD_POST, "/jogadores", {
+func create_player(name: String, sala_id: int = 0, sala_codigo: String = "") -> Dictionary:
+	var payload: Dictionary = {
 		"nome": name,
-	})
+	}
+	if sala_id > 0:
+		payload["salaId"] = sala_id
+	if not sala_codigo.strip_edges().is_empty():
+		payload["salaCodigo"] = sala_codigo.strip_edges().to_upper()
+	return await _request_json(HTTPClient.METHOD_POST, "/jogadores", payload)
 
 func register_teacher(name: String, email: String, password: String) -> Dictionary:
 	return await _request_json(HTTPClient.METHOD_POST, "/professores/cadastro", {
@@ -50,20 +55,30 @@ func fetch_room_dashboard(room_id: int) -> Dictionary:
 func fetch_room_answers(room_id: int) -> Dictionary:
 	return await _request_json(HTTPClient.METHOD_GET, "/salas/%d/respostas" % room_id)
 
+func fetch_room_players(room_id: int) -> Dictionary:
+	return await _request_json(HTTPClient.METHOD_GET, "/salas/%d/alunos" % room_id)
+
+func fetch_room_ranking(room_id: int) -> Dictionary:
+	return await _request_json(HTTPClient.METHOD_GET, "/salas/%d/ranking" % room_id)
+
 func delete_room(room_id: int) -> Dictionary:
 	return await _request_json(HTTPClient.METHOD_DELETE, "/salas/%d" % room_id)
 
-func fetch_questions() -> Dictionary:
-	return await _request_json(HTTPClient.METHOD_GET, "/perguntas")
+func fetch_questions(sala_id: int) -> Dictionary:
+	return await _request_json(HTTPClient.METHOD_GET, "/perguntas?salaId=%d" % sala_id)
 
-func update_question(question_id: int, payload: Dictionary) -> Dictionary:
-	return await _request_json(HTTPClient.METHOD_PATCH, "/perguntas/%d" % question_id, payload)
+func update_question(question_id: int, sala_id: int, payload: Dictionary) -> Dictionary:
+	return await _request_json(HTTPClient.METHOD_PATCH, "/perguntas/%d?salaId=%d" % [question_id, sala_id], payload)
 
-func delete_question(question_id: int) -> Dictionary:
-	return await _request_json(HTTPClient.METHOD_DELETE, "/perguntas/%d" % question_id)
+func delete_question(question_id: int, sala_id: int) -> Dictionary:
+	return await _request_json(HTTPClient.METHOD_DELETE, "/perguntas/%d?salaId=%d" % [question_id, sala_id])
 
-func generate_questions_ai(tema: String, materia: String, dificuldade: String, quantidade: int, pontuacao: int, tempo_limite: int) -> Dictionary:
+func delete_all_questions(sala_id: int) -> Dictionary:
+	return await _request_json(HTTPClient.METHOD_DELETE, "/perguntas?salaId=%d" % sala_id)
+
+func generate_questions_ai(sala_id: int, tema: String, materia: String, dificuldade: String, quantidade: int, pontuacao: int, tempo_limite: int) -> Dictionary:
 	var payload: Dictionary = {
+		"salaId": sala_id,
 		"tema": tema,
 		"materia": materia,
 		"dificuldade": dificuldade,
@@ -80,15 +95,15 @@ func generate_questions_ai(tema: String, materia: String, dificuldade: String, q
 		AI_REQUEST_TIMEOUT_SECONDS
 	)
 
-func save_generated_questions(perguntas_aprovadas: Array) -> Dictionary:
+func save_generated_questions(sala_id: int, perguntas_aprovadas: Array) -> Dictionary:
 	return await _request_json(
 		HTTPClient.METHOD_POST,
-		"/perguntas/salvar-geradas",
+		"/perguntas/salvar-geradas?salaId=%d" % sala_id,
 		perguntas_aprovadas,
 		AI_REQUEST_TIMEOUT_SECONDS
 	)
 
-func import_questions_spreadsheet(file_path: String) -> Dictionary:
+func import_questions_spreadsheet(file_path: String, sala_id: int) -> Dictionary:
 	var extension: String = file_path.get_extension().to_lower()
 	if extension != "csv" and extension != "xlsx":
 		return _error_response(0, "Selecione um arquivo .csv ou .xlsx.")
@@ -104,18 +119,30 @@ func import_questions_spreadsheet(file_path: String) -> Dictionary:
 		return _error_response(0, "O arquivo selecionado esta vazio.")
 
 	return await _request_json(HTTPClient.METHOD_POST, "/perguntas/importar-planilha", {
+		"salaId": sala_id,
 		"fileName": file_path.get_file(),
 		"contentBase64": Marshalls.raw_to_base64(content),
 	}, IMPORT_REQUEST_TIMEOUT_SECONDS)
 
-func create_progress(jogador_id: int, pergunta_id: int, acertou: bool, fase: int, sala_id: int = 0, sala_codigo: String = "") -> Dictionary:
-	return await _request_json(HTTPClient.METHOD_POST, "/progresso", {
+func create_progress(jogador_id: int, pergunta_id: int, acertou: bool, fase: int, sala_id: int = 0, sala_codigo: String = "", casa_atual: int = 0, status_partida: String = "") -> Dictionary:
+	var payload: Dictionary = {
 		"jogadorId": jogador_id,
 		"perguntaId": pergunta_id,
 		"acertou": acertou,
 		"fase": fase,
 		"salaId": sala_id if sala_id > 0 else null,
 		"salaCodigo": sala_codigo.strip_edges().to_upper() if not sala_codigo.strip_edges().is_empty() else null,
+	}
+	if casa_atual > 0:
+		payload["casaAtual"] = casa_atual
+	if not status_partida.strip_edges().is_empty():
+		payload["statusPartida"] = status_partida.strip_edges().to_lower()
+	return await _request_json(HTTPClient.METHOD_POST, "/progresso", payload)
+
+func finish_player_session(jogador_id: int, casa_atual: int, won: bool) -> Dictionary:
+	return await _request_json(HTTPClient.METHOD_PATCH, "/jogadores/%d/finalizar-partida" % jogador_id, {
+		"casaAtual": casa_atual,
+		"venceu": won,
 	})
 
 func update_player_phase(jogador_id: int, fase_atual: int) -> Dictionary:

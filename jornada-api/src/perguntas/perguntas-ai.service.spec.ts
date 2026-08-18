@@ -18,9 +18,9 @@ describe('PerguntasAiService', () => {
   const originalGeminiModel = process.env.GEMINI_MODEL;
 
   beforeEach(async () => {
-    const genAiModule = jest.requireMock('@google/genai') as {
+    const genAiModule = jest.requireMock<{
       GoogleGenAI: jest.Mock;
-    };
+    }>('@google/genai');
     googleGenAiMock = genAiModule.GoogleGenAI;
     generateContentMock = jest.fn();
     googleGenAiMock.mockReset();
@@ -79,6 +79,7 @@ describe('PerguntasAiService', () => {
     });
 
     const result = await service.gerarPerguntas({
+      salaId: 1,
       tema: 'Sistema Solar',
       materia: 'Ciencias',
       dificuldade: 'Medio',
@@ -97,8 +98,126 @@ describe('PerguntasAiService', () => {
       dificuldade: 'Medio',
       pontuacao: 100,
       tempoLimite: 30,
-      respostaCorreta: 'A',
     });
+    expect(
+      new Set(result.perguntas.map((item) => item.respostaCorreta)).size,
+    ).toBe(2);
+    expect(obterTextoRespostaCorreta(result.perguntas[0])).toBe('Marte');
+    expect(obterTextoRespostaCorreta(result.perguntas[1])).toBe('Jupiter');
+  });
+
+  it('distribui as respostas corretas entre A, B, C e D e preserva o conteudo correto', async () => {
+    generateContentMock.mockResolvedValue({
+      text: JSON.stringify(
+        Array.from({ length: 4 }, (_, index) => ({
+          titulo: `Pergunta ${index + 1}`,
+          enunciado: `Enunciado ${index + 1}`,
+          alternativaA: `Correta ${index + 1}`,
+          alternativaB: `Distrator B ${index + 1}`,
+          alternativaC: `Distrator C ${index + 1}`,
+          alternativaD: `Distrator D ${index + 1}`,
+          respostaCorreta: 'A',
+          materia: 'Teste',
+          dificuldade: 'Medio',
+          pontuacao: 100,
+          tempoLimite: 30,
+        })),
+      ),
+    });
+
+    const result = await service.gerarPerguntas({
+      salaId: 1,
+      tema: 'Distribuicao',
+      materia: 'Teste',
+      dificuldade: 'Medio',
+      quantidade: 4,
+      pontuacao: 100,
+      tempoLimite: 30,
+    });
+
+    expect(result.perguntas.map((item) => item.respostaCorreta).sort()).toEqual(
+      ['A', 'B', 'C', 'D'],
+    );
+    result.perguntas.forEach((pergunta, index) => {
+      expect(obterTextoRespostaCorreta(pergunta)).toBe(`Correta ${index + 1}`);
+    });
+  });
+
+  it('rejeita perguntas com alternativas duplicadas', async () => {
+    generateContentMock.mockResolvedValue({
+      text: JSON.stringify([
+        {
+          titulo: 'Duplicada',
+          enunciado: 'Qual alternativa esta correta?',
+          alternativaA: 'Mesmo texto',
+          alternativaB: 'Mesmo texto',
+          alternativaC: 'Outra alternativa',
+          alternativaD: 'Mais uma alternativa',
+          respostaCorreta: 'A',
+          materia: 'Teste',
+          dificuldade: 'Medio',
+          pontuacao: 100,
+          tempoLimite: 30,
+        },
+      ]),
+    });
+
+    await expect(
+      service.gerarPerguntas({
+        salaId: 1,
+        tema: 'Duplicadas',
+        materia: 'Teste',
+        dificuldade: 'Medio',
+        quantidade: 1,
+        pontuacao: 100,
+        tempoLimite: 30,
+      }),
+    ).rejects.toThrow('possui alternativas duplicadas');
+  });
+
+  it('rejeita um lote em que a resposta correta e sempre o maior numero', async () => {
+    generateContentMock.mockResolvedValue({
+      text: JSON.stringify([
+        {
+          titulo: 'Numerica 1',
+          enunciado: 'Primeira pergunta numerica',
+          alternativaA: '10',
+          alternativaB: '20',
+          alternativaC: '30',
+          alternativaD: '40',
+          respostaCorreta: 'D',
+          materia: 'Matematica',
+          dificuldade: 'Medio',
+          pontuacao: 100,
+          tempoLimite: 30,
+        },
+        {
+          titulo: 'Numerica 2',
+          enunciado: 'Segunda pergunta numerica',
+          alternativaA: '1',
+          alternativaB: '2',
+          alternativaC: '3',
+          alternativaD: '4',
+          respostaCorreta: 'D',
+          materia: 'Matematica',
+          dificuldade: 'Medio',
+          pontuacao: 100,
+          tempoLimite: 30,
+        },
+      ]),
+    });
+
+    await expect(
+      service.gerarPerguntas({
+        salaId: 1,
+        tema: 'Numeros',
+        materia: 'Matematica',
+        dificuldade: 'Medio',
+        quantidade: 2,
+        pontuacao: 100,
+        tempoLimite: 30,
+      }),
+    ).rejects.toThrow('padrao previsivel');
   });
 
   it('retorna erro amigavel quando o Gemini devolve JSON invalido', async () => {
@@ -108,6 +227,7 @@ describe('PerguntasAiService', () => {
 
     await expect(
       service.gerarPerguntas({
+        salaId: 1,
         tema: 'Sistema Solar',
         materia: 'Ciencias',
         dificuldade: 'Medio',
@@ -117,4 +237,21 @@ describe('PerguntasAiService', () => {
       }),
     ).rejects.toThrow('A IA nao retornou uma lista valida de perguntas.');
   });
+
+  function obterTextoRespostaCorreta(pergunta: {
+    alternativaA: string;
+    alternativaB: string;
+    alternativaC: string;
+    alternativaD: string;
+    respostaCorreta: string;
+  }): string {
+    const alternativas = {
+      A: pergunta.alternativaA,
+      B: pergunta.alternativaB,
+      C: pergunta.alternativaC,
+      D: pergunta.alternativaD,
+    };
+
+    return alternativas[pergunta.respostaCorreta as keyof typeof alternativas];
+  }
 });

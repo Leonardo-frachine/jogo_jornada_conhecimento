@@ -3,6 +3,9 @@ extends Node
 signal session_preparation_updated(message: String)
 
 const TOTAL_CASAS := 28
+const STATUS_INICIADO := "iniciado"
+const STATUS_JOGANDO := "jogando"
+const STATUS_FINALIZADO := "finalizado"
 const CHARACTER_TEXTURE_PATHS := {
 	1: "res://imagens/Player/personagem.png",
 	2: "res://imagens/personagem/personagem_feminina2.png",
@@ -13,6 +16,7 @@ var room_code: String = ""
 var selected_character_index: int = 1
 var selected_character_texture_path: String = str(CHARACTER_TEXTURE_PATHS[1])
 var score: int = 0
+var persisted_score: int = 0
 var xp: int = 0
 var level: int = 1
 var current_house: int = 1
@@ -95,20 +99,22 @@ func prepare_session() -> Dictionary:
 	used_question_ids.clear()
 	current_question.clear()
 
-	if not room_code.is_empty():
-		_emit_session_status("Validando sala informada...")
-		var room_response: Dictionary = await ApiClient.fetch_room_by_code(room_code)
-		if not room_response.get("ok", false):
-			return _session_failure("Codigo de sala invalido ou sala nao cadastrada. Confira o codigo informado e tente novamente.")
+	if room_code.is_empty():
+		return _session_failure("Informe o codigo da sala para carregar as perguntas corretas.")
 
-		var room_data: Dictionary = room_response.get("data", {})
-		resolved_room_id = int(room_data.get("id", 0))
-		room_code = str(room_data.get("codigo", room_code)).strip_edges().to_upper()
-		if resolved_room_id <= 0:
-			return _session_failure("A sala informada nao possui um identificador valido no servidor.")
+	_emit_session_status("Validando sala informada...")
+	var room_response: Dictionary = await ApiClient.fetch_room_by_code(room_code)
+	if not room_response.get("ok", false):
+		return _session_failure("Codigo de sala invalido ou sala nao cadastrada. Confira o codigo informado e tente novamente.")
+
+	var room_data: Dictionary = room_response.get("data", {})
+	resolved_room_id = int(room_data.get("id", 0))
+	room_code = str(room_data.get("codigo", room_code)).strip_edges().to_upper()
+	if resolved_room_id <= 0:
+		return _session_failure("A sala informada nao possui um identificador valido no servidor.")
 
 	_emit_session_status("Conectando ao backend...")
-	var player_response: Dictionary = await ApiClient.create_player(player_name)
+	var player_response: Dictionary = await ApiClient.create_player(player_name, resolved_room_id, room_code)
 	if not player_response.get("ok", false):
 		return _session_failure("Nao foi possivel criar o jogador na API. %s" % player_response.get("error", ""))
 
@@ -116,15 +122,17 @@ func prepare_session() -> Dictionary:
 	player_id = int(created_player.get("id", 0))
 	if player_id <= 0:
 		return _session_failure("A API nao retornou um identificador valido para o jogador.")
+	persisted_score = int(created_player.get("pontuacao", 0))
+	score = persisted_score
 
 	_emit_session_status("Carregando perguntas da API...")
-	var questions_response: Dictionary = await ApiClient.fetch_questions()
+	var questions_response: Dictionary = await ApiClient.fetch_questions(resolved_room_id)
 	if not questions_response.get("ok", false):
 		return _session_failure("Nao foi possivel carregar as perguntas. %s" % questions_response.get("error", ""))
 
 	var normalized_questions: Array[Dictionary] = _normalize_questions(questions_response.get("data", []))
 	if normalized_questions.is_empty():
-		return _session_failure("A API nao retornou perguntas validas para iniciar a partida.")
+		return _session_failure("Esta sala ainda nao possui perguntas validas para iniciar a partida.")
 
 	loaded_questions = normalized_questions
 	backend_ready = true
@@ -139,6 +147,7 @@ func prepare_session() -> Dictionary:
 
 func reset_run_stats() -> void:
 	score = 0
+	persisted_score = 0
 	xp = 0
 	level = 1
 	current_house = 1
@@ -154,18 +163,19 @@ func reset_run_stats() -> void:
 func register_answer(correct: bool, house_index: int) -> int:
 	questions_answered += 1
 	var question: Dictionary = current_question if not current_question.is_empty() else get_question_for_house(house_index)
-	var gained_points: int = _get_points_for_question(question, house_index)
+	var question_points: int = _get_points_for_question(question, house_index)
+	var score_delta: int = _get_score_delta(correct, question_points)
+	score += score_delta
 
 	if correct:
 		correct_answers += 1
-		score += gained_points
-		xp += max(25, int(round(float(gained_points) / 4.0)))
-		last_feedback = "Resposta correta! +%d pontos." % gained_points
-		return gained_points
+		xp += max(25, int(round(float(question_points) / 4.0)))
+		last_feedback = "Resposta correta! +%d pontos." % score_delta
+		return score_delta
 
 	wrong_answers += 1
-	last_feedback = "Resposta incorreta. Tente novamente na proxima rodada."
-	return 0
+	last_feedback = "Resposta incorreta! %d pontos." % score_delta
+	return score_delta
 
 func submit_answer_result(correct: bool, house_index: int) -> Dictionary:
 	sync_warning = ""
@@ -177,17 +187,43 @@ func submit_answer_result(correct: bool, house_index: int) -> Dictionary:
 	if question_id <= 0:
 		return _sync_failure("Pergunta atual sem identificador valido.")
 
-	var fase: int = get_level_for_house(house_index) if correct else level
+	var casa_atual := current_house
+	if correct:
+		casa_atual = clampi(house_index, 1, TOTAL_CASAS)
+	var fase: int = get_level_for_house(casa_atual) if correct else level
 	var response: Dictionary = await ApiClient.create_progress(
 		player_id,
 		question_id,
 		correct,
 		fase,
 		resolved_room_id,
-		room_code
+		room_code,
+		casa_atual,
+		STATUS_JOGANDO
 	)
 	if not response.get("ok", false):
+		score = persisted_score
 		return _sync_failure("Nao foi possivel registrar o progresso. %s" % response.get("error", ""))
+
+	var progress_data: Dictionary = response.get("data", {})
+	persisted_score = int(progress_data.get("pontuacaoTotal", score))
+	score = persisted_score
+
+	return response
+
+func sync_finished_session(won: bool) -> Dictionary:
+	sync_warning = ""
+
+	if not backend_ready or player_id <= 0:
+		return _sync_failure("Sessao da API nao esta pronta.")
+
+	var response: Dictionary = await ApiClient.finish_player_session(
+		player_id,
+		current_house,
+		won
+	)
+	if not response.get("ok", false):
+		return _sync_failure("Nao foi possivel registrar o encerramento da partida. %s" % response.get("error", ""))
 
 	return response
 
@@ -229,6 +265,12 @@ func get_question_for_house(house_index: int) -> Dictionary:
 	current_question = _select_question_for_house(house_index)
 	return current_question.duplicate(true)
 
+func get_challenge_question_for_house(house_index: int) -> Dictionary:
+	var challenge_level := mini(get_level_for_house(house_index) + 1, 4)
+	current_question = _select_question_for_level(house_index, challenge_level)
+	current_question["is_challenge"] = true
+	return current_question.duplicate(true)
+
 func register_imported_questions(payload: Variant) -> int:
 	var normalized_questions: Array[Dictionary] = _normalize_questions(payload)
 	var imported_count := 0
@@ -251,10 +293,15 @@ func register_imported_questions(payload: Variant) -> int:
 	return imported_count
 
 func _select_question_for_house(house_index: int) -> Dictionary:
-	if loaded_questions.is_empty():
-		return _build_fallback_question(house_index)
+	return _select_question_for_level(house_index, get_level_for_house(house_index))
 
-	var desired_level: int = get_level_for_house(house_index)
+func _select_question_for_level(house_index: int, desired_level: int) -> Dictionary:
+	if loaded_questions.is_empty():
+		var fallback := _build_fallback_question(house_index)
+		fallback["difficulty"] = desired_level
+		fallback["points"] = desired_level * 100
+		return fallback
+
 	var candidates: Array[Dictionary] = _collect_candidates(desired_level, false)
 	if candidates.is_empty():
 		candidates = _collect_candidates(desired_level, true)
@@ -355,6 +402,9 @@ func _build_fallback_question(house_index: int) -> Dictionary:
 func _get_points_for_question(question: Dictionary, house_index: int) -> int:
 	var default_points: int = get_difficulty_for_house(house_index) * 100
 	return _parse_non_negative_int(question.get("points", default_points), default_points)
+
+func _get_score_delta(correct: bool, question_points: int) -> int:
+	return question_points if correct else -int(round(float(question_points) / 2.0))
 
 func _parse_difficulty(value: Variant) -> int:
 	var numeric_value: int = _parse_non_negative_int(value, -1)

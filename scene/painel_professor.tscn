@@ -277,6 +277,39 @@ custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 text = "Apagar Sala"
 
+[node name="RankingFinalPanel" type="PanelContainer" parent="SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/DashboardPage"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="RankingFinalMargin" type="MarginContainer" parent="SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/DashboardPage/RankingFinalPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="RankingFinalVBox" type="VBoxContainer" parent="SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/DashboardPage/RankingFinalPanel/RankingFinalMargin"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="RankingFinalTitle" type="Label" parent="SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/DashboardPage/RankingFinalPanel/RankingFinalMargin/RankingFinalVBox"]
+layout_mode = 2
+text = "Ranking geral da sala"
+
+[node name="RankingFinalDescription" type="Label" parent="SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/DashboardPage/RankingFinalPanel/RankingFinalMargin/RankingFinalVBox"]
+layout_mode = 2
+autowrap_mode = 3
+text = "Classificacao por pontuacao somente entre alunos com partida oficialmente finalizada."
+
+[node name="RankingFinalSummary" type="Label" parent="SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/DashboardPage/RankingFinalPanel/RankingFinalMargin/RankingFinalVBox"]
+layout_mode = 2
+text = "Nenhum aluno finalizado."
+
+[node name="RankingFinalList" type="VBoxContainer" parent="SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/DashboardPage/RankingFinalPanel/RankingFinalMargin/RankingFinalVBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
 [node name="GerenciarSalaPage" type="VBoxContainer" parent="SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack"]
 visible = false
 layout_mode = 2
@@ -473,6 +506,12 @@ custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 text = "Recolher Todas"
 
+[node name="BotaoEliminarPerguntas" type="Button" parent="SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/BancoPerguntasPage/PerguntasHeaderCard/PerguntasHeaderMargin/PerguntasHeaderVBox/PerguntasActions"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+tooltip_text = "Eliminar todas as perguntas ativas da sala selecionada"
+text = "Eliminar Perguntas"
+
 [node name="PerguntasFiltersCard" type="PanelContainer" parent="SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/BancoPerguntasPage"]
 layout_mode = 2
 
@@ -536,6 +575,12 @@ text = "Importar perguntas por planilha"
 layout_mode = 2
 autowrap_mode = 3
 text = "Envie um arquivo .csv ou .xlsx com as colunas esperadas para preencher o banco de perguntas de forma mais rapida."
+
+[node name="ImportRoomSelector" type="OptionButton" parent="SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/ImportarPerguntasPage/ImportarIntroCard/ImportarIntroMargin/ImportarIntroVBox"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "Sala que recebera as perguntas importadas"
 
 [node name="ImportarFeedback" type="Label" parent="SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/ImportarPerguntasPage/ImportarIntroCard/ImportarIntroMargin/ImportarIntroVBox"]
 layout_mode = 2
@@ -668,9 +713,27 @@ theme_override_constants/margin_bottom = 18
 [node name="IaFormGrid" type="GridContainer" parent="SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/GerarIAPage/IaFormCard/IaFormMargin"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/h_separation = 12
-theme_override_constants/v_separation = 12
+theme_override_constants/h_separation = 24
+theme_override_constants/v_separation = 10
 columns = 1
+
+[node name="IaSalaLabel" type="Label" parent="SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/GerarIAPage/IaFormCard/IaFormMargin/IaFormGrid"]
+custom_minimum_size = Vector2(190, 44)
+layout_mode = 2
+text = "Sala de destino *"
+vertical_alignment = 1
+
+[node name="IaRoomSelector" type="OptionButton" parent="SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/GerarIAPage/IaFormCard/IaFormMargin/IaFormGrid"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "Sala que recebera as perguntas geradas"
+
+[node name="IaTemaLabel" type="Label" parent="SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/GerarIAPage/IaFormCard/IaFormMargin/IaFormGrid"]
+custom_minimum_size = Vector2(190, 44)
+layout_mode = 2
+text = "Tema *"
+vertical_alignment = 1
 
 [node name="IaTemaInput" type="LineEdit" parent="SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/GerarIAPage/IaFormCard/IaFormMargin/IaFormGrid"]
 custom_minimum_size = Vector2(420, 44)
@@ -678,26 +741,56 @@ layout_mode = 2
 size_flags_horizontal = 3
 placeholder_text = "Tema"
 
+[node name="IaMateriaLabel" type="Label" parent="SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/GerarIAPage/IaFormCard/IaFormMargin/IaFormGrid"]
+custom_minimum_size = Vector2(190, 44)
+layout_mode = 2
+text = "Materia *"
+vertical_alignment = 1
+
 [node name="IaMateriaInput" type="LineEdit" parent="SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/GerarIAPage/IaFormCard/IaFormMargin/IaFormGrid"]
 custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 size_flags_horizontal = 3
 placeholder_text = "Materia"
 
+[node name="IaDificuldadeLabel" type="Label" parent="SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/GerarIAPage/IaFormCard/IaFormMargin/IaFormGrid"]
+custom_minimum_size = Vector2(190, 44)
+layout_mode = 2
+text = "Dificuldade *"
+vertical_alignment = 1
+
 [node name="IaDificuldadeSelect" type="OptionButton" parent="SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/GerarIAPage/IaFormCard/IaFormMargin/IaFormGrid"]
 custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 size_flags_horizontal = 3
+
+[node name="IaQuantidadeLabel" type="Label" parent="SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/GerarIAPage/IaFormCard/IaFormMargin/IaFormGrid"]
+custom_minimum_size = Vector2(190, 44)
+layout_mode = 2
+text = "Quantidade de perguntas *"
+vertical_alignment = 1
 
 [node name="IaQuantidadeInput" type="SpinBox" parent="SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/GerarIAPage/IaFormCard/IaFormMargin/IaFormGrid"]
 custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 size_flags_horizontal = 3
 
+[node name="IaPontuacaoLabel" type="Label" parent="SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/GerarIAPage/IaFormCard/IaFormMargin/IaFormGrid"]
+custom_minimum_size = Vector2(190, 44)
+layout_mode = 2
+text = "Pontos por pergunta *"
+vertical_alignment = 1
+
 [node name="IaPontuacaoInput" type="SpinBox" parent="SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/GerarIAPage/IaFormCard/IaFormMargin/IaFormGrid"]
 custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 size_flags_horizontal = 3
+
+[node name="IaTempoLabel" type="Label" parent="SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/GerarIAPage/IaFormCard/IaFormMargin/IaFormGrid"]
+custom_minimum_size = Vector2(190, 44)
+layout_mode = 2
+text = "Tempo de resposta (segundos)"
+vertical_alignment = 1
 
 [node name="IaTempoInput" type="SpinBox" parent="SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/GerarIAPage/IaFormCard/IaFormMargin/IaFormGrid"]
 custom_minimum_size = Vector2(0, 44)
@@ -753,3 +846,9 @@ theme_override_constants/separation = 14
 title = "Apagar sala"
 ok_button_text = "Apagar"
 dialog_text = "Tem certeza que deseja apagar a sala selecionada?"
+
+[node name="ConfirmacaoApagarPerguntas" type="ConfirmationDialog" parent="."]
+title = "Eliminar perguntas"
+ok_button_text = "Eliminar"
+cancel_button_text = "Cancelar"
+dialog_text = "Tem certeza que deseja eliminar as perguntas selecionadas?"

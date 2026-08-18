@@ -401,10 +401,57 @@ theme_override_constants/margin_bottom = 22
 layout_mode = 2
 theme_override_constants/separation = 14
 
-[node name="DialogTitle" type="Label" parent="CanvasLayer/JanelaPergunta/Margin/VBox" unique_id=1011249176]
+[node name="HeaderRow" type="HBoxContainer" parent="CanvasLayer/JanelaPergunta/Margin/VBox"]
 layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="DialogTitle" type="Label" parent="CanvasLayer/JanelaPergunta/Margin/VBox/HeaderRow" unique_id=1011249176]
+layout_mode = 2
+size_flags_horizontal = 3
 text = "DESAFIO DO TABULEIRO"
 horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="QuestionTimerPanel" type="PanelContainer" parent="CanvasLayer/JanelaPergunta/Margin/VBox/HeaderRow"]
+custom_minimum_size = Vector2(156, 46)
+layout_mode = 2
+
+[node name="TimerMargin" type="MarginContainer" parent="CanvasLayer/JanelaPergunta/Margin/VBox/HeaderRow/QuestionTimerPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 8
+
+[node name="QuestionTimerLabel" type="Label" parent="CanvasLayer/JanelaPergunta/Margin/VBox/HeaderRow/QuestionTimerPanel/TimerMargin"]
+layout_mode = 2
+text = "Tempo: 30s"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="QuestionTimerProgress" type="ProgressBar" parent="CanvasLayer/JanelaPergunta/Margin/VBox"]
+custom_minimum_size = Vector2(0, 9)
+layout_mode = 2
+value = 100.0
+show_percentage = false
+
+[node name="TurnFeedbackPanel" type="PanelContainer" parent="CanvasLayer/JanelaPergunta/Margin/VBox"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+
+[node name="FeedbackMargin" type="MarginContainer" parent="CanvasLayer/JanelaPergunta/Margin/VBox/TurnFeedbackPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 8
+
+[node name="TurnFeedbackLabel" type="Label" parent="CanvasLayer/JanelaPergunta/Margin/VBox/TurnFeedbackPanel/FeedbackMargin"]
+layout_mode = 2
+text = "Casa 1 | Vale 100 pontos"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
 
 [node name="QuestionLabel" type="Label" parent="CanvasLayer/JanelaPergunta/Margin/VBox" unique_id=1100644188]
 custom_minimum_size = Vector2(0, 84)

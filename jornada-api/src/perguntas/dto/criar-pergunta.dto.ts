@@ -10,6 +10,11 @@ import {
 import { trimString, trimUppercaseString } from '../../common/transformers';
 
 export class CriarPerguntaDto {
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  salaId: number;
+
   @Transform(trimString)
   @IsString()
   @IsOptional()

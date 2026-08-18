@@ -423,6 +423,54 @@ theme_override_font_sizes/font_size = 20
 text = "0"
 horizontal_alignment = 2
 
+[node name="RankingCard" type="Panel" parent="PainelCentral/MarginContainer/MainVBox/ContentRow"]
+custom_minimum_size = Vector2(300, 230)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("3")
+
+[node name="RankingMargin" type="MarginContainer" parent="PainelCentral/MarginContainer/MainVBox/ContentRow/RankingCard"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 18
+
+[node name="RankingVBox" type="VBoxContainer" parent="PainelCentral/MarginContainer/MainVBox/ContentRow/RankingCard/RankingMargin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="RankingTitle" type="Label" parent="PainelCentral/MarginContainer/MainVBox/ContentRow/RankingCard/RankingMargin/RankingVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.121569, 0.14902, 0.239216, 1)
+theme_override_font_sizes/font_size = 22
+text = "Ranking Geral"
+
+[node name="RankingStatus" type="Label" parent="PainelCentral/MarginContainer/MainVBox/ContentRow/RankingCard/RankingMargin/RankingVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.188235, 0.227451, 0.337255, 0.92)
+theme_override_font_sizes/font_size = 14
+text = "Carregando alunos finalizados..."
+autowrap_mode = 3
+
+[node name="RankingScroll" type="ScrollContainer" parent="PainelCentral/MarginContainer/MainVBox/ContentRow/RankingCard/RankingMargin/RankingVBox"]
+custom_minimum_size = Vector2(0, 135)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+vertical_scroll_mode = 1
+
+[node name="RankingList" type="VBoxContainer" parent="PainelCentral/MarginContainer/MainVBox/ContentRow/RankingCard/RankingMargin/RankingVBox/RankingScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 7
+
 [node name="MetricsRow" type="HBoxContainer" parent="PainelCentral/MarginContainer/MainVBox" unique_id=451064583]
 layout_mode = 2
 theme_override_constants/separation = 16

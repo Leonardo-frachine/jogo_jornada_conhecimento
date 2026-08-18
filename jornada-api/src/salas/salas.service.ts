@@ -1,6 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { Jogador } from '../jogadores/jogador.entity';
+import { PARTIDA_STATUS } from '../jogadores/partida-status';
+import type { PartidaStatus } from '../jogadores/partida-status';
 import { Professor } from '../professores/professor.entity';
 import { Progresso } from '../progresso/progresso.entity';
 import { CriarSalaDto } from './dto/criar-sala.dto';
@@ -16,6 +19,26 @@ type SalaResumo = {
   criadoEm: Date;
 };
 
+type AlunoSalaResumo = {
+  jogadorId: number;
+  nome: string;
+  pontuacao: number;
+  faseAtual: number;
+  casaAtual: number;
+  statusPartida: PartidaStatus;
+  finalizadoEm: Date | null;
+  criadoEm: Date;
+};
+
+type RankingSalaItem = {
+  posicao: number;
+  jogadorId: number;
+  nome: string;
+  pontuacao: number;
+  statusPartida: typeof PARTIDA_STATUS.FINALIZADO;
+  finalizadoEm: Date | null;
+};
+
 @Injectable()
 export class SalasService {
   constructor(
@@ -27,6 +50,9 @@ export class SalasService {
 
     @InjectRepository(Progresso)
     private readonly progressoRepository: Repository<Progresso>,
+
+    @InjectRepository(Jogador)
+    private readonly jogadorRepository: Repository<Jogador>,
   ) {}
 
   async criar(criarSalaDto: CriarSalaDto): Promise<{
@@ -100,7 +126,9 @@ export class SalasService {
     });
 
     if (!sala) {
-      throw new NotFoundException('Sala nao encontrada para o codigo informado.');
+      throw new NotFoundException(
+        'Sala nao encontrada para o codigo informado.',
+      );
     }
 
     return this.serializarSala(sala, sala.professor?.nome);
@@ -114,6 +142,7 @@ export class SalasService {
       quantidadeAcertos: number;
       quantidadeErros: number;
       percentualAcertoTurma: number;
+      pontuacaoTotalTurma: number;
     };
     desempenhoPorMateria: Array<{
       materia: string;
@@ -129,6 +158,7 @@ export class SalasService {
       erros: number;
       percentualAcerto: number;
     }>;
+    ranking: RankingSalaItem[];
   }> {
     const sala = await this.salaRepository.findOne({
       where: { id },
@@ -148,9 +178,17 @@ export class SalasService {
     });
 
     const totalPerguntasRespondidas = respostas.length;
-    const quantidadeAcertos = respostas.filter((resposta) => resposta.acertou).length;
+    const quantidadeAcertos = respostas.filter(
+      (resposta) => resposta.acertou,
+    ).length;
     const quantidadeErros = totalPerguntasRespondidas - quantidadeAcertos;
-    const totalAlunos = new Set(respostas.map((resposta) => resposta.jogadorId)).size;
+    const alunos = await this.montarAlunosDaSala(sala.id, respostas);
+    const totalAlunos = alunos.length;
+    const pontuacaoTotalTurma = alunos.reduce(
+      (soma, aluno) => soma + aluno.pontuacao,
+      0,
+    );
+    const ranking = await this.montarRankingDaSala(sala.id);
 
     return {
       sala: this.serializarSala(sala, sala.professor?.nome),
@@ -159,12 +197,16 @@ export class SalasService {
         totalPerguntasRespondidas,
         quantidadeAcertos,
         quantidadeErros,
+        pontuacaoTotalTurma,
         percentualAcertoTurma:
           totalPerguntasRespondidas === 0
             ? 0
             : Math.round((quantidadeAcertos / totalPerguntasRespondidas) * 100),
       },
-      desempenhoPorMateria: this.agruparDesempenho(respostas, 'materia') as Array<{
+      desempenhoPorMateria: this.agruparDesempenho(
+        respostas,
+        'materia',
+      ) as Array<{
         materia: string;
         respondidas: number;
         acertos: number;
@@ -181,11 +223,32 @@ export class SalasService {
         erros: number;
         percentualAcerto: number;
       }>,
+      ranking,
+    };
+  }
+
+  async obterRanking(id: number): Promise<{
+    sala: SalaResumo;
+    ranking: RankingSalaItem[];
+  }> {
+    const sala = await this.salaRepository.findOne({
+      where: { id },
+      relations: ['professor'],
+    });
+
+    if (!sala) {
+      throw new NotFoundException('Sala nao encontrada.');
+    }
+
+    return {
+      sala: this.serializarSala(sala, sala.professor?.nome),
+      ranking: await this.montarRankingDaSala(sala.id),
     };
   }
 
   async listarRespostas(id: number): Promise<{
     sala: SalaResumo;
+    alunos: AlunoSalaResumo[];
     respostas: Array<{
       progressoId: number;
       jogadorId: number;
@@ -196,6 +259,8 @@ export class SalasService {
       dificuldade: string;
       acertou: boolean;
       fase: number;
+      casaAtual: number;
+      statusPartida: PartidaStatus;
       pontuacaoGanha: number;
       respondidoEm: Date;
     }>;
@@ -216,9 +281,11 @@ export class SalasService {
         id: 'DESC',
       },
     });
+    const alunos = await this.montarAlunosDaSala(sala.id, respostas);
 
     return {
       sala: this.serializarSala(sala, sala.professor?.nome),
+      alunos,
       respostas: respostas.map((resposta) => ({
         progressoId: resposta.id,
         jogadorId: resposta.jogadorId,
@@ -229,10 +296,35 @@ export class SalasService {
         dificuldade: resposta.pergunta?.dificuldade ?? `Nivel ${resposta.fase}`,
         acertou: resposta.acertou,
         fase: resposta.fase,
+        casaAtual: resposta.casaAtual ?? resposta.jogador?.casaAtual ?? 1,
+        statusPartida:
+          resposta.jogador?.statusPartida ??
+          resposta.statusPartida ??
+          PARTIDA_STATUS.JOGANDO,
         pontuacaoGanha: resposta.pontuacaoGanha,
         respondidoEm: resposta.criadoEm,
       })),
     };
+  }
+
+  async listarAlunos(id: number): Promise<AlunoSalaResumo[]> {
+    const sala = await this.salaRepository.findOne({
+      where: { id },
+    });
+
+    if (!sala) {
+      throw new NotFoundException('Sala nao encontrada.');
+    }
+
+    const jogadores = await this.jogadorRepository.find({
+      where: { salaId: sala.id },
+      order: {
+        nome: 'ASC',
+        id: 'ASC',
+      },
+    });
+
+    return jogadores.map((jogador) => this.serializarAlunoSala(jogador));
   }
 
   async remover(id: number): Promise<{
@@ -294,6 +386,96 @@ export class SalasService {
       ativa: sala.ativa,
       criadoEm: sala.criadoEm,
     };
+  }
+
+  private async montarAlunosDaSala(
+    salaId: number,
+    respostas: Progresso[],
+  ): Promise<AlunoSalaResumo[]> {
+    const alunosPorId = new Map<number, Jogador>();
+    const jogadores = await this.jogadorRepository.find({
+      where: { salaId },
+      order: {
+        criadoEm: 'DESC',
+      },
+    });
+
+    for (const jogador of jogadores) {
+      alunosPorId.set(jogador.id, jogador);
+    }
+
+    for (const resposta of respostas) {
+      if (resposta.jogador && !alunosPorId.has(resposta.jogador.id)) {
+        alunosPorId.set(resposta.jogador.id, resposta.jogador);
+      }
+    }
+
+    return Array.from(alunosPorId.values()).map((jogador) =>
+      this.serializarAlunoSala(jogador),
+    );
+  }
+
+  private serializarAlunoSala(jogador: Jogador): AlunoSalaResumo {
+    return {
+      jogadorId: jogador.id,
+      nome: jogador.nome,
+      pontuacao: jogador.pontuacao,
+      faseAtual: jogador.faseAtual,
+      casaAtual: jogador.casaAtual ?? 1,
+      statusPartida: jogador.statusPartida ?? PARTIDA_STATUS.INICIADO,
+      finalizadoEm: jogador.finalizadoEm ?? null,
+      criadoEm: jogador.criadoEm,
+    };
+  }
+
+  private async montarRankingDaSala(
+    salaId: number,
+  ): Promise<RankingSalaItem[]> {
+    const finalizados = await this.jogadorRepository.find({
+      where: {
+        salaId,
+        statusPartida: PARTIDA_STATUS.FINALIZADO,
+      },
+    });
+    const alunosUnicos = new Map<string, Jogador>();
+
+    for (const jogador of finalizados) {
+      const chave = jogador.nome
+        .trim()
+        .replace(/\s+/g, ' ')
+        .toLocaleLowerCase('pt-BR');
+      const atual = alunosUnicos.get(chave);
+      if (!atual || this.compararJogadoresRanking(jogador, atual) < 0) {
+        alunosUnicos.set(chave, jogador);
+      }
+    }
+
+    return Array.from(alunosUnicos.values())
+      .sort((a, b) => this.compararJogadoresRanking(a, b))
+      .map((jogador, index) => ({
+        posicao: index + 1,
+        jogadorId: jogador.id,
+        nome: jogador.nome,
+        pontuacao: jogador.pontuacao,
+        statusPartida: PARTIDA_STATUS.FINALIZADO,
+        finalizadoEm: jogador.finalizadoEm ?? null,
+      }));
+  }
+
+  private compararJogadoresRanking(a: Jogador, b: Jogador): number {
+    const diferencaPontuacao = b.pontuacao - a.pontuacao;
+    if (diferencaPontuacao !== 0) {
+      return diferencaPontuacao;
+    }
+
+    const terminoA = a.finalizadoEm?.getTime() ?? Number.MAX_SAFE_INTEGER;
+    const terminoB = b.finalizadoEm?.getTime() ?? Number.MAX_SAFE_INTEGER;
+    if (terminoA !== terminoB) {
+      return terminoA - terminoB;
+    }
+
+    const diferencaNome = a.nome.localeCompare(b.nome, 'pt-BR');
+    return diferencaNome !== 0 ? diferencaNome : a.id - b.id;
   }
 
   private agruparDesempenho(

@@ -2,6 +2,7 @@ extends CanvasLayer
 class_name SettingsOverlay
 
 const UITheme := preload("res://scripts/UITheme.gd")
+const FONT_SCALE_OPTIONS: Array[float] = [1.0, 1.15, 1.30]
 
 signal menu_opened
 signal menu_closed
@@ -18,13 +19,15 @@ var sfx_value: Label
 var music_toggle: Button
 var vfx_toggle: Button
 var subtitle_toggle: Button
+var font_scale_buttons: Array[Button] = []
+var font_scale_group: ButtonGroup
 var reset_button: Button
 var exit_button: Button
 var close_button: Button
 var settings_manager: Node = null
 var opened := false
 var animating := false
-var panel_base_size := Vector2(720, 620)
+var panel_base_size := Vector2(760, 680)
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -49,6 +52,8 @@ func _ready() -> void:
 	_bind_feedback(music_toggle)
 	_bind_feedback(vfx_toggle)
 	_bind_feedback(subtitle_toggle)
+	for button in font_scale_buttons:
+		_bind_feedback(button)
 
 	if not settings_manager.settings_loaded.is_connected(_refresh_ui):
 		settings_manager.settings_loaded.connect(_refresh_ui)
@@ -67,6 +72,8 @@ func _apply_visual_refresh() -> void:
 	UITheme.apply_button(reset_button, UITheme.BUTTON_SURFACE, 17)
 	UITheme.apply_button(exit_button, UITheme.BUTTON_DANGER, 17)
 	UITheme.apply_button(close_button, UITheme.BUTTON_DANGER, 17)
+	for button in font_scale_buttons:
+		UITheme.apply_toggle_button(button, button.button_pressed, 16)
 
 func _cache_controls() -> void:
 	master_slider = get_node_or_null("Root/CenterContainer/Panel/Margin/VBox/Scroll/Content/AudioSection/Margin/Rows/MasterRow/MasterSlider")
@@ -85,6 +92,7 @@ func _create_missing_controls_if_needed() -> void:
 	var sfx_row: HBoxContainer = get_node_or_null("Root/CenterContainer/Panel/Margin/VBox/Scroll/Content/AudioSection/Margin/Rows/SfxRow")
 	var vfx_row: HBoxContainer = get_node_or_null("Root/CenterContainer/Panel/Margin/VBox/Scroll/Content/TogglesSection/Margin/Rows/VfxRow")
 	var music_text: Label = get_node_or_null("Root/CenterContainer/Panel/Margin/VBox/Scroll/Content/TogglesSection/Margin/Rows/MusicRow/MusicText")
+	var toggle_rows: VBoxContainer = get_node_or_null("Root/CenterContainer/Panel/Margin/VBox/Scroll/Content/TogglesSection/Margin/Rows")
 
 	if master_value == null and master_row != null:
 		master_value = _make_value_label()
@@ -110,6 +118,40 @@ func _create_missing_controls_if_needed() -> void:
 		vfx_toggle = _make_toggle_button(music_toggle)
 		vfx_toggle.name = "VfxToggle"
 		vfx_row.add_child(vfx_toggle)
+
+	if toggle_rows != null:
+		_create_font_scale_row(toggle_rows, music_text)
+
+func _create_font_scale_row(rows: VBoxContainer, reference_label: Label) -> void:
+	var row := HBoxContainer.new()
+	row.name = "FontScaleRow"
+	row.add_theme_constant_override("separation", 12)
+	rows.add_child(row)
+
+	var label := Label.new()
+	label.name = "FontScaleText"
+	label.text = "Tamanho do texto"
+	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	if reference_label != null:
+		label.add_theme_color_override("font_color", reference_label.get_theme_color("font_color"))
+	UITheme.apply_subtitle(label, 18, Color(0.96, 0.97, 0.98, 1.0))
+	row.add_child(label)
+
+	var options := HBoxContainer.new()
+	options.name = "FontScaleOptions"
+	options.add_theme_constant_override("separation", 6)
+	row.add_child(options)
+	font_scale_group = ButtonGroup.new()
+	for scale_value in FONT_SCALE_OPTIONS:
+		var button := Button.new()
+		button.custom_minimum_size = Vector2(96, 40)
+		button.toggle_mode = true
+		button.button_group = font_scale_group
+		button.text = "%d%%" % roundi(scale_value * 100.0)
+		button.pressed.connect(_on_font_scale_pressed.bind(scale_value))
+		options.add_child(button)
+		font_scale_buttons.append(button)
 
 func _make_value_label() -> Label:
 	var label := Label.new()
@@ -220,6 +262,10 @@ func _refresh_ui() -> void:
 	UITheme.apply_toggle_button(music_toggle, settings_manager.music_enabled, 16)
 	UITheme.apply_toggle_button(vfx_toggle, settings_manager.vfx_enabled, 16)
 	UITheme.apply_toggle_button(subtitle_toggle, settings_manager.subtitles_enabled, 16)
+	for index in range(font_scale_buttons.size()):
+		var selected := is_equal_approx(settings_manager.font_scale, FONT_SCALE_OPTIONS[index])
+		font_scale_buttons[index].set_pressed_no_signal(selected)
+		UITheme.apply_toggle_button(font_scale_buttons[index], selected, 16)
 
 func _on_master_slider_changed(value: float) -> void:
 	if settings_manager == null:
@@ -250,6 +296,11 @@ func _on_subtitles_toggled(enabled: bool) -> void:
 		return
 	settings_manager.set_subtitles_enabled(enabled)
 	subtitle_toggle.text = "ON" if enabled else "OFF"
+
+func _on_font_scale_pressed(value: float) -> void:
+	if settings_manager == null:
+		return
+	settings_manager.set_font_scale(value)
 
 func _on_reset_pressed() -> void:
 	if settings_manager == null:

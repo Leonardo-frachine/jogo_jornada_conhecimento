@@ -55,7 +55,11 @@ static func apply_font_only(control: Control, font_size: int = -1) -> void:
 
 	control.add_theme_font_override("font", FONT_RESOURCE)
 	if font_size > 0:
-		control.add_theme_font_size_override("font_size", font_size)
+		var accessibility_manager := _get_accessibility_manager()
+		if accessibility_manager != null and accessibility_manager.has_method("apply_font_size"):
+			accessibility_manager.call("apply_font_size", control, font_size)
+		else:
+			control.add_theme_font_size_override("font_size", font_size)
 
 static func apply_font_tree(root: Node) -> void:
 	if root == null:
@@ -137,6 +141,7 @@ static func apply_line_edit(line_edit: LineEdit, font_size: int = 18) -> void:
 	if line_edit == null:
 		return
 
+	line_edit.custom_minimum_size.y = maxf(line_edit.custom_minimum_size.y, 48.0)
 	apply_font_only(line_edit, font_size)
 	line_edit.add_theme_stylebox_override("normal", _make_surface_style(
 		Color(1.0, 0.995, 0.985, 0.98),
@@ -183,6 +188,10 @@ static func apply_button(button: Button, variant: String = BUTTON_PRIMARY, font_
 		padding_vertical = 12
 
 	apply_font_only(button, font_size)
+	button.clip_text = false
+	button.text_overrun_behavior = TextServer.OVERRUN_NO_TRIMMING
+	if button.get_parent() is Container:
+		button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	button.add_theme_constant_override("h_separation", 10)
 	button.add_theme_color_override("font_color", scheme["font"])
 	button.add_theme_color_override("font_hover_color", scheme["font"])
@@ -324,3 +333,9 @@ static func _tint(color_value: Color, amount: float) -> Color:
 
 static func _shade(color_value: Color, amount: float) -> Color:
 	return color_value.lerp(Color(0.0, 0.0, 0.0, color_value.a), clampf(amount, 0.0, 1.0))
+
+static func _get_accessibility_manager() -> Node:
+	var main_loop := Engine.get_main_loop()
+	if not main_loop is SceneTree:
+		return null
+	return (main_loop as SceneTree).root.get_node_or_null("AccessibilityManager")

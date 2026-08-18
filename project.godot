@@ -23,6 +23,8 @@ default_bus_layout="res://default_bus_layout.tres"
 [autoload]
 
 SettingsManager="*res://scripts/SettingsManager.gd"
+AccessibilityManager="*res://scripts/AccessibilityManager.gd"
+AudioManager="*res://scripts/AudioManager.gd"
 ApiClient="*res://scripts/ApiClient.gd"
 GameState="*res://scripts/GameState.gd"
 ProfessorSession="*res://scripts/ProfessorSession.gd"

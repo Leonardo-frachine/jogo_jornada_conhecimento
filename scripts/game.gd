@@ -10,7 +10,7 @@ const HUD_LAYER := 20
 const DIALOG_LAYER := 40
 const CAMERA_PADDING := 0.92
 const BOARD_MIN_ZOOM := 0.36
-const DIALOG_MAX_WIDTH := 980.0
+const DIALOG_MAX_WIDTH := 1180.0
 const DIALOG_MAX_HEIGHT := 720.0
 const QUESTION_BASE_HEIGHT := 84.0
 const QUESTION_TALL_HEIGHT := 126.0
@@ -20,6 +20,9 @@ const ANSWER_TALL_HEIGHT := 78.0
 const ANSWER_EXTRA_TALL_HEIGHT := 104.0
 const ANSWER_ULTRA_TALL_HEIGHT := 128.0
 const ANSWER_SLOT_LABELS: Array[String] = ["A", "B", "C", "D"]
+const DEFAULT_QUESTION_TIME_LIMIT := 30
+const QUESTION_TIMER_WARNING_SECONDS := 10
+const QUESTION_TIMER_DANGER_SECONDS := 5
 const BOARD_HORIZONTAL_PADDING_RATIO := 0.015
 const BOARD_HORIZONTAL_PADDING_MIN := 12.0
 const BOARD_HORIZONTAL_PADDING_MAX := 28.0
@@ -32,6 +35,16 @@ const BOARD_BOTTOM_PADDING_MAX := 52.0
 const BOARD_PATH_SHADOW_NAME := "BoardPathShadow"
 const BOARD_PATH_LINE_NAME := "BoardPathLine"
 const BOARD_HOUSE_SPRITE_SCALE := Vector2(0.18, 0.135)
+const BOARD_BACKGROUND_TINT := Color(0.76, 0.76, 0.76, 1.0)
+const CHALLENGE_HOUSE_TEXTURE := preload("res://imagens/chao/challenge_house.png")
+const CHALLENGE_HOUSE_SPRITE_SCALE := Vector2(0.075, 0.075)
+const CHALLENGE_HOUSES: Array[int] = [5, 10, 15, 20, 25]
+const CHALLENGE_COLOR := Color(0.92, 0.22, 0.18, 1.0)
+const ROOM_PLAYERS_REFRESH_SECONDS := 3.0
+const REMOTE_PLAYER_TEXTURE_PATHS: Array[String] = [
+	"res://imagens/Player/personagem.png",
+	"res://imagens/personagem/personagem_feminina2.png",
+]
 const BOARD_PATH_SCREEN_POINTS: Array[Vector2] = [
 	Vector2(0.22, 0.83),
 	Vector2(0.30, 0.80),
@@ -66,7 +79,9 @@ const BOARD_PATH_SCREEN_POINTS: Array[Vector2] = [
 enum TurnState {
 	WAITING_ROLL,
 	SHOWING_QUESTION,
-	MOVING_PLAYER
+	MOVING_PLAYER,
+	MOVING_TO_CHALLENGE,
+	RETURNING_FROM_CHALLENGE
 }
 
 @onready var casas_root: Node = get_node_or_null("Casas")
@@ -75,7 +90,12 @@ enum TurnState {
 @onready var sprite_dado: Sprite2D = get_node_or_null("CanvasLayer/SpriteDado") as Sprite2D
 @onready var dialog_panel: Control = get_node_or_null("CanvasLayer/JanelaPergunta") as Control
 @onready var dialog_backdrop: ColorRect = get_node_or_null("CanvasLayer/DialogBackdrop") as ColorRect
-@onready var dialog_title_label: Label = get_node_or_null("CanvasLayer/JanelaPergunta/Margin/VBox/DialogTitle") as Label
+@onready var dialog_title_label: Label = get_node_or_null("CanvasLayer/JanelaPergunta/Margin/VBox/HeaderRow/DialogTitle") as Label
+@onready var question_timer_panel: PanelContainer = get_node_or_null("CanvasLayer/JanelaPergunta/Margin/VBox/HeaderRow/QuestionTimerPanel") as PanelContainer
+@onready var question_timer_label: Label = get_node_or_null("CanvasLayer/JanelaPergunta/Margin/VBox/HeaderRow/QuestionTimerPanel/TimerMargin/QuestionTimerLabel") as Label
+@onready var question_timer_progress: ProgressBar = get_node_or_null("CanvasLayer/JanelaPergunta/Margin/VBox/QuestionTimerProgress") as ProgressBar
+@onready var turn_feedback_panel: PanelContainer = get_node_or_null("CanvasLayer/JanelaPergunta/Margin/VBox/TurnFeedbackPanel") as PanelContainer
+@onready var turn_feedback_label: Label = get_node_or_null("CanvasLayer/JanelaPergunta/Margin/VBox/TurnFeedbackPanel/FeedbackMargin/TurnFeedbackLabel") as Label
 @onready var question_label: Label = get_node_or_null("CanvasLayer/JanelaPergunta/Margin/VBox/QuestionLabel") as Label
 @onready var question_hint_label: Label = get_node_or_null("CanvasLayer/JanelaPergunta/Margin/VBox/QuestionHintLabel") as Label
 @onready var answers_container: VBoxContainer = get_node_or_null("CanvasLayer/JanelaPergunta/Margin/VBox/Answers") as VBoxContainer
@@ -111,15 +131,23 @@ var dice_textures: Array[Texture2D] = [
 var board_positions: Array[Vector2] = []
 var board_local_positions: Array[Vector2] = []
 var pending_target_house: int = 1
+var pending_start_house: int = 1
+var pending_is_challenge := false
 var pending_correct_index: int = 0
 var current_roll: int = 0
 var rng_roll = RandomNumberGenerator.new()
 var accepting_roll: bool = true
 var turn_state: int = TurnState.WAITING_ROLL
 var answering_locked: bool = false
-
-var music_player: AudioStreamPlayer
-var sfx_player: AudioStreamPlayer
+var remote_players_root: Node2D
+var remote_player_nodes: Dictionary = {}
+var remote_players_snapshot: Array[Dictionary] = []
+var room_players_refreshing := false
+var room_players_timer: Timer
+var question_timer: Timer
+var question_time_limit := DEFAULT_QUESTION_TIME_LIMIT
+var question_deadline_ms := 0
+var question_timer_color_state := -1
 
 func _ready() -> void:
 	randomize()
@@ -131,8 +159,10 @@ func _ready() -> void:
 	if hud_canvas != null:
 		hud_canvas.layer = HUD_LAYER
 	_bind_scene_ui()
+	_setup_question_timer()
 	_layout_board_path()
 	_build_board_positions()
+	_decorate_challenge_houses()
 
 	if player != null:
 		if player.has_method("setup"):
@@ -142,19 +172,20 @@ func _ready() -> void:
 		if player.has_signal("movement_finished") and not player.movement_finished.is_connected(_on_movement_finished):
 			player.movement_finished.connect(_on_movement_finished)
 
-	_create_audio_players()
-	if not SettingsManager.settings_changed.is_connected(_on_settings_changed):
-		SettingsManager.settings_changed.connect(_on_settings_changed)
+	_setup_room_players_sync()
+
+	AudioManager.play_game_music()
 	_configure_camera()
 	_refresh_hud()
 	call_deferred("_apply_initial_layout")
 	_hide_dialog()
 	_set_turn_state(TurnState.WAITING_ROLL)
-	_sync_music_state()
 	_show_feedback("Role o dado para abrir uma pergunta.", FEEDBACK_OK)
 
 	if not get_viewport().size_changed.is_connected(_on_viewport_size_changed):
 		get_viewport().size_changed.connect(_on_viewport_size_changed)
+	if not SettingsManager.font_scale_changed.is_connected(_on_font_scale_changed):
+		SettingsManager.font_scale_changed.connect(_on_font_scale_changed)
 
 func _bind_scene_ui() -> void:
 	if hud_root != null:
@@ -182,6 +213,9 @@ func _bind_scene_ui() -> void:
 			label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			UITheme.apply_font_only(label, 22 if label == player_label else (16 if label == room_label else 15))
 			label.add_theme_color_override("font_color", Color.WHITE)
+			label.clip_text = false
+	if subtitle_label != null:
+		subtitle_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 
 	for label in [score_label, level_label, progress_label, accuracy_label]:
 		if label != null:
@@ -193,6 +227,9 @@ func _bind_scene_ui() -> void:
 		feedback_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		UITheme.apply_font_only(feedback_label, 20)
 		feedback_label.add_theme_color_override("font_color", Color.WHITE)
+		feedback_label.add_theme_color_override("font_outline_color", Color(0.02, 0.03, 0.07, 0.95))
+		feedback_label.add_theme_constant_override("outline_size", 4)
+		feedback_label.add_theme_stylebox_override("normal", _make_emphasis_style(HUD_BG, HUD_ACCENT, 2, 14))
 
 	if roll_button != null:
 		roll_button.focus_mode = Control.FOCUS_NONE
@@ -237,10 +274,110 @@ func _bind_scene_ui() -> void:
 		question_hint_label.add_theme_color_override("font_color", Color(0.85, 0.90, 0.98, 0.88))
 		question_hint_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 
+	if question_timer_panel != null:
+		question_timer_panel.add_theme_stylebox_override("panel", _make_emphasis_style(Color(0.06, 0.08, 0.15, 0.98), HUD_ACCENT, 2, 14))
+	if question_timer_label != null:
+		UITheme.apply_font_only(question_timer_label, 18)
+		question_timer_label.add_theme_color_override("font_color", Color.WHITE)
+	if question_timer_progress != null:
+		question_timer_progress.add_theme_stylebox_override("background", _make_emphasis_style(Color(0.03, 0.05, 0.10, 0.95), Color(0.16, 0.20, 0.31, 1.0), 0, 5))
+	if turn_feedback_label != null:
+		UITheme.apply_font_only(turn_feedback_label, 17)
+		turn_feedback_label.add_theme_color_override("font_color", Color.WHITE)
+	if turn_feedback_panel != null:
+		turn_feedback_panel.add_theme_stylebox_override("panel", _make_emphasis_style(Color(0.15, 0.11, 0.04, 0.96), HUD_ACCENT, 2, 14))
+
 	_style_and_connect_answer_button(button_a, 0)
 	_style_and_connect_answer_button(button_b, 1)
 	_style_and_connect_answer_button(button_c, 2)
 	_style_and_connect_answer_button(button_d, 3)
+
+func _make_emphasis_style(background: Color, border: Color, border_width: int, radius: int) -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = background
+	style.border_color = border
+	style.border_width_left = border_width
+	style.border_width_top = border_width
+	style.border_width_right = border_width
+	style.border_width_bottom = border_width
+	style.corner_radius_top_left = radius
+	style.corner_radius_top_right = radius
+	style.corner_radius_bottom_left = radius
+	style.corner_radius_bottom_right = radius
+	style.content_margin_left = 12.0
+	style.content_margin_right = 12.0
+	style.content_margin_top = 6.0
+	style.content_margin_bottom = 6.0
+	return style
+
+func _setup_question_timer() -> void:
+	if question_timer != null and is_instance_valid(question_timer):
+		return
+	question_timer = Timer.new()
+	question_timer.name = "QuestionCountdownTimer"
+	question_timer.wait_time = 0.1
+	question_timer.one_shot = false
+	question_timer.timeout.connect(_on_question_timer_tick)
+	add_child(question_timer)
+
+func _start_question_timer(time_limit: int) -> void:
+	if question_timer == null:
+		return
+	question_time_limit = maxi(time_limit, 1)
+	question_deadline_ms = Time.get_ticks_msec() + question_time_limit * 1000
+	question_timer_color_state = -1
+	_update_question_timer_visual(float(question_time_limit))
+	question_timer.start()
+
+func _stop_question_timer() -> void:
+	question_deadline_ms = 0
+	if question_timer != null:
+		question_timer.stop()
+
+func _on_question_timer_tick() -> void:
+	if question_deadline_ms <= 0 or turn_state != TurnState.SHOWING_QUESTION:
+		_stop_question_timer()
+		return
+
+	var remaining_seconds := maxf(0.0, float(question_deadline_ms - Time.get_ticks_msec()) / 1000.0)
+	_update_question_timer_visual(remaining_seconds)
+	if remaining_seconds > 0.0:
+		return
+
+	_stop_question_timer()
+	if answering_locked or dialog_panel == null or not dialog_panel.visible:
+		return
+	answering_locked = true
+	_set_question_buttons_enabled(false)
+	if question_timer_label != null:
+		question_timer_label.text = "Tempo esgotado!"
+	_set_turn_feedback("Tempo esgotado. A resposta sera registrada como incorreta.", FEEDBACK_FAIL)
+	await get_tree().create_timer(0.65).timeout
+	if is_inside_tree() and turn_state == TurnState.SHOWING_QUESTION:
+		await _resolve_answer(false, true)
+
+func _update_question_timer_visual(remaining_seconds: float) -> void:
+	if question_timer_label != null:
+		question_timer_label.text = "Tempo: %ds" % ceili(remaining_seconds)
+	if question_timer_progress != null:
+		question_timer_progress.max_value = float(question_time_limit)
+		question_timer_progress.value = remaining_seconds
+
+	var color_state := 2 if remaining_seconds <= QUESTION_TIMER_DANGER_SECONDS else (1 if remaining_seconds <= QUESTION_TIMER_WARNING_SECONDS else 0)
+	if color_state == question_timer_color_state:
+		return
+	question_timer_color_state = color_state
+	var timer_color := FEEDBACK_FAIL if color_state == 2 else (HUD_ACCENT if color_state == 1 else FEEDBACK_OK)
+	if question_timer_label != null:
+		question_timer_label.add_theme_color_override("font_color", timer_color)
+	if question_timer_progress != null:
+		question_timer_progress.add_theme_stylebox_override("fill", _make_emphasis_style(timer_color, timer_color, 0, 5))
+
+func _set_turn_feedback(text_value: String, accent_color: Color) -> void:
+	if turn_feedback_label != null:
+		turn_feedback_label.text = text_value
+	if turn_feedback_panel != null:
+		turn_feedback_panel.add_theme_stylebox_override("panel", _make_emphasis_style(Color(0.06, 0.08, 0.15, 0.98), accent_color, 2, 14))
 
 func _style_and_connect_answer_button(button: Button, answer_slot: int) -> void:
 	if button == null:
@@ -284,6 +421,29 @@ func _build_board_positions() -> void:
 			board_local_positions.append(casa_2d.position)
 
 	_refresh_board_path_visual()
+
+func _decorate_challenge_houses() -> void:
+	if casas_root == null:
+		return
+
+	for house_index in CHALLENGE_HOUSES:
+		var house := casas_root.get_node_or_null("StaticBody2D_P%d" % house_index) as Node2D
+		if house == null:
+			continue
+
+		house.set_meta("is_challenge_house", true)
+		var sprite := house.get_node_or_null("Sprite2D") as Sprite2D
+		if sprite != null:
+			sprite.texture = CHALLENGE_HOUSE_TEXTURE
+			sprite.scale = CHALLENGE_HOUSE_SPRITE_SCALE
+			sprite.modulate = Color.WHITE
+			sprite.z_index = 4
+
+func _is_challenge_house(house_index: int) -> bool:
+	return CHALLENGE_HOUSES.has(house_index)
+
+func _get_challenge_return_house() -> int:
+	return maxi(1, pending_target_house - current_roll)
 
 func _refresh_board_path_visual() -> void:
 	var casas_node := casas_root as Node2D
@@ -345,47 +505,11 @@ func _layout_board_path() -> void:
 func _apply_house_visual_size(casa: Node2D) -> void:
 	var sprite := casa.get_node_or_null("Sprite2D") as Sprite2D
 	if sprite != null:
-		sprite.scale = BOARD_HOUSE_SPRITE_SCALE
-
-func _create_audio_players() -> void:
-	music_player = AudioStreamPlayer.new()
-	music_player.name = "GameMusic"
-	music_player.bus = "Music"
-	music_player.stream = load("res://assets/audio/fundo.mp3")
-	add_child(music_player)
-
-	sfx_player = AudioStreamPlayer.new()
-	sfx_player.name = "GameSfx"
-	sfx_player.bus = "SFX"
-	add_child(sfx_player)
-
-func _play_music() -> void:
-	if music_player and music_player.stream and SettingsManager.music_enabled and not music_player.playing:
-		music_player.play()
-
-func _sync_music_state() -> void:
-	if music_player == null or music_player.stream == null:
-		return
-	if SettingsManager.music_enabled:
-		if not music_player.playing:
-			music_player.play()
-	else:
-		if music_player.playing:
-			music_player.stop()
-
-func _on_settings_changed() -> void:
-	_sync_music_state()
-
-func _play_sfx(path: String) -> void:
-	if sfx_player == null:
-		return
-
-	var stream: AudioStream = load(path) as AudioStream
-	if stream == null:
-		return
-
-	sfx_player.stream = stream
-	sfx_player.play()
+		if bool(casa.get_meta("is_challenge_house", false)):
+			sprite.texture = CHALLENGE_HOUSE_TEXTURE
+			sprite.scale = CHALLENGE_HOUSE_SPRITE_SCALE
+		else:
+			sprite.scale = BOARD_HOUSE_SPRITE_SCALE
 
 func _on_settings_pressed() -> void:
 	SettingsManager.open_menu()
@@ -401,19 +525,147 @@ func _configure_camera() -> void:
 func _on_viewport_size_changed() -> void:
 	_update_viewport_layout()
 
+func _on_font_scale_changed(_value: float) -> void:
+	_bind_scene_ui()
+	_update_viewport_layout()
+	if dialog_panel != null and dialog_panel.visible:
+		_fit_question_content(question_label.text, _get_answer_buttons())
+
 func _update_viewport_layout() -> void:
 	_layout_screen_background()
 	_layout_hud()
 	_layout_dialog()
 	_layout_board_path()
 	_build_board_positions()
+	if player != null and player.has_method("update_board_positions"):
+		player.update_board_positions(board_positions)
+	_apply_remote_players_snapshot(false)
 	_fit_board_to_view()
+
+func _setup_room_players_sync() -> void:
+	if GameState.resolved_room_id <= 0:
+		return
+
+	remote_players_root = Node2D.new()
+	remote_players_root.name = "RemotePlayers"
+	remote_players_root.z_index = 8
+	add_child(remote_players_root)
+
+	room_players_timer = Timer.new()
+	room_players_timer.name = "RoomPlayersRefreshTimer"
+	room_players_timer.wait_time = ROOM_PLAYERS_REFRESH_SECONDS
+	room_players_timer.one_shot = false
+	room_players_timer.timeout.connect(_refresh_room_players)
+	add_child(room_players_timer)
+	room_players_timer.start()
+	call_deferred("_refresh_room_players")
+
+func _refresh_room_players() -> void:
+	if room_players_refreshing or GameState.resolved_room_id <= 0:
+		return
+
+	room_players_refreshing = true
+	var response: Dictionary = await ApiClient.fetch_room_players(GameState.resolved_room_id)
+	room_players_refreshing = false
+	if not is_inside_tree() or not response.get("ok", false):
+		return
+
+	remote_players_snapshot.clear()
+	var payload: Variant = response.get("data", [])
+	if payload is Array:
+		for item in payload:
+			if item is Dictionary:
+				remote_players_snapshot.append(item)
+	_apply_remote_players_snapshot(true)
+
+func _refresh_room_players_after_answer() -> void:
+	while room_players_refreshing and is_inside_tree():
+		await get_tree().process_frame
+	if is_inside_tree():
+		await _refresh_room_players()
+
+func _apply_remote_players_snapshot(animate_changes: bool) -> void:
+	if remote_players_root == null or board_positions.is_empty():
+		return
+
+	var active_player_ids := {}
+	var occupants_per_house := {}
+	for aluno in remote_players_snapshot:
+		var jogador_id := int(aluno.get("jogadorId", 0))
+		if jogador_id <= 0 or jogador_id == GameState.player_id:
+			continue
+
+		var casa_atual := clampi(int(aluno.get("casaAtual", 1)), 1, board_positions.size())
+		var occupant_index := int(occupants_per_house.get(casa_atual, 0))
+		occupants_per_house[casa_atual] = occupant_index + 1
+		active_player_ids[jogador_id] = true
+
+		var avatar := remote_player_nodes.get(jogador_id) as Node2D
+		if avatar == null:
+			avatar = _create_remote_player(jogador_id)
+			remote_player_nodes[jogador_id] = avatar
+
+		var name_label := avatar.get_node_or_null("NameLabel") as Label
+		if name_label != null:
+			name_label.text = str(aluno.get("nome", "Aluno"))
+
+		var target_position := board_positions[casa_atual - 1] + _get_remote_player_offset(occupant_index)
+		var previous_house := int(avatar.get_meta("casa_atual", 0))
+		avatar.set_meta("casa_atual", casa_atual)
+		if animate_changes and previous_house > 0 and previous_house != casa_atual:
+			var tween := create_tween()
+			tween.tween_property(avatar, "global_position", target_position, 0.24).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+		else:
+			avatar.global_position = target_position
+
+	for jogador_id in remote_player_nodes.keys():
+		if active_player_ids.has(jogador_id):
+			continue
+		var stale_avatar := remote_player_nodes[jogador_id] as Node2D
+		remote_player_nodes.erase(jogador_id)
+		if stale_avatar != null:
+			stale_avatar.queue_free()
+
+func _create_remote_player(jogador_id: int) -> Node2D:
+	var avatar := Node2D.new()
+	avatar.name = "RemotePlayer_%d" % jogador_id
+	avatar.z_index = 8
+	remote_players_root.add_child(avatar)
+
+	var sprite := Sprite2D.new()
+	sprite.name = "Sprite"
+	var texture_path := REMOTE_PLAYER_TEXTURE_PATHS[jogador_id % REMOTE_PLAYER_TEXTURE_PATHS.size()]
+	var texture := load(texture_path) as Texture2D
+	if texture != null:
+		sprite.texture = texture
+		var scale_ratio := 1536.0 / maxf(float(texture.get_width()), 1.0)
+		sprite.scale = Vector2(0.072, 0.085) * scale_ratio
+	sprite.modulate = Color(1.0, 1.0, 1.0, 0.82)
+	avatar.add_child(sprite)
+
+	var name_label := Label.new()
+	name_label.name = "NameLabel"
+	name_label.position = Vector2(-58.0, -72.0)
+	name_label.size = Vector2(116.0, 28.0)
+	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	name_label.add_theme_font_size_override("font_size", 14)
+	name_label.add_theme_color_override("font_color", Color.WHITE)
+	name_label.add_theme_color_override("font_outline_color", Color(0.05, 0.06, 0.10, 0.95))
+	name_label.add_theme_constant_override("outline_size", 5)
+	avatar.add_child(name_label)
+	return avatar
+
+func _get_remote_player_offset(occupant_index: int) -> Vector2:
+	var angle := -PI * 0.5 + float(occupant_index % 8) * TAU / 8.0
+	var radius := 24.0 + float(occupant_index / 8) * 12.0
+	return Vector2(cos(angle), sin(angle)) * radius
 
 func _layout_screen_background() -> void:
 	if screen_background == null:
 		return
 
 	var viewport_size: Vector2 = _get_layout_size()
+	screen_background.self_modulate = BOARD_BACKGROUND_TINT
 	screen_background.anchor_left = 0.0
 	screen_background.anchor_top = 0.0
 	screen_background.anchor_right = 0.0
@@ -429,17 +681,20 @@ func _layout_hud() -> void:
 
 	var viewport_size: Vector2 = _get_layout_size()
 	var top_panel: PanelContainer = hud_root.get_node_or_null("TopPanel") as PanelContainer
+	var font_scale: float = SettingsManager.font_scale
+	var top_panel_height := 102.0 + roundf(42.0 * (font_scale - 1.0))
 
 	if top_panel:
 		top_panel.position = Vector2(16, 16)
 		top_panel.size = Vector2(
-			clampf(viewport_size.x * 0.34, 320.0, 680.0),
-			102.0
+			clampf(viewport_size.x * 0.44, 420.0, 760.0),
+			top_panel_height
 		)
 
 	if feedback_label != null:
-		feedback_label.position = Vector2(18, 156)
-		feedback_label.size.x = maxf(320.0, minf(560.0, viewport_size.x - 36.0))
+		feedback_label.position = Vector2(18, 34.0 + top_panel_height)
+		feedback_label.size = Vector2(maxf(420.0, minf(720.0, viewport_size.x - 36.0)), 64.0 * font_scale)
+		feedback_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 
 	if roll_button != null:
 		var bottom_margin: float = 24.0
@@ -453,7 +708,7 @@ func _layout_hud() -> void:
 		sprite_dado.position = Vector2(viewport_size.x - 86.0, 82.0)
 
 	if settings_button != null:
-		var settings_size: float = 128.0
+		var settings_size: float = 84.0 if viewport_size.y <= 720.0 else 96.0
 		var settings_margin: float = 18.0
 		settings_button.anchor_left = 0.0
 		settings_button.anchor_top = 0.0
@@ -547,6 +802,7 @@ func _calculate_board_bounds() -> Rect2:
 	return bounds
 
 func _hide_dialog() -> void:
+	_stop_question_timer()
 	if dialog_panel != null:
 		dialog_panel.hide()
 
@@ -555,6 +811,8 @@ func _hide_dialog() -> void:
 
 	_set_question_buttons_enabled(false)
 	answering_locked = false
+	if feedback_label != null:
+		feedback_label.show()
 
 func _show_dialog() -> void:
 	if dialog_panel == null:
@@ -562,6 +820,8 @@ func _show_dialog() -> void:
 
 	if dialog_backdrop != null:
 		dialog_backdrop.show()
+	if feedback_label != null:
+		feedback_label.hide()
 
 	dialog_panel.show()
 	canvas_layer.move_child(dialog_panel, canvas_layer.get_child_count() - 1)
@@ -599,7 +859,7 @@ func roll_dice() -> void:
 	if (dialog_panel != null and dialog_panel.visible) or get_tree().paused:
 		return
 
-	_set_turn_state(TurnState.SHOWING_QUESTION)
+	AudioManager.play_dice_sfx()
 	rng_roll.randomize()
 	var rng_roll: float = rng_roll.randf() #gera um numero aleatorio entre 0 e 1
 	if rng_roll <= 0.1: current_roll = 6 #10%
@@ -609,23 +869,39 @@ func roll_dice() -> void:
 	elif rng_roll <= 0.5: current_roll= 2	#50%
 	else: current_roll= 1	 # >50%
 	
-	pending_target_house = mini(player.current_house + current_roll, TOTAL_CASAS)
+	pending_start_house = player.current_house
+	pending_target_house = mini(pending_start_house + current_roll, TOTAL_CASAS)
+	pending_is_challenge = _is_challenge_house(pending_target_house)
 
 	if sprite_dado != null:
 		sprite_dado.texture = dice_textures[current_roll - 1]
 
-	_play_sfx("res://assets/audio/dice.mp3")
+	if pending_is_challenge:
+		_set_turn_state(TurnState.MOVING_TO_CHALLENGE)
+		_show_feedback("Casa desafio! Prepare-se para uma pergunta especial.", CHALLENGE_COLOR)
+		await player.move_to_house(pending_target_house)
+		if not is_inside_tree():
+			return
+
+	_set_turn_state(TurnState.SHOWING_QUESTION)
 	_present_question(pending_target_house)
 
 func _present_question(house_index: int) -> void:
 	if dialog_panel == null:
 		return
 
-	var question: Dictionary = GameState.get_question_for_house(house_index)
+	var question: Dictionary
+	if pending_is_challenge:
+		question = GameState.get_challenge_question_for_house(house_index)
+	else:
+		question = GameState.get_question_for_house(house_index)
 	var options: Array = question.get("options", [])
 	if options.is_empty():
 		push_error("Pergunta selecionada sem alternativas.")
-		_finalize_turn()
+		if pending_is_challenge:
+			call_deferred("_cancel_unavailable_challenge")
+		else:
+			_finalize_turn()
 		return
 
 	var order: Array[int] = []
@@ -634,7 +910,23 @@ func _present_question(house_index: int) -> void:
 	order.shuffle()
 	pending_correct_index = order.find(int(question.get("correct_index", 0)))
 
-	dialog_title_label.text = "Casa %d - Nivel %d" % [house_index, GameState.get_level_for_house(house_index)]
+	var question_level := int(question.get("difficulty", GameState.get_level_for_house(house_index)))
+	var question_points := int(question.get("points", question_level * 100))
+	var wrong_penalty := int(round(float(question_points) / 2.0))
+	if pending_is_challenge:
+		dialog_title_label.text = "DESAFIO - Casa %d - Nivel %d" % [house_index, question_level]
+		dialog_title_label.add_theme_color_override("font_color", CHALLENGE_COLOR)
+		_set_turn_feedback(
+			"Casa desafio %d | Acerto: +%d pontos | Erro: -%d pontos e volta %d casas" % [house_index, question_points, wrong_penalty, current_roll],
+			CHALLENGE_COLOR
+		)
+	else:
+		dialog_title_label.text = "Casa %d - Nivel %d" % [house_index, question_level]
+		dialog_title_label.add_theme_color_override("font_color", HUD_ACCENT)
+		_set_turn_feedback(
+			"Casa %d | Acerto: +%d pontos | Erro: -%d pontos" % [house_index, question_points, wrong_penalty],
+			HUD_ACCENT
+		)
 	question_label.text = str(question.get("text", ""))
 	_update_question_hint(question)
 
@@ -653,9 +945,17 @@ func _present_question(house_index: int) -> void:
 
 	_fit_question_content(question_label.text, buttons)
 	_show_dialog()
+	_start_question_timer(_get_question_time_limit(question))
 
 	if SettingsManager.subtitles_enabled:
 		subtitle_label.text = "Leia a pergunta e escolha a resposta correta."
+
+func _cancel_unavailable_challenge() -> void:
+	_set_turn_state(TurnState.RETURNING_FROM_CHALLENGE)
+	_show_feedback("Pergunta desafio indisponivel. Retornando a posicao anterior.", FEEDBACK_FAIL)
+	if player != null:
+		await player.move_to_house(_get_challenge_return_house())
+	_finalize_turn()
 
 func _fit_question_content(question_text: String, buttons: Array[Button]) -> void:
 	var question_length := question_text.length()
@@ -666,6 +966,7 @@ func _fit_question_content(question_text: String, buttons: Array[Button]) -> voi
 
 	var question_font_size := 24
 	var question_height := QUESTION_BASE_HEIGHT
+	var height_scale := minf(SettingsManager.font_scale, 1.2)
 	if question_length > 170:
 		question_font_size = 19
 		question_height = QUESTION_EXTRA_TALL_HEIGHT
@@ -675,7 +976,7 @@ func _fit_question_content(question_text: String, buttons: Array[Button]) -> voi
 
 	if question_label != null:
 		UITheme.apply_font_only(question_label, question_font_size)
-		question_label.custom_minimum_size.y = question_height
+		question_label.custom_minimum_size.y = question_height * height_scale
 
 	var answer_font_size := 17
 	var answer_height := ANSWER_BASE_HEIGHT
@@ -692,7 +993,7 @@ func _fit_question_content(question_text: String, buttons: Array[Button]) -> voi
 	for button in buttons:
 		if button == null:
 			continue
-		button.custom_minimum_size.y = answer_height
+		button.custom_minimum_size.y = answer_height * height_scale
 		UITheme.apply_button(button, UITheme.BUTTON_SECONDARY, answer_font_size)
 		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		button.set("autowrap_mode", TextServer.AUTOWRAP_WORD_SMART)
@@ -708,20 +1009,20 @@ func _fit_question_content(question_text: String, buttons: Array[Button]) -> voi
 func _update_question_hint(question: Dictionary) -> void:
 	var hints: Array[String] = []
 	var subject: String = str(question.get("subject", "")).strip_edges()
-	var time_limit: int = int(question.get("time_limit", 0))
-	var points: int = int(question.get("points", 0))
 
+	if bool(question.get("is_challenge", false)):
+		hints.append("Pergunta desafio")
 	if not subject.is_empty():
 		hints.append("Materia: %s" % subject)
-	if time_limit > 0:
-		hints.append("Tempo: %ds" % time_limit)
-	if points > 0:
-		hints.append("Valor: %d pts" % points)
 
 	if hints.is_empty():
 		question_hint_label.text = "Escolha a alternativa correta para seguir no tabuleiro."
 	else:
 		question_hint_label.text = "  |  ".join(hints)
+
+func _get_question_time_limit(question: Dictionary) -> int:
+	var configured_limit := int(question.get("time_limit", 0))
+	return configured_limit if configured_limit > 0 else DEFAULT_QUESTION_TIME_LIMIT
 
 func _on_answer_button_pressed(answer_slot: int) -> void:
 	if turn_state != TurnState.SHOWING_QUESTION:
@@ -730,26 +1031,55 @@ func _on_answer_button_pressed(answer_slot: int) -> void:
 		return
 
 	answering_locked = true
+	_stop_question_timer()
 	_set_question_buttons_enabled(false)
+	await _resolve_answer(answer_slot == pending_correct_index, false)
 
-	var correct: bool = answer_slot == pending_correct_index
+func _resolve_answer(correct: bool, timed_out: bool) -> void:
 	_hide_dialog()
-	GameState.register_answer(correct, pending_target_house)
-	await GameState.submit_answer_result(correct, pending_target_house)
+	var score_delta := GameState.register_answer(correct, pending_target_house)
+	if timed_out:
+		GameState.last_feedback = "Tempo esgotado! %d pontos." % score_delta
+	_show_feedback(GameState.last_feedback, FEEDBACK_OK if correct else FEEDBACK_FAIL)
+
+	if pending_is_challenge and not correct:
+		_set_turn_state(TurnState.RETURNING_FROM_CHALLENGE)
+		_show_feedback(
+			"%s Casa desafio: volte %d casas." % [GameState.last_feedback, current_roll],
+			FEEDBACK_FAIL
+		)
+		AudioManager.play_wrong_sfx()
+		if player != null:
+			await player.move_to_house(_get_challenge_return_house())
+
+		var challenge_sync: Dictionary = await GameState.submit_answer_result(false, pending_target_house)
+		if challenge_sync.get("ok", false):
+			call_deferred("_refresh_room_players_after_answer")
+		_refresh_hud()
+		_finalize_turn()
+		return
+
+	var sync_response: Dictionary = await GameState.submit_answer_result(correct, pending_target_house)
+	if sync_response.get("ok", false):
+		call_deferred("_refresh_room_players_after_answer")
 
 	if correct:
-		_set_turn_state(TurnState.MOVING_PLAYER)
-		_show_feedback(GameState.last_feedback, FEEDBACK_OK)
-		_play_sfx("res://assets/audio/correct.mp3")
+		if pending_is_challenge:
+			_show_feedback("%s Desafio concluido!" % GameState.last_feedback, FEEDBACK_OK)
+		else:
+			_set_turn_state(TurnState.MOVING_PLAYER)
+		AudioManager.play_correct_sfx()
 
 		if SettingsManager.vfx_enabled:
 			_pulse_feedback()
 
-		if player != null:
+		if pending_is_challenge:
+			_finalize_turn()
+		elif player != null:
 			await player.move_to_house(pending_target_house)
 	else:
 		_show_feedback(GameState.last_feedback, FEEDBACK_FAIL)
-		_play_sfx("res://assets/audio/wrong.wav")
+		AudioManager.play_wrong_sfx()
 		_finalize_turn()
 
 	_refresh_hud()
@@ -765,7 +1095,7 @@ func _pulse_feedback() -> void:
 func _on_step_reached(house_index: int) -> void:
 	GameState.update_progress(house_index)
 	_refresh_hud()
-	_play_sfx("res://assets/audio/move.wav")
+	AudioManager.play_move_sfx()
 
 func _on_movement_finished() -> void:
 	if turn_state == TurnState.MOVING_PLAYER:
@@ -774,10 +1104,13 @@ func _on_movement_finished() -> void:
 func _finalize_turn() -> void:
 	current_roll = 0
 	answering_locked = false
+	pending_is_challenge = false
+	pending_start_house = GameState.current_house
 	GameState.current_question.clear()
 
 	if GameState.current_house >= TOTAL_CASAS:
 		GameState.finish_session(true)
+		await GameState.sync_finished_session(true)
 		get_tree().change_scene_to_file("res://scene/end_game_screen.tscn")
 		return
 

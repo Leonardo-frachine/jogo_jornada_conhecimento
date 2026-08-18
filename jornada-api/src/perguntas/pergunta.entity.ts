@@ -3,12 +3,25 @@ import {
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
+  JoinColumn,
+  ManyToOne,
 } from 'typeorm';
+import { Sala } from '../salas/sala.entity';
 
 @Entity('perguntas')
 export class Pergunta {
   @PrimaryGeneratedColumn()
   id: number;
+
+  @Column({ type: 'integer', nullable: true })
+  salaId?: number | null;
+
+  @ManyToOne(() => Sala, (sala) => sala.perguntas, {
+    onDelete: 'CASCADE',
+    nullable: true,
+  })
+  @JoinColumn({ name: 'salaId' })
+  sala?: Sala | null;
 
   @Column({ nullable: true })
   titulo?: string;
@@ -42,6 +55,9 @@ export class Pergunta {
 
   @Column({ type: 'integer', nullable: true })
   tempoLimite?: number | null;
+
+  @Column({ default: true })
+  ativa: boolean;
 
   @CreateDateColumn()
   criadoEm: Date;

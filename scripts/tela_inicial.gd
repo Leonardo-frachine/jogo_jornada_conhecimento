@@ -17,7 +17,6 @@ const UITheme := preload("res://scripts/UITheme.gd")
 
 var nome_aluno: String = ""
 var codigo_sala: String = ""
-var music_player: AudioStreamPlayer
 var personagem_selecionado: int = 1
 var estilo_personagem_normal: StyleBox
 var estilo_personagem_selecionado: StyleBox
@@ -25,10 +24,7 @@ var estilo_personagem_selecionado: StyleBox
 func _ready() -> void:
 	SettingsManager.pause_tree_when_open = false
 	SettingsManager.close_menu()
-	_ensure_music_player()
-	if not SettingsManager.settings_changed.is_connected(_on_settings_changed):
-		SettingsManager.settings_changed.connect(_on_settings_changed)
-	_sync_music_state()
+	AudioManager.play_menu_music()
 	_apply_visual_refresh()
 
 	_preparar_botoes_personagem()
@@ -38,6 +34,11 @@ func _ready() -> void:
 	input_nome.text_submitted.connect(_on_input_nome_submitted)
 	input_codigo.text_submitted.connect(_on_input_codigo_submitted)
 	input_nome.grab_focus()
+	if not get_viewport().size_changed.is_connected(_update_responsive_layout):
+		get_viewport().size_changed.connect(_update_responsive_layout)
+	if not SettingsManager.font_scale_changed.is_connected(_on_font_scale_changed):
+		SettingsManager.font_scale_changed.connect(_on_font_scale_changed)
+	_update_responsive_layout()
 
 func _apply_visual_refresh() -> void:
 	UITheme.apply_surface_panel(painel_central)
@@ -50,6 +51,25 @@ func _apply_visual_refresh() -> void:
 	UITheme.apply_line_edit(input_codigo, 18)
 	UITheme.apply_button(botao_jogar, UITheme.BUTTON_PRIMARY, 20)
 	UITheme.apply_button(botao_voltar, UITheme.BUTTON_SECONDARY, 19)
+	subtitulo.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+
+func _update_responsive_layout() -> void:
+	var viewport_size := get_viewport_rect().size
+	var font_scale := SettingsManager.font_scale
+	var panel_width := clampf(viewport_size.x * 0.86, 540.0, 620.0 + 100.0 * (font_scale - 1.0))
+	var panel_height := minf(viewport_size.y - 32.0, 720.0 + 100.0 * (font_scale - 1.0))
+	painel_central.offset_left = -panel_width * 0.5
+	painel_central.offset_right = panel_width * 0.5
+	painel_central.offset_top = -panel_height * 0.5
+	painel_central.offset_bottom = panel_height * 0.5
+	painel_central.custom_minimum_size = Vector2(panel_width, panel_height)
+	var character_height := 125.0 if viewport_size.y <= 720.0 else 145.0
+	botao_personagem_1.custom_minimum_size.y = character_height
+	botao_personagem_2.custom_minimum_size.y = character_height
+
+func _on_font_scale_changed(_value: float) -> void:
+	_apply_visual_refresh()
+	call_deferred("_update_responsive_layout")
 
 func _preparar_botoes_personagem() -> void:
 	estilo_personagem_selecionado = botao_personagem_1.get_theme_stylebox("normal").duplicate()
@@ -75,36 +95,6 @@ func _aplicar_estilo_personagem(botao: Button, selecionado: bool) -> void:
 	botao.add_theme_stylebox_override("hover", estilo_interacao)
 	botao.add_theme_stylebox_override("pressed", estilo_interacao)
 	botao.add_theme_stylebox_override("focus", estilo_base)
-
-func _ensure_music_player() -> void:
-	music_player = get_node_or_null("MenuMusic")
-	if music_player != null:
-		return
-	music_player = AudioStreamPlayer.new()
-	music_player.name = "MenuMusic"
-	music_player.bus = "Music"
-	music_player.stream = load("res://assets/audio/menu_theme.wav")
-	music_player.autoplay = false
-	add_child(music_player)
-
-func _play_music() -> void:
-	if music_player == null or music_player.stream == null:
-		return
-	if SettingsManager.music_enabled and not music_player.playing:
-		music_player.play()
-
-func _sync_music_state() -> void:
-	if music_player == null or music_player.stream == null:
-		return
-	if SettingsManager.music_enabled:
-		if not music_player.playing:
-			music_player.play()
-	else:
-		if music_player.playing:
-			music_player.stop()
-
-func _on_settings_changed() -> void:
-	_sync_music_state()
 
 func _on_input_nome_submitted(_texto: String) -> void:
 	input_codigo.grab_focus()

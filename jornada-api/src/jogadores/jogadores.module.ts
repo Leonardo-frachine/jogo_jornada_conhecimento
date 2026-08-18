@@ -4,9 +4,10 @@ import { JogadoresService } from './jogadores.service';
 import { JogadoresController } from './jogadores.controller';
 import { Jogador } from './jogador.entity';
 import { Progresso } from '../progresso/progresso.entity';
+import { Sala } from '../salas/sala.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Jogador, Progresso])],
+  imports: [TypeOrmModule.forFeature([Jogador, Progresso, Sala])],
   controllers: [JogadoresController],
   providers: [JogadoresService],
 })

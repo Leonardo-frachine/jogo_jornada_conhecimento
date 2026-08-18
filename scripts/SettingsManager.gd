@@ -2,6 +2,7 @@ extends Node
 
 signal settings_loaded
 signal settings_changed
+signal font_scale_changed(value: float)
 
 const CONFIG_PATH := "user://settings.cfg"
 const OVERLAY_SCENE := preload("res://ui/settings/SettingsOverlay.tscn")
@@ -20,12 +21,15 @@ const DEFAULT_SFX_VOLUME := 0.80
 const DEFAULT_MUSIC_ENABLED := true
 const DEFAULT_VFX_ENABLED := true
 const DEFAULT_SUBTITLES_ENABLED := true
+const DEFAULT_FONT_SCALE := 1.0
+const FONT_SCALE_OPTIONS: Array[float] = [1.0, 1.15, 1.30]
 
 var master_volume: float = DEFAULT_MASTER_VOLUME
 var sfx_volume: float = DEFAULT_SFX_VOLUME
 var music_enabled: bool = DEFAULT_MUSIC_ENABLED
 var vfx_enabled: bool = DEFAULT_VFX_ENABLED
 var subtitles_enabled: bool = DEFAULT_SUBTITLES_ENABLED
+var font_scale: float = DEFAULT_FONT_SCALE
 
 var overlay = null
 var pause_tree_when_open := false
@@ -141,15 +145,34 @@ func set_subtitles_enabled(enabled: bool) -> void:
 	save_settings()
 	settings_changed.emit()
 
+func set_font_scale(value: float) -> void:
+	var selected_scale := FONT_SCALE_OPTIONS[0]
+	var shortest_distance := absf(value - selected_scale)
+	for option in FONT_SCALE_OPTIONS:
+		var distance := absf(value - option)
+		if distance < shortest_distance:
+			selected_scale = option
+			shortest_distance = distance
+
+	if is_equal_approx(font_scale, selected_scale):
+		return
+
+	font_scale = selected_scale
+	save_settings()
+	font_scale_changed.emit(font_scale)
+	settings_changed.emit()
+
 func reset_settings() -> void:
 	master_volume = DEFAULT_MASTER_VOLUME
 	sfx_volume = DEFAULT_SFX_VOLUME
 	music_enabled = DEFAULT_MUSIC_ENABLED
 	vfx_enabled = DEFAULT_VFX_ENABLED
 	subtitles_enabled = DEFAULT_SUBTITLES_ENABLED
+	font_scale = DEFAULT_FONT_SCALE
 
 	apply_settings()
 	save_settings()
+	font_scale_changed.emit(font_scale)
 	settings_changed.emit()
 
 func apply_settings() -> void:
@@ -164,6 +187,7 @@ func save_settings() -> void:
 	config.set_value("audio", "music_enabled", music_enabled)
 	config.set_value("graphics", "vfx_enabled", vfx_enabled)
 	config.set_value("accessibility", "subtitles_enabled", subtitles_enabled)
+	config.set_value("accessibility", "font_scale", font_scale)
 
 	var err := config.save(CONFIG_PATH)
 	if err != OK:
@@ -184,9 +208,20 @@ func load_settings() -> void:
 	music_enabled = bool(config.get_value("audio", "music_enabled", DEFAULT_MUSIC_ENABLED))
 	vfx_enabled = bool(config.get_value("graphics", "vfx_enabled", DEFAULT_VFX_ENABLED))
 	subtitles_enabled = bool(config.get_value("accessibility", "subtitles_enabled", DEFAULT_SUBTITLES_ENABLED))
+	font_scale = _validated_font_scale(float(config.get_value("accessibility", "font_scale", DEFAULT_FONT_SCALE)))
 
 	apply_settings()
 	settings_loaded.emit()
+
+func _validated_font_scale(value: float) -> float:
+	var selected_scale := FONT_SCALE_OPTIONS[0]
+	var shortest_distance := absf(value - selected_scale)
+	for option in FONT_SCALE_OPTIONS:
+		var distance := absf(value - option)
+		if distance < shortest_distance:
+			selected_scale = option
+			shortest_distance = distance
+	return selected_scale
 
 func _apply_bus_volume(bus_name: String, value: float) -> void:
 	var bus_index := AudioServer.get_bus_index(bus_name)

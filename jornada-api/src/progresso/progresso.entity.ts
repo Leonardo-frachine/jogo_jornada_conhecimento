@@ -7,6 +7,8 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { Jogador } from '../jogadores/jogador.entity';
+import { PARTIDA_STATUS } from '../jogadores/partida-status';
+import type { PartidaStatus } from '../jogadores/partida-status';
 import { Pergunta } from '../perguntas/pergunta.entity';
 import { Sala } from '../salas/sala.entity';
 
@@ -44,6 +46,12 @@ export class Progresso {
 
   @Column()
   fase: number;
+
+  @Column({ default: 1 })
+  casaAtual: number;
+
+  @Column({ type: 'varchar', default: PARTIDA_STATUS.JOGANDO })
+  statusPartida: PartidaStatus;
 
   @Column({ default: 0 })
   pontuacaoGanha: number;

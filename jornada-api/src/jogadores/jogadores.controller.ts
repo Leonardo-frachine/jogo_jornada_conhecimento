@@ -10,6 +10,7 @@ import {
 import { JogadoresService } from './jogadores.service';
 import { AtualizarFaseDto } from './dto/atualizar-fase.dto';
 import { CriarJogadorDto } from './dto/criar-jogador.dto';
+import { FinalizarPartidaDto } from './dto/finalizar-partida.dto';
 
 @Controller('jogadores')
 export class JogadoresController {
@@ -17,7 +18,7 @@ export class JogadoresController {
 
   @Post()
   criar(@Body() criarJogadorDto: CriarJogadorDto) {
-    return this.jogadoresService.criar(criarJogadorDto.nome);
+    return this.jogadoresService.criar(criarJogadorDto);
   }
 
   @Get()
@@ -41,5 +42,13 @@ export class JogadoresController {
     @Body() atualizarFaseDto: AtualizarFaseDto,
   ) {
     return this.jogadoresService.atualizarFase(id, atualizarFaseDto.faseAtual);
+  }
+
+  @Patch(':id/finalizar-partida')
+  finalizarPartida(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() finalizarPartidaDto: FinalizarPartidaDto,
+  ) {
+    return this.jogadoresService.finalizarPartida(id, finalizarPartidaDto);
   }
 }

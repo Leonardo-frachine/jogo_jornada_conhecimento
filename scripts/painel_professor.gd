@@ -30,16 +30,21 @@ const COLOR_SIDEBAR_TEXT := UITheme.PROFESSOR_SIDEBAR_TEXT
 const COLOR_SIDEBAR_MUTED := UITheme.PROFESSOR_SIDEBAR_MUTED
 const COLOR_GLOW_PRIMARY := UITheme.APP_GLOW_PRIMARY
 const COLOR_GLOW_SECONDARY := UITheme.APP_GLOW_SECONDARY
-const TEMPLATE_SPREADSHEET_RESOURCE_PATH := "res://planilha importacao.xlsx"
-const TEMPLATE_SPREADSHEET_FILENAME := "planilha importacao.xlsx"
+const TEMPLATE_SPREADSHEET_FILENAME := "modelo_perguntas.csv"
+const TEMPLATE_SPREADSHEET_HEADER := "enunciado,alternativaA,alternativaB,alternativaC,alternativaD,respostaCorreta,materia,dificuldade,titulo,pontuacao,tempoLimite"
+const TEMPLATE_SPREADSHEET_EXAMPLE := "Quanto e 2 + 2?,3,4,5,6,B,Matematica,Facil,Exemplo de pergunta,100,30"
 
 const IA_STATUS_PENDING := "pendente"
 const IA_STATUS_APPROVED := "aprovada"
 const IA_STATUS_REJECTED := "rejeitada"
 const IA_DIFFICULTIES: Array[String] = ["Facil", "Medio", "Dificil", "Especial"]
 const QUESTION_CORRECT_OPTIONS: Array[String] = ["A", "B", "C", "D"]
-# Heuristica provisoria ate o backend expor um status formal de partida por aluno.
-const STUDENT_FINAL_PHASE_ESTIMATE := 10
+const STUDENT_STATUS_AGUARDANDO := "aguardando"
+const STUDENT_STATUS_INICIADO := "iniciado"
+const STUDENT_STATUS_JOGANDO := "jogando"
+const STUDENT_STATUS_FINALIZADO := "finalizado"
+const STUDENT_TOTAL_BOARD_HOUSES := 28
+const DASHBOARD_AUTO_REFRESH_SECONDS := 5.0
 
 const PAGE_META := {
 	VIEW_DASHBOARD: {
@@ -117,6 +122,9 @@ const PAGE_META := {
 @onready var lista_dificuldades_dashboard: VBoxContainer = $SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/DashboardPage/DashboardBodyGrid/PainelDificuldades/DificuldadesMargin/DificuldadesVBox/ListaDificuldades
 @onready var dashboard_secondary_grid: GridContainer = $SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/DashboardPage/DashboardSecondaryGrid
 @onready var lista_atividades: VBoxContainer = $SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/DashboardPage/DashboardSecondaryGrid/PainelAtividades/AtividadesMargin/AtividadesVBox/ListaAtividades
+@onready var ranking_final_panel: PanelContainer = $SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/DashboardPage/RankingFinalPanel
+@onready var ranking_final_summary: Label = $SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/DashboardPage/RankingFinalPanel/RankingFinalMargin/RankingFinalVBox/RankingFinalSummary
+@onready var ranking_final_list: VBoxContainer = $SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/DashboardPage/RankingFinalPanel/RankingFinalMargin/RankingFinalVBox/RankingFinalList
 @onready var gerenciar_sala_grid: GridContainer = $SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/GerenciarSalaPage/GerenciarSalaGrid
 @onready var resumo_gerenciar_sala: Label = $SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/GerenciarSalaPage/GerenciarSalaHero/GerenciarSalaHeroMargin/GerenciarSalaHeroVBox/ResumoGerenciarSala
 @onready var sala_atual_info: Label = $SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/GerenciarSalaPage/GerenciarSalaGrid/PainelSalaGerenciar/SalaGerenciarMargin/SalaGerenciarVBox/SalaAtualInfo
@@ -135,21 +143,28 @@ const PAGE_META := {
 @onready var botao_atualizar_perguntas: Button = $SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/BancoPerguntasPage/PerguntasHeaderCard/PerguntasHeaderMargin/PerguntasHeaderVBox/PerguntasActions/BotaoAtualizarPerguntas
 @onready var botao_expandir_todas: Button = $SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/BancoPerguntasPage/PerguntasHeaderCard/PerguntasHeaderMargin/PerguntasHeaderVBox/PerguntasActions/BotaoExpandirTodas
 @onready var botao_recolher_todas: Button = $SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/BancoPerguntasPage/PerguntasHeaderCard/PerguntasHeaderMargin/PerguntasHeaderVBox/PerguntasActions/BotaoRecolherTodas
+@onready var botao_eliminar_perguntas: Button = $SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/BancoPerguntasPage/PerguntasHeaderCard/PerguntasHeaderMargin/PerguntasHeaderVBox/PerguntasActions/BotaoEliminarPerguntas
+@onready var perguntas_actions: GridContainer = $SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/BancoPerguntasPage/PerguntasHeaderCard/PerguntasHeaderMargin/PerguntasHeaderVBox/PerguntasActions
+@onready var perguntas_filters_grid: GridContainer = $SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/BancoPerguntasPage/PerguntasFiltersCard/PerguntasFiltersMargin/PerguntasFiltersGrid
 @onready var input_busca_perguntas: LineEdit = $SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/BancoPerguntasPage/PerguntasFiltersCard/PerguntasFiltersMargin/PerguntasFiltersGrid/InputBuscaPerguntas
 @onready var filtro_materia_perguntas: OptionButton = $SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/BancoPerguntasPage/PerguntasFiltersCard/PerguntasFiltersMargin/PerguntasFiltersGrid/FiltroMateriaPerguntas
 @onready var filtro_dificuldade_perguntas: OptionButton = $SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/BancoPerguntasPage/PerguntasFiltersCard/PerguntasFiltersMargin/PerguntasFiltersGrid/FiltroDificuldadePerguntas
 @onready var lista_banco_perguntas: VBoxContainer = $SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/BancoPerguntasPage/ListaBancoPerguntas
 
+@onready var import_room_selector: OptionButton = $SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/ImportarPerguntasPage/ImportarIntroCard/ImportarIntroMargin/ImportarIntroVBox/ImportRoomSelector
 @onready var importar_feedback: Label = $SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/ImportarPerguntasPage/ImportarIntroCard/ImportarIntroMargin/ImportarIntroVBox/ImportarFeedback
 @onready var botao_baixar_modelo: Button = $SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/ImportarPerguntasPage/ImportarIntroCard/ImportarIntroMargin/ImportarIntroVBox/ImportarActions/BotaoBaixarModelo
 @onready var botao_importar: Button = $SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/ImportarPerguntasPage/ImportarIntroCard/ImportarIntroMargin/ImportarIntroVBox/ImportarActions/BotaoImportar
 
+@onready var ia_form_grid: GridContainer = $SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/GerarIAPage/IaFormCard/IaFormMargin/IaFormGrid
+@onready var ia_room_selector: OptionButton = $SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/GerarIAPage/IaFormCard/IaFormMargin/IaFormGrid/IaRoomSelector
 @onready var ia_tema_input: LineEdit = $SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/GerarIAPage/IaFormCard/IaFormMargin/IaFormGrid/IaTemaInput
 @onready var ia_materia_input: LineEdit = $SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/GerarIAPage/IaFormCard/IaFormMargin/IaFormGrid/IaMateriaInput
 @onready var ia_dificuldade_select: OptionButton = $SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/GerarIAPage/IaFormCard/IaFormMargin/IaFormGrid/IaDificuldadeSelect
 @onready var ia_quantidade_input: SpinBox = $SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/GerarIAPage/IaFormCard/IaFormMargin/IaFormGrid/IaQuantidadeInput
 @onready var ia_pontuacao_input: SpinBox = $SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/GerarIAPage/IaFormCard/IaFormMargin/IaFormGrid/IaPontuacaoInput
 @onready var ia_tempo_input: SpinBox = $SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/GerarIAPage/IaFormCard/IaFormMargin/IaFormGrid/IaTempoInput
+@onready var ia_actions_grid: GridContainer = $SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/GerarIAPage/IaActionsGrid
 @onready var ia_botao_gerar: Button = $SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/GerarIAPage/IaActionsGrid/IaBotaoGerar
 @onready var ia_botao_salvar: Button = $SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/GerarIAPage/IaActionsGrid/IaBotaoSalvar
 @onready var ia_botao_aprovar_todas: Button = $SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/GerarIAPage/IaActionsGrid/IaBotaoAprovarTodas
@@ -159,6 +174,7 @@ const PAGE_META := {
 @onready var ia_lista: VBoxContainer = $SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/GerarIAPage/IaLista
 
 @onready var confirmacao_apagar_sala: ConfirmationDialog = $ConfirmacaoApagarSala
+@onready var confirmacao_apagar_perguntas: ConfirmationDialog = $ConfirmacaoApagarPerguntas
 
 var salas: Array[Dictionary] = []
 var carregando := false
@@ -173,11 +189,20 @@ var template_download_dialog: FileDialog
 var current_view := VIEW_DASHBOARD
 var dashboard_payload: Dictionary = {}
 var respostas_sala: Array[Dictionary] = []
+var alunos_sala: Array[Dictionary] = []
 var banco_perguntas: Array[Dictionary] = []
 var perguntas_geradas: Array[Dictionary] = []
+var perguntas_geradas_sala_id := 0
+var importacao_sala_id := 0
 var expanded_bank_question_ids := {}
 var expanded_generated_question_ids := {}
 var settings_overlay_bound := false
+var dashboard_refresh_timer: Timer
+var dashboard_refresh_in_progress := false
+var panel_exiting := false
+var pergunta_exclusao_id := 0
+var pergunta_exclusao_sala_id := 0
+var pergunta_exclusao_todas := false
 
 func _ready() -> void:
 	SettingsManager.pause_tree_when_open = false
@@ -191,9 +216,11 @@ func _ready() -> void:
 	_connect_signals()
 	_bind_settings_overlay_signals()
 	_apply_theme()
+	_configure_action_groups()
 	_prepare_dashboard_layout()
 	_setup_ia_form()
 	_update_responsive_layout()
+	call_deferred("_update_responsive_layout")
 	_set_current_view(VIEW_DASHBOARD)
 	_render_empty_dashboard()
 	_render_students([])
@@ -205,8 +232,39 @@ func _ready() -> void:
 
 	if not get_viewport().size_changed.is_connected(_update_responsive_layout):
 		get_viewport().size_changed.connect(_update_responsive_layout)
+	if not SettingsManager.font_scale_changed.is_connected(_on_font_scale_changed):
+		SettingsManager.font_scale_changed.connect(_on_font_scale_changed)
 
+	_setup_dashboard_auto_refresh()
 	call_deferred("_load_initial_data")
+
+func _exit_tree() -> void:
+	panel_exiting = true
+	_stop_dashboard_auto_refresh()
+
+func _setup_dashboard_auto_refresh() -> void:
+	if dashboard_refresh_timer != null and is_instance_valid(dashboard_refresh_timer):
+		return
+
+	dashboard_refresh_timer = Timer.new()
+	dashboard_refresh_timer.name = "DashboardAutoRefreshTimer"
+	dashboard_refresh_timer.wait_time = DASHBOARD_AUTO_REFRESH_SECONDS
+	dashboard_refresh_timer.one_shot = false
+	dashboard_refresh_timer.timeout.connect(_on_dashboard_auto_refresh_timeout)
+	add_child(dashboard_refresh_timer)
+	dashboard_refresh_timer.start()
+
+func _stop_dashboard_auto_refresh() -> void:
+	if dashboard_refresh_timer == null or not is_instance_valid(dashboard_refresh_timer):
+		return
+	dashboard_refresh_timer.stop()
+
+func _on_dashboard_auto_refresh_timeout() -> void:
+	if panel_exiting or carregando or dashboard_refresh_in_progress:
+		return
+	if not ProfessorSession.has_current_room():
+		return
+	await _refresh_dashboard()
 
 func _connect_signals() -> void:
 	sidebar_toggle.pressed.connect(_on_sidebar_toggle_pressed)
@@ -226,10 +284,12 @@ func _connect_signals() -> void:
 	botao_atualizar_salas.pressed.connect(_on_botao_atualizar_salas_pressed)
 	botao_apagar_sala.pressed.connect(_on_botao_apagar_sala_pressed)
 	confirmacao_apagar_sala.confirmed.connect(_on_confirmacao_apagar_sala_confirmed)
+	confirmacao_apagar_perguntas.confirmed.connect(_on_confirmacao_apagar_perguntas_confirmed)
 
 	botao_atualizar_perguntas.pressed.connect(_on_botao_atualizar_banco_perguntas_pressed)
 	botao_expandir_todas.pressed.connect(_on_botao_expandir_todas_pressed)
 	botao_recolher_todas.pressed.connect(_on_botao_recolher_todas_pressed)
+	botao_eliminar_perguntas.pressed.connect(_on_botao_eliminar_perguntas_pressed)
 	input_busca_perguntas.text_changed.connect(_on_question_filter_changed)
 	filtro_materia_perguntas.item_selected.connect(_on_question_filter_changed)
 	filtro_dificuldade_perguntas.item_selected.connect(_on_question_filter_changed)
@@ -283,6 +343,7 @@ func _apply_theme() -> void:
 		get_node("SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/DashboardPage/DashboardBodyGrid/PainelMaterias"),
 		get_node("SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/DashboardPage/DashboardBodyGrid/PainelDificuldades"),
 		get_node("SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/DashboardPage/DashboardSecondaryGrid/PainelAtividades"),
+		ranking_final_panel,
 		get_node("SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/AcompanhamentoPage/AcompanhamentoHero"),
 		get_node("SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/BancoPerguntasPage/PerguntasHeaderCard"),
 		get_node("SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/BancoPerguntasPage/PerguntasFiltersCard"),
@@ -293,10 +354,12 @@ func _apply_theme() -> void:
 	]:
 		_apply_surface_panel(panel as PanelContainer, COLOR_SURFACE, COLOR_BORDER, 22, 0.05)
 
-	UITheme.apply_title(page_title, 30, COLOR_TEXT)
-	UITheme.apply_subtitle(page_subtitle, 15, COLOR_MUTED)
-	UITheme.apply_subtitle(status_label, 14, COLOR_MUTED)
-	UITheme.apply_subtitle(current_room_label, 14, COLOR_ACCENT_DARK)
+	UITheme.apply_title(page_title, 32, COLOR_TEXT)
+	UITheme.apply_subtitle(page_subtitle, 17, COLOR_MUTED)
+	UITheme.apply_subtitle(status_label, 15, COLOR_MUTED)
+	UITheme.apply_subtitle(current_room_label, 15, COLOR_ACCENT_DARK)
+	page_subtitle.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	status_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_apply_badge_panel(current_room_badge, _tint_color(COLOR_ACCENT, 0.86), COLOR_ACCENT)
 
 	UITheme.apply_title(dashboard_hero_title, 24, COLOR_TEXT)
@@ -306,6 +369,7 @@ func _apply_theme() -> void:
 	UITheme.apply_title(get_node("SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/DashboardPage/DashboardBodyGrid/PainelMaterias/MateriasMargin/MateriasVBox/TituloMaterias"), 20, COLOR_TEXT)
 	UITheme.apply_title(get_node("SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/DashboardPage/DashboardBodyGrid/PainelDificuldades/DificuldadesMargin/DificuldadesVBox/TituloDificuldades"), 20, COLOR_TEXT)
 	UITheme.apply_title(get_node("SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/DashboardPage/DashboardSecondaryGrid/PainelAtividades/AtividadesMargin/AtividadesVBox/TituloAtividades"), 20, COLOR_TEXT)
+	UITheme.apply_title(get_node("SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/DashboardPage/RankingFinalPanel/RankingFinalMargin/RankingFinalVBox/RankingFinalTitle"), 20, COLOR_TEXT)
 	UITheme.apply_title(get_node("SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/AcompanhamentoPage/AcompanhamentoHero/AcompanhamentoHeroMargin/AcompanhamentoHeroVBox/TituloAcompanhamento"), 22, COLOR_TEXT)
 	UITheme.apply_title(get_node("SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/BancoPerguntasPage/PerguntasHeaderCard/PerguntasHeaderMargin/PerguntasHeaderVBox/PerguntasHeaderTop/PerguntasTituloBox/TituloBancoPerguntas"), 22, COLOR_TEXT)
 	UITheme.apply_title(get_node("SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/ImportarPerguntasPage/ImportarIntroCard/ImportarIntroMargin/ImportarIntroVBox/TituloImportar"), 22, COLOR_TEXT)
@@ -320,6 +384,8 @@ func _apply_theme() -> void:
 		get_node("SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/DashboardPage/DashboardBodyGrid/PainelMaterias/MateriasMargin/MateriasVBox/DescricaoMaterias"),
 		get_node("SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/DashboardPage/DashboardBodyGrid/PainelDificuldades/DificuldadesMargin/DificuldadesVBox/DescricaoDificuldades"),
 		get_node("SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/DashboardPage/DashboardSecondaryGrid/PainelAtividades/AtividadesMargin/AtividadesVBox/DescricaoAtividades"),
+		get_node("SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/DashboardPage/RankingFinalPanel/RankingFinalMargin/RankingFinalVBox/RankingFinalDescription"),
+		ranking_final_summary,
 		get_node("SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/ImportarPerguntasPage/ImportarIntroCard/ImportarIntroMargin/ImportarIntroVBox/DescricaoImportar"),
 		get_node("SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/GerarIAPage/IaIntroCard/IaIntroMargin/IaIntroVBox/DescricaoIa"),
 		get_node("SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/GerenciarSalaPage/GerenciarSalaGrid/PainelSalaGerenciar/SalaGerenciarMargin/SalaGerenciarVBox/DescricaoSalaCardGerenciar"),
@@ -333,7 +399,7 @@ func _apply_theme() -> void:
 		sala_atual_info,
 		sala_codigo_info,
 	]:
-		UITheme.apply_subtitle(label as Label, 15, COLOR_MUTED if label != contador_banco_perguntas else COLOR_ACCENT_DARK)
+		UITheme.apply_subtitle(label as Label, 16, COLOR_MUTED if label != contador_banco_perguntas else COLOR_ACCENT_DARK)
 
 	UITheme.apply_subtitle(sidebar_brand_title, 18, COLOR_SIDEBAR_TEXT)
 	UITheme.apply_subtitle(sidebar_brand_subtitle, 13, COLOR_SIDEBAR_MUTED)
@@ -348,10 +414,22 @@ func _apply_theme() -> void:
 	_apply_option_button_palette(seletor_salas)
 	_apply_option_button_palette(filtro_materia_perguntas)
 	_apply_option_button_palette(filtro_dificuldade_perguntas)
+	_apply_option_button_palette(import_room_selector)
+	_apply_option_button_palette(ia_room_selector)
 	_apply_option_button_palette(ia_dificuldade_select)
 	_apply_spin_box_palette(ia_quantidade_input)
 	_apply_spin_box_palette(ia_pontuacao_input)
 	_apply_spin_box_palette(ia_tempo_input)
+	for label_name in [
+		"IaSalaLabel",
+		"IaTemaLabel",
+		"IaMateriaLabel",
+		"IaDificuldadeLabel",
+		"IaQuantidadeLabel",
+		"IaPontuacaoLabel",
+		"IaTempoLabel",
+	]:
+		UITheme.apply_field_label(ia_form_grid.get_node(label_name) as Label, 16, COLOR_TEXT)
 
 	_apply_button_palette(botao_atualizar_salas_header, COLOR_SURFACE_ALT, COLOR_BORDER, COLOR_TEXT)
 	_apply_button_palette(botao_sair, STATUS_ERROR, _shade_color(STATUS_ERROR, 0.24))
@@ -361,6 +439,7 @@ func _apply_theme() -> void:
 	_apply_button_palette(botao_atualizar_perguntas, STATUS_INFO, _shade_color(STATUS_INFO, 0.24))
 	_apply_button_palette(botao_expandir_todas, COLOR_SURFACE_ALT, COLOR_BORDER, COLOR_TEXT)
 	_apply_button_palette(botao_recolher_todas, COLOR_SURFACE_ALT, COLOR_BORDER, COLOR_TEXT)
+	_apply_button_palette(botao_eliminar_perguntas, STATUS_ERROR, _shade_color(STATUS_ERROR, 0.24))
 	_apply_button_palette(botao_baixar_modelo, COLOR_SURFACE_ALT, COLOR_BORDER, COLOR_TEXT)
 	_apply_button_palette(botao_importar, COLOR_ACCENT, COLOR_ACCENT_DARK)
 	_apply_button_palette(ia_botao_gerar, COLOR_ACCENT, COLOR_ACCENT_DARK)
@@ -382,14 +461,19 @@ func _setup_ia_form() -> void:
 	_configure_spin_box(ia_quantidade_input, 1, 20, 5)
 	_configure_spin_box(ia_pontuacao_input, 1, 10000, 100)
 	_configure_spin_box(ia_tempo_input, 0, 3600, 30)
+	ia_quantidade_input.suffix = " perguntas"
+	ia_pontuacao_input.suffix = " pontos"
+	ia_tempo_input.suffix = " segundos"
 
 func _update_responsive_layout() -> void:
 	var viewport_size: Vector2 = get_viewport().get_visible_rect().size
-	var compact := viewport_size.x < 1260.0
+	var font_scale: float = SettingsManager.font_scale
+	var compact := viewport_size.x < 1260.0 * font_scale
 	var content_width: float = content_shell.size.x
 	if content_width <= 0.0:
 		content_width = viewport_size.x - (sidebar.custom_minimum_size.x + (32.0 if compact else 48.0))
-	var compact_content: bool = content_width < 980.0
+	var effective_content_width := content_width / font_scale
+	var compact_content: bool = effective_content_width < 980.0
 
 	safe_area.add_theme_constant_override("margin_left", 16 if compact else 24)
 	safe_area.add_theme_constant_override("margin_top", 16 if viewport_size.y < 760.0 else 24)
@@ -398,22 +482,65 @@ func _update_responsive_layout() -> void:
 	shell.add_theme_constant_override("separation", 16 if compact else 22)
 	content_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	content_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
-	metrics_grid.columns = 1 if content_width < 700.0 else (2 if content_width < 1080.0 else (3 if content_width < 1420.0 else 4))
-	dashboard_body_grid.columns = 1 if content_width < 900.0 else (2 if content_width < 1320.0 else 3)
+	metrics_grid.columns = 1 if effective_content_width < 700.0 else (2 if effective_content_width < 1080.0 else (3 if effective_content_width < 1420.0 else 4))
+	dashboard_body_grid.columns = 1 if effective_content_width < 900.0 else (2 if effective_content_width < 1320.0 else 3)
 	dashboard_secondary_grid.columns = 1
 	gerenciar_sala_grid.columns = 1
-	acoes_sala.columns = 1 if content_width < 900.0 else 3
-	acompanhamento_grid.columns = 1 if content_width < 1180.0 else 2
-	get_node("SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/BancoPerguntasPage/PerguntasHeaderCard/PerguntasHeaderMargin/PerguntasHeaderVBox/PerguntasActions").columns = 1 if content_width < 760.0 else (2 if content_width < 1080.0 else 3)
-	get_node("SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/BancoPerguntasPage/PerguntasFiltersCard/PerguntasFiltersMargin/PerguntasFiltersGrid").columns = 1 if content_width < 900.0 else 3
-	get_node("SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/GerarIAPage/IaFormCard/IaFormMargin/IaFormGrid").columns = 1 if content_width < 980.0 else 2
-	get_node("SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/GerarIAPage/IaActionsGrid").columns = 1 if content_width < 900.0 else (2 if content_width < 1280.0 else 4)
+	acoes_sala.columns = 1 if effective_content_width < 900.0 else 3
+	acompanhamento_grid.columns = 1 if effective_content_width < 1180.0 else 2
+	perguntas_actions.columns = 1 if effective_content_width < 760.0 else (2 if effective_content_width < 1180.0 else 4)
+	perguntas_filters_grid.columns = 1 if effective_content_width < 900.0 else 3
+	get_node("SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/GerarIAPage/IaFormCard/IaFormMargin/IaFormGrid").columns = 1 if effective_content_width < 980.0 else 2
+	ia_actions_grid.columns = 1 if effective_content_width < 900.0 else (2 if effective_content_width < 1280.0 else 4)
 	header_actions.alignment = BoxContainer.ALIGNMENT_BEGIN if compact_content else BoxContainer.ALIGNMENT_END
 	header_actions.add_theme_constant_override("separation", 8 if compact_content else 12)
-	seletor_salas.custom_minimum_size = Vector2(160.0 if compact_content else 240.0, 44.0)
-	botao_atualizar_salas_header.custom_minimum_size = Vector2(110.0 if compact_content else 132.0, 44.0)
-	botao_sair.custom_minimum_size = Vector2(118.0 if compact_content else 154.0, 44.0)
+	seletor_salas.custom_minimum_size = Vector2(180.0 if compact_content else 250.0, 44.0)
+	botao_atualizar_salas_header.custom_minimum_size = Vector2(140.0 if compact_content else 150.0, 44.0)
+	botao_sair.custom_minimum_size = Vector2(140.0 if compact_content else 160.0, 44.0)
+	header.custom_minimum_size.y = 116.0 + roundf(36.0 * (font_scale - 1.0))
+	current_room_badge.visible = effective_content_width >= 760.0
 	sidebar.size.x = 278.0 if sidebar_expanded else 94.0
+	_configure_action_groups()
+
+func _configure_action_groups() -> void:
+	_configure_action_grid(acoes_sala, [botao_criar_sala, botao_atualizar_salas, botao_apagar_sala])
+	_configure_action_grid(perguntas_actions, [
+		botao_atualizar_perguntas,
+		botao_expandir_todas,
+		botao_recolher_todas,
+		botao_eliminar_perguntas,
+	])
+	_configure_action_grid(ia_actions_grid, [
+		ia_botao_gerar,
+		ia_botao_salvar,
+		ia_botao_aprovar_todas,
+		ia_botao_rejeitar_todas,
+	])
+
+	perguntas_filters_grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	perguntas_filters_grid.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	for filter_control in [input_busca_perguntas, filtro_materia_perguntas, filtro_dificuldade_perguntas]:
+		filter_control.custom_minimum_size.x = 180.0
+		filter_control.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		filter_control.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+
+func _configure_action_grid(grid: GridContainer, buttons: Array) -> void:
+	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	grid.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	for button_value in buttons:
+		var button := button_value as Button
+		if button == null:
+			continue
+		button.custom_minimum_size.x = 160.0
+		button.custom_minimum_size.y = maxf(button.custom_minimum_size.y, 48.0)
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+		button.autowrap_mode = TextServer.AUTOWRAP_OFF
+		button.clip_text = false
+		button.text_overrun_behavior = TextServer.OVERRUN_NO_TRIMMING
+
+func _on_font_scale_changed(_value: float) -> void:
+	call_deferred("_update_responsive_layout")
 
 func _on_sidebar_toggle_pressed() -> void:
 	sidebar_expanded = not sidebar_expanded
@@ -551,7 +678,7 @@ func _ensure_import_dialog() -> void:
 		template_download_dialog.use_native_dialog = true
 		template_download_dialog.title = "Salvar modelo de planilha"
 		template_download_dialog.current_file = TEMPLATE_SPREADSHEET_FILENAME
-		template_download_dialog.add_filter("*.xlsx", "Planilhas Excel")
+		template_download_dialog.add_filter("*.csv", "Arquivos CSV")
 		add_child(template_download_dialog)
 
 	if not template_download_dialog.file_selected.is_connected(_on_template_download_file_selected):
@@ -601,6 +728,7 @@ func _populate_room_selector() -> void:
 	if salas.is_empty():
 		seletor_salas.add_item("Nenhuma sala criada")
 		seletor_salas.disabled = true
+		_populate_question_room_selectors()
 		return
 
 	for index in range(salas.size()):
@@ -610,6 +738,50 @@ func _populate_room_selector() -> void:
 		seletor_salas.add_item("%s (%s)" % [nome, codigo])
 		seletor_salas.set_item_metadata(index, sala)
 	seletor_salas.disabled = carregando
+	_populate_question_room_selectors()
+
+func _populate_question_room_selectors() -> void:
+	var preferred_room_id := ProfessorSession.current_room_id if ProfessorSession.has_current_room() else 0
+	_populate_question_room_selector(import_room_selector, preferred_room_id)
+	var ia_preferred_room_id := perguntas_geradas_sala_id if not perguntas_geradas.is_empty() and perguntas_geradas_sala_id > 0 else preferred_room_id
+	_populate_question_room_selector(ia_room_selector, ia_preferred_room_id)
+	_update_question_bank_controls_state()
+	_update_ia_controls_state()
+
+func _populate_question_room_selector(selector: OptionButton, preferred_room_id: int) -> void:
+	selector.clear()
+	if salas.is_empty():
+		selector.add_item("Nenhuma sala disponivel")
+		selector.set_item_metadata(0, 0)
+		selector.disabled = true
+		return
+
+	var selected_index := 0
+	for index in range(salas.size()):
+		var sala: Dictionary = salas[index]
+		var sala_id := int(sala.get("id", 0))
+		var nome := str(sala.get("nome", "Sala"))
+		var codigo := str(sala.get("codigo", "")).strip_edges().to_upper()
+		selector.add_item("Sala de destino: %s (%s)" % [nome, codigo])
+		selector.set_item_metadata(index, sala_id)
+		if sala_id == preferred_room_id:
+			selected_index = index
+	selector.select(selected_index)
+
+func _select_question_target_room(sala_id: int) -> void:
+	var selectors: Array[OptionButton] = [import_room_selector]
+	if perguntas_geradas.is_empty():
+		selectors.append(ia_room_selector)
+	for selector in selectors:
+		for index in range(selector.item_count):
+			if int(selector.get_item_metadata(index)) == sala_id:
+				selector.select(index)
+				break
+
+func _get_question_target_room_id(selector: OptionButton) -> int:
+	if selector.item_count == 0 or selector.selected < 0:
+		return 0
+	return int(selector.get_item_metadata(selector.selected))
 
 func _find_selected_room_index() -> int:
 	if not ProfessorSession.has_current_room():
@@ -624,6 +796,8 @@ func _apply_selected_room(index: int) -> void:
 		ProfessorSession.set_current_room({})
 	else:
 		ProfessorSession.set_current_room(salas[index])
+	if ProfessorSession.has_current_room():
+		_select_question_target_room(ProfessorSession.current_room_id)
 	_refresh_header_context()
 
 func _on_seletor_salas_item_selected(index: int) -> void:
@@ -631,6 +805,7 @@ func _on_seletor_salas_item_selected(index: int) -> void:
 		return
 	_apply_selected_room(index)
 	await _refresh_dashboard()
+	await _refresh_question_bank()
 
 func _on_botao_atualizar_salas_pressed() -> void:
 	await _fetch_rooms(true)
@@ -682,6 +857,7 @@ func _on_confirmacao_apagar_sala_confirmed() -> void:
 
 	ProfessorSession.set_current_room({})
 	respostas_sala.clear()
+	alunos_sala.clear()
 	dashboard_payload.clear()
 	_render_empty_dashboard()
 	_render_students([])
@@ -689,19 +865,31 @@ func _on_confirmacao_apagar_sala_confirmed() -> void:
 	await _fetch_rooms(true)
 
 func _refresh_dashboard() -> void:
-	if carregando:
+	if panel_exiting or carregando or dashboard_refresh_in_progress:
 		return
 
 	if not ProfessorSession.has_current_room():
+		alunos_sala.clear()
+		respostas_sala.clear()
 		_render_empty_dashboard()
 		_render_students([])
 		return
 
+	var requested_room_id := ProfessorSession.current_room_id
+	dashboard_refresh_in_progress = true
 	_set_loading_state(true)
 	_show_status("Atualizando indicadores da sala...", STATUS_INFO)
-	var dashboard_response: Dictionary = await ApiClient.fetch_room_dashboard(ProfessorSession.current_room_id)
-	var answers_response: Dictionary = await ApiClient.fetch_room_answers(ProfessorSession.current_room_id)
+	var dashboard_response: Dictionary = await ApiClient.fetch_room_dashboard(requested_room_id)
+	if panel_exiting or not is_inside_tree():
+		return
+	var answers_response: Dictionary = await ApiClient.fetch_room_answers(requested_room_id)
+	if panel_exiting or not is_inside_tree():
+		return
 	_set_loading_state(false)
+	dashboard_refresh_in_progress = false
+
+	if not ProfessorSession.has_current_room() or ProfessorSession.current_room_id != requested_room_id:
+		return
 
 	if not dashboard_response.get("ok", false):
 		_render_empty_dashboard()
@@ -711,13 +899,16 @@ func _refresh_dashboard() -> void:
 
 	dashboard_payload = dashboard_response.get("data", {})
 	if answers_response.get("ok", false):
-		respostas_sala = _normalize_answer_list(answers_response.get("data", {}).get("respostas", []))
+		var answers_payload: Dictionary = answers_response.get("data", {})
+		respostas_sala = _normalize_answer_list(answers_payload.get("respostas", []))
+		alunos_sala = _normalize_answer_list(answers_payload.get("alunos", []))
 	else:
 		respostas_sala.clear()
+		alunos_sala.clear()
 		_show_status(answers_response.get("error", "Nao foi possivel carregar as respostas da sala."), STATUS_WARNING)
 
 	_render_dashboard_data(dashboard_payload)
-	_render_students(_build_student_models(respostas_sala))
+	_render_students(_build_student_models(respostas_sala, alunos_sala))
 	_show_status("Dashboard atualizado.", STATUS_OK)
 
 func _render_empty_dashboard() -> void:
@@ -728,21 +919,24 @@ func _render_empty_dashboard() -> void:
 		{"title": "Total de alunos", "value": "0", "subtitle": "Aguardando respostas vinculadas a uma sala.", "accent": COLOR_ACCENT, "icon": "A"},
 		{"title": "Perguntas cadastradas", "value": str(banco_perguntas.size()), "subtitle": "Banco oficial disponivel para a turma.", "accent": STATUS_INFO, "icon": "P"},
 		{"title": "Media de acertos", "value": "0%", "subtitle": "Sem historico suficiente para calcular.", "accent": STATUS_OK, "icon": "M"},
+		{"title": "Pontuacao da turma", "value": "0", "subtitle": "Saldo de acertos e descontos por erros.", "accent": COLOR_ACCENT, "icon": "S"},
 		{"title": "Respostas realizadas", "value": "0", "subtitle": "Nenhuma atividade concluida ainda.", "accent": STATUS_WARNING, "icon": "R"},
 		{"title": "Alunos em andamento", "value": "0", "subtitle": "Aguardando inicio das partidas.", "accent": COLOR_ACCENT, "icon": "E"},
-		{"title": "Alunos finalizados", "value": "0", "subtitle": "O backend ainda nao enviou finalizacoes.", "accent": STATUS_OK, "icon": "F"},
+		{"title": "Alunos finalizados", "value": "0", "subtitle": "Nenhum encerramento oficial registrado.", "accent": STATUS_OK, "icon": "F"},
 	])
 	_render_group_summary_list(lista_materias_dashboard, [], "materia", "Nenhum dado por materia disponivel ainda.")
 	_render_group_summary_list(lista_dificuldades_dashboard, [], "dificuldade", "Nenhum dado por dificuldade disponivel ainda.")
 	_render_recent_activity([])
+	_render_teacher_ranking([])
 	_refresh_header_context()
 
 func _render_dashboard_data(payload: Dictionary) -> void:
 	var indicadores: Dictionary = payload.get("indicadores", {})
-	var student_models: Array[Dictionary] = _build_student_models(respostas_sala)
+	var student_models: Array[Dictionary] = _build_student_models(respostas_sala, alunos_sala)
 	var states: Dictionary = _summarize_student_states(student_models)
 	var total_alunos: int = int(indicadores.get("totalAlunos", 0))
 	var total_respostas: int = int(indicadores.get("totalPerguntasRespondidas", 0))
+	var pontuacao_total: int = int(indicadores.get("pontuacaoTotalTurma", 0))
 	var room_name := ProfessorSession.current_room_name.strip_edges()
 
 	dashboard_hero_title.text = "Visao geral da sala %s" % (room_name if not room_name.is_empty() else "selecionada")
@@ -755,14 +949,16 @@ func _render_dashboard_data(payload: Dictionary) -> void:
 		{"title": "Total de alunos", "value": str(total_alunos), "subtitle": "Participantes com respostas registradas na sala.", "accent": COLOR_ACCENT, "icon": "A"},
 		{"title": "Perguntas cadastradas", "value": str(banco_perguntas.size()), "subtitle": "Itens disponiveis hoje no banco oficial.", "accent": STATUS_INFO, "icon": "P"},
 		{"title": "Media de acertos", "value": "%d%%" % int(indicadores.get("percentualAcertoTurma", 0)), "subtitle": "%d acertos e %d erros no agregado." % [int(indicadores.get("quantidadeAcertos", 0)), int(indicadores.get("quantidadeErros", 0))], "accent": STATUS_OK, "icon": "M"},
+		{"title": "Pontuacao da turma", "value": str(pontuacao_total), "subtitle": "Total liquido apos os descontos por respostas incorretas.", "accent": STATUS_ERROR if pontuacao_total < 0 else COLOR_ACCENT, "icon": "S"},
 		{"title": "Respostas realizadas", "value": str(total_respostas), "subtitle": "Historico usado para acompanhar a sala.", "accent": STATUS_WARNING, "icon": "R"},
-		{"title": "Alunos em andamento", "value": str(int(states.get("jogando", 0))), "subtitle": "Em progresso com base no historico atual.", "accent": COLOR_ACCENT, "icon": "E"},
-		{"title": "Alunos finalizados", "value": str(int(states.get("finalizado", 0))), "subtitle": "Estimativa provisoria ate existir status explicito no backend.", "accent": STATUS_OK, "icon": "F"},
+		{"title": "Alunos em andamento", "value": str(int(states.get(STUDENT_STATUS_JOGANDO, 0))), "subtitle": "Partidas com status jogando no backend.", "accent": COLOR_ACCENT, "icon": "E"},
+		{"title": "Alunos finalizados", "value": str(int(states.get(STUDENT_STATUS_FINALIZADO, 0))), "subtitle": "Somente encerramentos oficiais da partida.", "accent": STATUS_OK, "icon": "F"},
 	])
 
 	_render_group_summary_list(lista_materias_dashboard, payload.get("desempenhoPorMateria", []), "materia", "Nenhum dado por materia disponivel ainda.")
 	_render_group_summary_list(lista_dificuldades_dashboard, payload.get("desempenhoPorDificuldade", []), "dificuldade", "Nenhum dado por dificuldade disponivel ainda.")
 	_render_recent_activity(respostas_sala)
+	_render_teacher_ranking(_extract_dictionary_array(payload.get("ranking", [])))
 	_refresh_header_context()
 
 func _render_metric_cards(metrics: Array[Dictionary]) -> void:
@@ -856,9 +1052,12 @@ func _render_recent_activity(respostas: Array[Dictionary]) -> void:
 		box.add_child(title)
 
 		var detail := Label.new()
-		detail.text = "%s | %s | Fase %d | %s" % [
+		var pontos_resposta: int = int(resposta.get("pontuacaoGanha", 0))
+		var pontos_label := "+%d" % pontos_resposta if pontos_resposta >= 0 else str(pontos_resposta)
+		detail.text = "%s | %s | Pontos: %s | Fase %d | %s" % [
 			str(resposta.get("materia", "Sem materia")),
 			str(resposta.get("dificuldade", "Sem dificuldade")),
+			pontos_label,
 			int(resposta.get("fase", 0)),
 			_format_datetime(resposta.get("respondidoEm", "")),
 		]
@@ -868,15 +1067,83 @@ func _render_recent_activity(respostas: Array[Dictionary]) -> void:
 		box.add_child(detail)
 		lista_atividades.add_child(panel)
 
+func _render_teacher_ranking(items: Array[Dictionary]) -> void:
+	_clear_container(ranking_final_list)
+	var finalizados: Array[Dictionary] = []
+	var jogadores_exibidos := {}
+	for item in items:
+		if _normalize_student_status(str(item.get("statusPartida", ""))) != STUDENT_STATUS_FINALIZADO:
+			continue
+		var jogador_id := int(item.get("jogadorId", 0))
+		if jogador_id <= 0 or jogadores_exibidos.has(jogador_id):
+			continue
+		jogadores_exibidos[jogador_id] = true
+		finalizados.append(item)
+
+	if finalizados.is_empty():
+		ranking_final_summary.text = "Nenhum aluno possui encerramento oficial nesta sala."
+		var empty_label := Label.new()
+		empty_label.text = "O ranking sera preenchido quando as partidas forem finalizadas."
+		empty_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		UITheme.apply_font_only(empty_label, 14)
+		empty_label.add_theme_color_override("font_color", COLOR_MUTED)
+		ranking_final_list.add_child(empty_label)
+		return
+
+	ranking_final_summary.text = "%d alunos finalizados, ordenados pela pontuacao e pelo horario de termino em caso de empate." % finalizados.size()
+	for index in range(finalizados.size()):
+		ranking_final_list.add_child(_create_teacher_ranking_row(finalizados[index]))
+		if index < finalizados.size() - 1:
+			ranking_final_list.add_child(HSeparator.new())
+
+func _create_teacher_ranking_row(item: Dictionary) -> HBoxContainer:
+	var row := HBoxContainer.new()
+	row.custom_minimum_size = Vector2(0, 64)
+	row.add_theme_constant_override("separation", 12)
+
+	var position_label := Label.new()
+	position_label.custom_minimum_size = Vector2(52, 0)
+	position_label.text = "#%d" % int(item.get("posicao", 0))
+	UITheme.apply_font_only(position_label, 20)
+	position_label.add_theme_color_override("font_color", COLOR_ACCENT_DARK)
+	row.add_child(position_label)
+
+	var identity := VBoxContainer.new()
+	identity.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	identity.add_theme_constant_override("separation", 2)
+	var name_label := Label.new()
+	name_label.text = str(item.get("nome", "Aluno"))
+	name_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	name_label.text_overrun_behavior = TextServer.OVERRUN_NO_TRIMMING
+	UITheme.apply_font_only(name_label, 16)
+	name_label.add_theme_color_override("font_color", COLOR_TEXT)
+	identity.add_child(name_label)
+	var finished_label := Label.new()
+	finished_label.text = "Termino: %s" % _format_datetime(item.get("finalizadoEm", ""))
+	UITheme.apply_font_only(finished_label, 13)
+	finished_label.add_theme_color_override("font_color", COLOR_MUTED)
+	identity.add_child(finished_label)
+	row.add_child(identity)
+
+	var score_label := Label.new()
+	score_label.custom_minimum_size = Vector2(110, 0)
+	score_label.text = "%d pontos" % int(item.get("pontuacao", 0))
+	score_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	UITheme.apply_font_only(score_label, 16)
+	score_label.add_theme_color_override("font_color", COLOR_TEXT)
+	row.add_child(score_label)
+	row.add_child(_create_inline_badge("Finalizado", _tint_color(STATUS_OK, 0.90), STATUS_OK, _shade_color(STATUS_OK, 0.25)))
+	return row
+
 func _render_students(models: Array[Dictionary]) -> void:
 	_clear_container(acompanhamento_grid)
 	if models.is_empty():
 		resumo_acompanhamento.text = "Nenhum aluno apareceu no acompanhamento ainda."
 		resumo_acompanhamento.add_theme_color_override("font_color", COLOR_MUTED)
-		acompanhamento_grid.add_child(_create_empty_state_panel("Acompanhamento aguardando atividade", "Assim que a turma responder perguntas, esta pagina mostrara status, pontuacao, progresso e ultima atividade por aluno."))
+		acompanhamento_grid.add_child(_create_empty_state_panel("Acompanhamento aguardando atividade", "Assim que a turma iniciar uma partida, esta pagina mostrara status, pontuacao, progresso e ultima atividade por aluno."))
 		return
 
-	resumo_acompanhamento.text = "%d alunos com historico de respostas. O status atual usa o progresso registrado da sala e uma estimativa provisoria de finalizacao." % models.size()
+	resumo_acompanhamento.text = "%d alunos na sala. O status atual vem do backend e separa inicio, jogo em andamento e encerramento oficial." % models.size()
 	resumo_acompanhamento.add_theme_color_override("font_color", COLOR_TEXT)
 	for item in models:
 		acompanhamento_grid.add_child(_create_student_card(item))
@@ -903,12 +1170,13 @@ func _create_student_card(item: Dictionary) -> PanelContainer:
 	var name_label := Label.new()
 	name_label.text = str(item.get("nome", "Aluno"))
 	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	name_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	UITheme.apply_font_only(name_label, 18)
 	name_label.add_theme_color_override("font_color", COLOR_TEXT)
 	top.add_child(name_label)
 
 	var status_badge := _create_inline_badge(
-		str(item.get("status", "aguardando")).capitalize(),
+		_get_student_status_label(str(item.get("status", STUDENT_STATUS_AGUARDANDO))),
 		_tint_color(_get_student_status_color(str(item.get("status", ""))), 0.86),
 		_get_student_status_color(str(item.get("status", ""))),
 		_shade_color(_get_student_status_color(str(item.get("status", ""))), 0.22)
@@ -922,7 +1190,7 @@ func _create_student_card(item: Dictionary) -> PanelContainer:
 	meta_row.add_child(_create_inline_badge("Pontuacao: %d" % int(item.get("pontuacao", 0)), _tint_color(COLOR_ACCENT, 0.90), COLOR_ACCENT))
 	meta_row.add_child(_create_inline_badge("Acertos: %d" % int(item.get("acertos", 0)), _tint_color(STATUS_OK, 0.90), STATUS_OK))
 	meta_row.add_child(_create_inline_badge("Incorretas: %d" % int(item.get("erros", 0)), _tint_color(STATUS_ERROR, 0.90), STATUS_ERROR))
-	meta_row.add_child(_create_inline_badge("Progresso: %s" % str(item.get("progressoLabel", "Fase 0/10")), _tint_color(STATUS_INFO, 0.90), STATUS_INFO))
+	meta_row.add_child(_create_inline_badge("Progresso: %s" % str(item.get("progressoLabel", "Casa 1/28")), _tint_color(STATUS_INFO, 0.90), STATUS_INFO))
 
 	var bottom := Label.new()
 	bottom.text = "Ultima atividade: %s | Aproveitamento: %d%%" % [
@@ -935,21 +1203,25 @@ func _create_student_card(item: Dictionary) -> PanelContainer:
 	box.add_child(bottom)
 	return panel
 
-func _build_student_models(respostas: Array[Dictionary]) -> Array[Dictionary]:
+func _build_student_models(respostas: Array[Dictionary], alunos: Array[Dictionary] = []) -> Array[Dictionary]:
 	var grouped := {}
+	for aluno in alunos:
+		var aluno_id: int = int(aluno.get("jogadorId", aluno.get("id", 0)))
+		if aluno_id <= 0:
+			continue
+		var aluno_model := _create_student_model_base(aluno)
+		aluno_model["estadoAtualBackend"] = true
+		grouped[aluno_id] = aluno_model
+
 	for resposta in respostas:
 		var jogador_id: int = int(resposta.get("jogadorId", 0))
+		if jogador_id <= 0:
+			continue
 		if not grouped.has(jogador_id):
-			grouped[jogador_id] = {
+			grouped[jogador_id] = _create_student_model_base({
 				"jogadorId": jogador_id,
 				"nome": str(resposta.get("aluno", "Aluno")),
-				"pontuacao": 0,
-				"acertos": 0,
-				"erros": 0,
-				"respostas": 0,
-				"maxFase": 0,
-				"ultimaRespostaRaw": "",
-			}
+			})
 
 		var row: Dictionary = grouped[jogador_id]
 		row["pontuacao"] = int(row.get("pontuacao", 0)) + int(resposta.get("pontuacaoGanha", 0))
@@ -957,6 +1229,10 @@ func _build_student_models(respostas: Array[Dictionary]) -> Array[Dictionary]:
 		row["erros"] = int(row.get("erros", 0)) + (0 if bool(resposta.get("acertou", false)) else 1)
 		row["respostas"] = int(row.get("respostas", 0)) + 1
 		row["maxFase"] = max(int(row.get("maxFase", 0)), int(resposta.get("fase", 0)))
+		if not bool(row.get("estadoAtualBackend", false)):
+			row["casaAtual"] = max(int(row.get("casaAtual", 1)), int(resposta.get("casaAtual", 1)))
+			if _normalize_student_status(str(row.get("statusPartida", ""))) == STUDENT_STATUS_AGUARDANDO:
+				row["statusPartida"] = STUDENT_STATUS_JOGANDO
 		if str(row.get("ultimaRespostaRaw", "")).is_empty():
 			row["ultimaRespostaRaw"] = resposta.get("respondidoEm", "")
 		grouped[jogador_id] = row
@@ -965,14 +1241,15 @@ func _build_student_models(respostas: Array[Dictionary]) -> Array[Dictionary]:
 	for item in grouped.values():
 		var respostas_total: int = int(item.get("respostas", 0))
 		var acertos_total: int = int(item.get("acertos", 0))
-		var fase_atual: int = int(item.get("maxFase", 0))
+		var casa_atual: int = clampi(int(item.get("casaAtual", 1)), 1, STUDENT_TOTAL_BOARD_HOUSES)
 		var aproveitamento := 0 if respostas_total == 0 else int(round((float(acertos_total) / float(respostas_total)) * 100.0))
-		var status := "aguardando"
-		if respostas_total > 0:
-			status = "finalizado" if fase_atual >= STUDENT_FINAL_PHASE_ESTIMATE or respostas_total >= STUDENT_FINAL_PHASE_ESTIMATE else "jogando"
+		var status := _normalize_student_status(str(item.get("statusPartida", STUDENT_STATUS_AGUARDANDO)))
+		if not bool(item.get("estadoAtualBackend", false)) and status != STUDENT_STATUS_FINALIZADO:
+			status = STUDENT_STATUS_JOGANDO if respostas_total > 0 or status == STUDENT_STATUS_JOGANDO else STUDENT_STATUS_AGUARDANDO
+		item["pontuacao"] = int(item.get("pontuacao", 0)) if respostas_total > 0 else int(item.get("pontuacaoBackend", 0))
 		item["aproveitamento"] = aproveitamento
 		item["status"] = status
-		item["progressoLabel"] = "Fase %d/%d" % [fase_atual, STUDENT_FINAL_PHASE_ESTIMATE]
+		item["progressoLabel"] = "Casa %d/%d" % [casa_atual, STUDENT_TOTAL_BOARD_HOUSES]
 		item["ultimaAtividade"] = _format_datetime(item.get("ultimaRespostaRaw", ""))
 		students.append(item)
 
@@ -983,17 +1260,54 @@ func _build_student_models(respostas: Array[Dictionary]) -> Array[Dictionary]:
 	)
 	return students
 
+func _create_student_model_base(source: Dictionary) -> Dictionary:
+	return {
+		"jogadorId": int(source.get("jogadorId", source.get("id", 0))),
+		"nome": str(source.get("nome", source.get("aluno", "Aluno"))),
+		"pontuacao": 0,
+		"pontuacaoBackend": int(source.get("pontuacao", 0)),
+		"acertos": 0,
+		"erros": 0,
+		"respostas": 0,
+		"maxFase": int(source.get("faseAtual", 0)),
+		"casaAtual": max(1, int(source.get("casaAtual", 1))),
+		"statusPartida": _normalize_student_status(str(source.get("statusPartida", source.get("status", STUDENT_STATUS_AGUARDANDO)))),
+		"estadoAtualBackend": false,
+		"ultimaRespostaRaw": "",
+	}
+
 func _summarize_student_states(models: Array[Dictionary]) -> Dictionary:
 	var summary := {
-		"aguardando": 0,
-		"jogando": 0,
-		"finalizado": 0,
+		STUDENT_STATUS_AGUARDANDO: 0,
+		STUDENT_STATUS_JOGANDO: 0,
+		STUDENT_STATUS_FINALIZADO: 0,
 	}
 	for item in models:
-		var status: String = str(item.get("status", "aguardando"))
+		var status: String = _normalize_student_status(str(item.get("status", STUDENT_STATUS_AGUARDANDO)))
 		if summary.has(status):
 			summary[status] = int(summary[status]) + 1
 	return summary
+
+func _normalize_student_status(status: String) -> String:
+	var normalized := status.strip_edges().to_lower()
+	match normalized:
+		STUDENT_STATUS_FINALIZADO:
+			return STUDENT_STATUS_FINALIZADO
+		STUDENT_STATUS_JOGANDO:
+			return STUDENT_STATUS_JOGANDO
+		STUDENT_STATUS_INICIADO, STUDENT_STATUS_AGUARDANDO:
+			return STUDENT_STATUS_AGUARDANDO
+		_:
+			return STUDENT_STATUS_AGUARDANDO
+
+func _get_student_status_label(status: String) -> String:
+	match _normalize_student_status(status):
+		STUDENT_STATUS_FINALIZADO:
+			return "Finalizado"
+		STUDENT_STATUS_JOGANDO:
+			return "Jogando"
+		_:
+			return "Iniciado"
 
 func _normalize_answer_list(payload: Variant) -> Array[Dictionary]:
 	return _extract_dictionary_array(payload)
@@ -1001,13 +1315,22 @@ func _normalize_answer_list(payload: Variant) -> Array[Dictionary]:
 func _refresh_question_bank() -> void:
 	if carregando_banco_perguntas:
 		return
+	if not ProfessorSession.has_current_room():
+		banco_perguntas.clear()
+		_populate_question_filters()
+		_render_question_bank()
+		_set_question_bank_feedback("Selecione uma sala para carregar seu banco de perguntas.", STATUS_INFO)
+		return
 
+	var requested_room_id := ProfessorSession.current_room_id
 	carregando_banco_perguntas = true
 	_update_question_bank_controls_state()
-	_set_question_bank_feedback("Atualizando o banco oficial de perguntas...", STATUS_INFO)
-	var response: Dictionary = await ApiClient.fetch_questions()
+	_set_question_bank_feedback("Atualizando as perguntas da sala selecionada...", STATUS_INFO)
+	var response: Dictionary = await ApiClient.fetch_questions(requested_room_id)
 	carregando_banco_perguntas = false
 	_update_question_bank_controls_state()
+	if not ProfessorSession.has_current_room() or ProfessorSession.current_room_id != requested_room_id:
+		return
 
 	if not response.get("ok", false):
 		banco_perguntas.clear()
@@ -1193,7 +1516,7 @@ func _create_bank_question_card(entry: Dictionary) -> PanelContainer:
 	action_row.add_child(save_button)
 
 	var delete_button := Button.new()
-	delete_button.text = "Excluir"
+	delete_button.text = "Eliminar"
 	delete_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_apply_button_palette(delete_button, STATUS_ERROR, _shade_color(STATUS_ERROR, 0.22))
 	delete_button.pressed.connect(_on_bank_question_delete_pressed.bind(index))
@@ -1260,7 +1583,13 @@ func _on_bank_question_save_pressed(index: int) -> void:
 	carregando_banco_perguntas = true
 	_update_question_bank_controls_state()
 	_set_question_bank_feedback("Salvando alteracoes de %s..." % _question_title(question), STATUS_INFO)
-	var response: Dictionary = await ApiClient.update_question(int(question.get("id", 0)), _build_question_payload(question))
+	var sala_id := ProfessorSession.current_room_id if ProfessorSession.has_current_room() else 0
+	if sala_id <= 0:
+		carregando_banco_perguntas = false
+		_update_question_bank_controls_state()
+		_set_question_bank_feedback("Selecione uma sala antes de salvar a pergunta.", STATUS_ERROR)
+		return
+	var response: Dictionary = await ApiClient.update_question(int(question.get("id", 0)), sala_id, _build_question_payload(question))
 	carregando_banco_perguntas = false
 	_update_question_bank_controls_state()
 
@@ -1274,21 +1603,91 @@ func _on_bank_question_save_pressed(index: int) -> void:
 func _on_bank_question_delete_pressed(index: int) -> void:
 	if carregando_banco_perguntas or not _has_bank_question(index):
 		return
-	var question_id: int = int(banco_perguntas[index].get("id", 0))
+	var sala_id := ProfessorSession.current_room_id if ProfessorSession.has_current_room() else 0
+	if sala_id <= 0:
+		_set_question_bank_feedback("Selecione uma sala antes de eliminar a pergunta.", STATUS_ERROR)
+		return
+
+	var question: Dictionary = banco_perguntas[index]
+	pergunta_exclusao_id = int(question.get("id", 0))
+	pergunta_exclusao_sala_id = sala_id
+	pergunta_exclusao_todas = false
+	confirmacao_apagar_perguntas.title = "Eliminar pergunta"
+	confirmacao_apagar_perguntas.ok_button_text = "Eliminar pergunta"
+	confirmacao_apagar_perguntas.dialog_text = "Tem certeza que deseja eliminar '%s' da sala %s (%s)?\n\nA pergunta deixara de aparecer no banco e no jogo. Salas, alunos, ranking e historico de respostas serao preservados." % [
+		_question_title(question),
+		ProfessorSession.current_room_name,
+		ProfessorSession.current_room_code,
+	]
+	confirmacao_apagar_perguntas.popup_centered()
+
+func _on_botao_eliminar_perguntas_pressed() -> void:
+	if carregando_banco_perguntas or banco_perguntas.is_empty() or not ProfessorSession.has_current_room():
+		return
+
+	pergunta_exclusao_id = 0
+	pergunta_exclusao_sala_id = ProfessorSession.current_room_id
+	pergunta_exclusao_todas = true
+	confirmacao_apagar_perguntas.title = "Eliminar perguntas da sala"
+	confirmacao_apagar_perguntas.ok_button_text = "Eliminar %d perguntas" % banco_perguntas.size()
+	confirmacao_apagar_perguntas.dialog_text = "Tem certeza que deseja eliminar as %d perguntas ativas da sala %s (%s)?\n\nElas deixarao de aparecer no banco e no jogo. A sala, os alunos, o ranking e todo o historico de respostas serao preservados." % [
+		banco_perguntas.size(),
+		ProfessorSession.current_room_name,
+		ProfessorSession.current_room_code,
+	]
+	confirmacao_apagar_perguntas.popup_centered()
+
+func _on_confirmacao_apagar_perguntas_confirmed() -> void:
+	if carregando_banco_perguntas or pergunta_exclusao_sala_id <= 0:
+		return
+	if pergunta_exclusao_todas:
+		await _eliminar_todas_perguntas_confirmadas()
+	else:
+		await _eliminar_pergunta_confirmada()
+	pergunta_exclusao_id = 0
+	pergunta_exclusao_sala_id = 0
+	pergunta_exclusao_todas = false
+
+func _eliminar_pergunta_confirmada() -> void:
+	var question_id := pergunta_exclusao_id
+	var sala_id := pergunta_exclusao_sala_id
+	if question_id <= 0:
+		return
+
 	carregando_banco_perguntas = true
 	_update_question_bank_controls_state()
-	_set_question_bank_feedback("Excluindo a pergunta #%d..." % question_id, STATUS_INFO)
-	var response: Dictionary = await ApiClient.delete_question(question_id)
+	_set_question_bank_feedback("Eliminando a pergunta #%d..." % question_id, STATUS_INFO)
+	var response: Dictionary = await ApiClient.delete_question(question_id, sala_id)
 	carregando_banco_perguntas = false
 	_update_question_bank_controls_state()
 
 	if not response.get("ok", false):
-		_set_question_bank_feedback(response.get("error", "Nao foi possivel excluir a pergunta."), STATUS_ERROR)
+		_set_question_bank_feedback(response.get("error", "Nao foi possivel eliminar a pergunta."), STATUS_ERROR)
 		return
 
 	expanded_bank_question_ids.erase(question_id)
-	_set_question_bank_feedback("Pergunta #%d excluida com sucesso." % question_id, STATUS_OK)
 	await _refresh_question_bank()
+	await _refresh_dashboard()
+	_set_question_bank_feedback("Pergunta #%d eliminada. O historico foi preservado." % question_id, STATUS_OK)
+
+func _eliminar_todas_perguntas_confirmadas() -> void:
+	var sala_id := pergunta_exclusao_sala_id
+	carregando_banco_perguntas = true
+	_update_question_bank_controls_state()
+	_set_question_bank_feedback("Eliminando as perguntas da sala selecionada...", STATUS_INFO)
+	var response: Dictionary = await ApiClient.delete_all_questions(sala_id)
+	carregando_banco_perguntas = false
+	_update_question_bank_controls_state()
+
+	if not response.get("ok", false):
+		_set_question_bank_feedback(response.get("error", "Nao foi possivel eliminar as perguntas da sala."), STATUS_ERROR)
+		return
+
+	var total := int(response.get("data", {}).get("total", 0))
+	expanded_bank_question_ids.clear()
+	await _refresh_question_bank()
+	await _refresh_dashboard()
+	_set_question_bank_feedback("%d perguntas eliminadas da sala. O historico foi preservado." % total, STATUS_OK)
 
 func _has_bank_question(index: int) -> bool:
 	return index >= 0 and index < banco_perguntas.size()
@@ -1330,8 +1729,10 @@ func _update_question_bank_controls_state() -> void:
 	botao_atualizar_perguntas.text = "Atualizando..." if carregando_banco_perguntas else "Atualizar Banco"
 	botao_expandir_todas.disabled = banco_perguntas.is_empty()
 	botao_recolher_todas.disabled = banco_perguntas.is_empty()
+	botao_eliminar_perguntas.disabled = carregando or carregando_banco_perguntas or banco_perguntas.is_empty() or not ProfessorSession.has_current_room()
 	botao_baixar_modelo.disabled = carregando or importando_perguntas
-	botao_importar.disabled = carregando or carregando_banco_perguntas or importando_perguntas
+	import_room_selector.disabled = carregando or carregando_banco_perguntas or importando_perguntas or salas.is_empty()
+	botao_importar.disabled = carregando or carregando_banco_perguntas or importando_perguntas or salas.is_empty()
 	botao_baixar_modelo.text = "Preparando..." if carregando or importando_perguntas else "Baixar Modelo"
 	botao_importar.text = "Importando..." if importando_perguntas else "Selecionar Planilha"
 
@@ -1353,47 +1754,44 @@ func _on_botao_atualizar_banco_perguntas_pressed() -> void:
 func _on_botao_importar_pressed() -> void:
 	if carregando or importando_perguntas or import_dialog == null:
 		return
+	importacao_sala_id = _get_question_target_room_id(import_room_selector)
+	if importacao_sala_id <= 0:
+		_set_import_feedback("Selecione uma sala de destino antes de importar.", STATUS_ERROR)
+		return
 	_set_import_feedback("Selecione uma planilha .csv ou .xlsx para importar perguntas.", STATUS_INFO)
 	import_dialog.popup_centered_ratio(0.72)
 
 func _on_botao_baixar_modelo_pressed() -> void:
 	if carregando or importando_perguntas or template_download_dialog == null:
 		return
-	if not FileAccess.file_exists(TEMPLATE_SPREADSHEET_RESOURCE_PATH):
-		_set_import_feedback("O modelo de planilha nao foi encontrado no projeto.", STATUS_ERROR)
-		_show_status("O modelo de planilha nao foi encontrado no projeto.", STATUS_ERROR)
-		return
 	_set_import_feedback("Escolha onde salvar o modelo de planilha.", STATUS_INFO)
 	template_download_dialog.current_file = TEMPLATE_SPREADSHEET_FILENAME
 	template_download_dialog.popup_centered_ratio(0.72)
 
 func _on_template_download_file_selected(path: String) -> void:
-	var source_file := FileAccess.open(TEMPLATE_SPREADSHEET_RESOURCE_PATH, FileAccess.READ)
-	if source_file == null:
-		_set_import_feedback("Nao foi possivel abrir o modelo de planilha.", STATUS_ERROR)
-		_show_status("Nao foi possivel abrir o modelo de planilha.", STATUS_ERROR)
-		return
-
-	var content: PackedByteArray = source_file.get_buffer(source_file.get_length())
-	source_file.close()
-	if content.is_empty():
-		_set_import_feedback("O modelo de planilha esta vazio ou indisponivel.", STATUS_ERROR)
-		_show_status("O modelo de planilha esta vazio ou indisponivel.", STATUS_ERROR)
-		return
-
-	var target_file := FileAccess.open(path, FileAccess.WRITE)
+	var target_path := path if path.get_extension().to_lower() == "csv" else "%s.csv" % path
+	var target_file := FileAccess.open(target_path, FileAccess.WRITE)
 	if target_file == null:
 		_set_import_feedback("Nao foi possivel salvar o modelo no local escolhido.", STATUS_ERROR)
 		_show_status("Nao foi possivel salvar o modelo no local escolhido.", STATUS_ERROR)
 		return
 
-	target_file.store_buffer(content)
+	target_file.store_string("%s\r\n%s\r\n" % [TEMPLATE_SPREADSHEET_HEADER, TEMPLATE_SPREADSHEET_EXAMPLE])
+	var write_error := target_file.get_error()
 	target_file.close()
-	_set_import_feedback("Modelo salvo com sucesso em %s." % path.get_file(), STATUS_OK)
+	if write_error != OK:
+		_set_import_feedback("Nao foi possivel concluir a gravacao do modelo.", STATUS_ERROR)
+		_show_status("Falha ao gravar o modelo de planilha.", STATUS_ERROR)
+		return
+
+	_set_import_feedback("Modelo CSV salvo com sucesso em %s." % target_path.get_file(), STATUS_OK)
 	_show_status("Modelo de planilha salvo com sucesso.", STATUS_OK)
 
 func _on_import_file_selected(path: String) -> void:
 	if importando_perguntas:
+		return
+	if importacao_sala_id <= 0:
+		_set_import_feedback("A sala de destino da importacao nao e valida.", STATUS_ERROR)
 		return
 
 	importando_perguntas = true
@@ -1401,7 +1799,7 @@ func _on_import_file_selected(path: String) -> void:
 	_update_ia_controls_state()
 	_set_import_feedback("Importando perguntas para o banco de dados...", STATUS_INFO)
 	_show_status("Importando perguntas para o banco de dados...", STATUS_INFO)
-	var response: Dictionary = await ApiClient.import_questions_spreadsheet(path)
+	var response: Dictionary = await ApiClient.import_questions_spreadsheet(path, importacao_sala_id)
 	importando_perguntas = false
 	_update_question_bank_controls_state()
 	_update_ia_controls_state()
@@ -1415,7 +1813,8 @@ func _on_import_file_selected(path: String) -> void:
 	var imported_count: int = int(payload.get("total", 0))
 	_set_import_feedback("%d perguntas importadas com sucesso." % imported_count, STATUS_OK)
 	_show_status("%d perguntas importadas com sucesso." % imported_count, STATUS_OK)
-	await _refresh_question_bank()
+	if ProfessorSession.has_current_room() and ProfessorSession.current_room_id == importacao_sala_id:
+		await _refresh_question_bank()
 
 func _set_import_feedback(message: String, color_value: Color) -> void:
 	importar_feedback.text = message
@@ -1427,19 +1826,35 @@ func _on_botao_gerar_ia_pressed() -> void:
 
 	var tema := ia_tema_input.text.strip_edges()
 	var materia := ia_materia_input.text.strip_edges()
-	var dificuldade := ia_dificuldade_select.get_item_text(ia_dificuldade_select.selected).strip_edges()
+	var dificuldade := ""
+	if ia_dificuldade_select.selected >= 0:
+		dificuldade = ia_dificuldade_select.get_item_text(ia_dificuldade_select.selected).strip_edges()
 	var quantidade := int(ia_quantidade_input.value)
 	var pontuacao := int(ia_pontuacao_input.value)
 	var tempo_limite := int(ia_tempo_input.value)
+	var sala_id := _get_question_target_room_id(ia_room_selector)
+
+	if sala_id <= 0:
+		_show_ia_validation_error("Selecione uma sala de destino para as perguntas.", ia_room_selector)
+		return
 
 	if tema.is_empty():
-		_show_ia_feedback("Informe um tema para gerar perguntas.", STATUS_ERROR)
+		_show_ia_validation_error("Informe um tema para gerar perguntas.", ia_tema_input)
 		return
 	if materia.is_empty():
-		_show_ia_feedback("Informe uma materia para gerar perguntas.", STATUS_ERROR)
+		_show_ia_validation_error("Informe uma materia para gerar perguntas.", ia_materia_input)
 		return
 	if dificuldade.is_empty():
-		_show_ia_feedback("Selecione uma dificuldade para a geracao.", STATUS_ERROR)
+		_show_ia_validation_error("Selecione uma dificuldade para a geracao.", ia_dificuldade_select)
+		return
+	if quantidade <= 0:
+		_show_ia_validation_error("A quantidade de perguntas deve ser maior que zero.", ia_quantidade_input)
+		return
+	if pontuacao <= 0:
+		_show_ia_validation_error("A pontuacao por pergunta deve ser maior que zero.", ia_pontuacao_input)
+		return
+	if tempo_limite < 0:
+		_show_ia_validation_error("O tempo de resposta nao pode ser negativo.", ia_tempo_input)
 		return
 
 	ia_processando = true
@@ -1447,7 +1862,7 @@ func _on_botao_gerar_ia_pressed() -> void:
 	_show_ia_feedback("Gerando perguntas com IA. Aguarde alguns instantes...", STATUS_INFO)
 	_show_status("Gerando perguntas com IA para auditoria...", STATUS_INFO)
 
-	var response: Dictionary = await ApiClient.generate_questions_ai(tema, materia, dificuldade, quantidade, pontuacao, tempo_limite)
+	var response: Dictionary = await ApiClient.generate_questions_ai(sala_id, tema, materia, dificuldade, quantidade, pontuacao, tempo_limite)
 	ia_processando = false
 	_update_ia_controls_state()
 
@@ -1458,6 +1873,7 @@ func _on_botao_gerar_ia_pressed() -> void:
 
 	var payload: Dictionary = response.get("data", {})
 	perguntas_geradas = _normalize_generated_questions(payload.get("perguntas", []))
+	perguntas_geradas_sala_id = sala_id
 	expanded_generated_question_ids.clear()
 	_render_generated_questions()
 	_show_ia_feedback("%d perguntas foram geradas e estao prontas para revisao." % perguntas_geradas.size(), STATUS_OK)
@@ -1636,6 +2052,7 @@ func _update_ia_controls_state() -> void:
 	ia_tema_input.editable = not controls_locked
 	ia_materia_input.editable = not controls_locked
 	ia_dificuldade_select.disabled = controls_locked
+	ia_room_selector.disabled = controls_locked or salas.is_empty() or not perguntas_geradas.is_empty()
 	ia_quantidade_input.editable = not controls_locked
 	ia_pontuacao_input.editable = not controls_locked
 	ia_tempo_input.editable = not controls_locked
@@ -1651,6 +2068,12 @@ func _show_ia_feedback(message: String, color_value: Color) -> void:
 	ia_label_feedback.text = message
 	ia_label_feedback.add_theme_color_override("font_color", color_value)
 
+func _show_ia_validation_error(message: String, field: Control) -> void:
+	_show_ia_feedback(message, STATUS_ERROR)
+	_show_status(message, STATUS_ERROR)
+	if field != null:
+		field.grab_focus()
+
 func _on_botao_salvar_aprovadas_pressed() -> void:
 	if ia_salvando or ia_processando:
 		return
@@ -1658,12 +2081,16 @@ func _on_botao_salvar_aprovadas_pressed() -> void:
 	if payload.is_empty():
 		_show_ia_feedback("Nenhuma pergunta aprovada foi selecionada para salvar.", STATUS_ERROR)
 		return
+	if perguntas_geradas_sala_id <= 0:
+		_show_ia_feedback("A sala de destino das perguntas geradas nao e valida.", STATUS_ERROR)
+		return
 
+	var sala_destino_id := perguntas_geradas_sala_id
 	ia_salvando = true
 	_update_ia_controls_state()
 	_show_ia_feedback("Salvando perguntas aprovadas no banco oficial...", STATUS_INFO)
 	_show_status("Salvando perguntas aprovadas...", STATUS_INFO)
-	var response: Dictionary = await ApiClient.save_generated_questions(payload)
+	var response: Dictionary = await ApiClient.save_generated_questions(sala_destino_id, payload)
 	ia_salvando = false
 	_update_ia_controls_state()
 
@@ -1674,11 +2101,15 @@ func _on_botao_salvar_aprovadas_pressed() -> void:
 
 	var saved_count: int = int(response.get("data", {}).get("total", payload.size()))
 	perguntas_geradas.clear()
+	perguntas_geradas_sala_id = 0
+	if ProfessorSession.has_current_room():
+		_select_question_target_room(ProfessorSession.current_room_id)
 	expanded_generated_question_ids.clear()
 	_render_generated_questions()
 	_show_ia_feedback("%d perguntas aprovadas foram salvas com sucesso." % saved_count, STATUS_OK)
 	_show_status("%d perguntas aprovadas foram salvas no banco." % saved_count, STATUS_OK)
-	await _refresh_question_bank()
+	if ProfessorSession.has_current_room() and ProfessorSession.current_room_id == sala_destino_id:
+		await _refresh_question_bank()
 
 func _build_approved_questions_payload() -> Array[Dictionary]:
 	var payload: Array[Dictionary] = []
@@ -1739,6 +2170,8 @@ func _button_text_for_status(target_status: String, current_status: String) -> C
 	return Color(1.0, 1.0, 1.0, 1.0) if target_status == current_status else _shade_color(_status_color(target_status), 0.28)
 
 func _on_botao_sair_pressed() -> void:
+	panel_exiting = true
+	_stop_dashboard_auto_refresh()
 	ProfessorSession.clear_session()
 	get_tree().change_scene_to_file("res://scene/acesso_professor.tscn")
 
@@ -1908,10 +2341,10 @@ func _format_datetime(raw_value: Variant) -> String:
 	return normalized
 
 func _get_student_status_color(status: String) -> Color:
-	match status:
-		"finalizado":
+	match _normalize_student_status(status):
+		STUDENT_STATUS_FINALIZADO:
 			return STATUS_OK
-		"jogando":
+		STUDENT_STATUS_JOGANDO:
 			return STATUS_INFO
 		_:
 			return STATUS_WARNING
@@ -1920,6 +2353,7 @@ func _clear_container(container: Node) -> void:
 	if container == null:
 		return
 	for child in container.get_children():
+		container.remove_child(child)
 		child.queue_free()
 
 func _apply_surface_panel(panel: PanelContainer, background: Color, border: Color, radius: int, shadow_opacity: float) -> void:
