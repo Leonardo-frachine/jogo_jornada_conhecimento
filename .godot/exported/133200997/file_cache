@@ -4,11 +4,12 @@ res://scene/professor/components/ProfessorHeader.tscn::96c8b30cbd1dc66ac34f894a0
 res://scene/professor/components/ProfessorSidebar.tscn::b9ece366d529740be02415e58999a1eb::1779386129::res://.godot/exported/133200997/export-bcc02c9b67d9d8d80196dc6f6877a812-ProfessorSidebar.scn
 res://scene/professor/components/QuestionCard.tscn::0eb02863f8b35380ac3b08fc0e102533::1779369441::res://.godot/exported/133200997/export-aedc87733a10540cae8ff90b9f048f92-QuestionCard.scn
 res://scene/acesso_professor.tscn::638a3b562689e0084614eddbe147c05f::1779934065::res://.godot/exported/133200997/export-3edc550075045f24e6a8c83656379e2d-acesso_professor.scn
-res://scene/end_game_screen.tscn::b12b7aae67e15bf92799838a817de4ec::1779159171::res://.godot/exported/133200997/export-1ddbefa0272f390cf22b4b5f35adc4de-end_game_screen.scn
-res://scene/game.tscn::2929cb62f7b457af7564a01cfce48d8e::1779934065::res://.godot/exported/133200997/export-caa10c3bd03e8ed3318171f5303f6366-game.scn
+res://scene/end_game_screen.tscn::5dc5c27496d64065a88cd8047c81eaa2::1787085043::res://.godot/exported/133200997/export-1ddbefa0272f390cf22b4b5f35adc4de-end_game_screen.scn
+res://scene/game.tscn::33b74f0438ea58d0bfd710f00a7f09c8::1787178265::res://.godot/exported/133200997/export-caa10c3bd03e8ed3318171f5303f6366-game.scn
 res://scene/loading_screen.tscn::89461cebc54eedaa4da7b97cfe2b861d::1779934065::res://.godot/exported/133200997/export-5e30a32641b32b75095b3487e90dfc3b-loading_screen.scn
-res://scene/painel_professor.tscn::55d95ef4a88cbe63bb92658e84719ce4::1780370052::res://.godot/exported/133200997/export-0fcb28241b6841b9f475494fc5767482-painel_professor.scn
+res://scene/painel_professor.tscn::d47b509527cd000d830ed23f20bcee7a::1787086466::res://.godot/exported/133200997/export-0fcb28241b6841b9f475494fc5767482-painel_professor.scn
 res://scene/selecao_perfil.tscn::971e8558d84aa90eabb75f390eb84a84::1779934065::res://.godot/exported/133200997/export-4ab0f3a011488bcd0544f6ee91b7b7b6-selecao_perfil.scn
 res://scene/tela_inicial.tscn::6408552d377e1389c065141ec152cc96::1779934065::res://.godot/exported/133200997/export-54a173fa747d22ca79c2607cecf38318-tela_inicial.scn
 res://ui/settings/root.tscn::565a3658f5dbc2f56007d226cf1124d5::1779386133::res://.godot/exported/133200997/export-c1de76c19c323fa5354c1bcf2ff0571e-root.scn
 res://ui/settings/SettingsOverlay.tscn::77428350733dd757be72c86103f4f9dc::1777254169::res://.godot/exported/133200997/export-987e03ffcef827360b24e44dd14e73b3-SettingsOverlay.scn
+res://default_bus_layout.tres::973f686dc01627ff9b1ab258fa2d6d63::1787087025::res://.godot/exported/133200997/export-19246414aa9fb561ced4b8dce477acec-default_bus_layout.res

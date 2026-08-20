@@ -13,8 +13,8 @@ config_version=5
 config/name="Jornada do conhecimento"
 run/main_scene="res://scene/selecao_perfil.tscn"
 config/features=PackedStringArray("4.6", "GL Compatibility")
-config/icon="res://icon.svg"
-config/api_base_url="http://127.0.0.1:3000"
+config/icon="res://imagens/logo_jogo/jornada_exe_icon.png"
+config/api_base_url="https://api.nathanmariotto.com.br"
 
 [audio]
 
