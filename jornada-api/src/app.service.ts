@@ -3,6 +3,6 @@ import { Injectable } from '@nestjs/common';
 @Injectable()
 export class AppService {
   getHello(): string {
-    return 'Api ta no ar bem vindo ao jornada do conhecimento para mais informações acesse o link: https://nathanmariotto.com.br/jornada';
+    return 'API do Jornada do Conhecimento esta rodando. Este backend atende o jogo educacional Jornada do Conhecimento com recursos de salas, jogadores, progresso, professores e perguntas. Para mais informacoes, acesse: https://nathanmariotto.com.br/jornada';
   }
 }
