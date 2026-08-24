@@ -6,6 +6,9 @@ const LOADING_SCENE_PATH := "res://scene/loading_screen.tscn"
 const SCORE_ANIMATION_DURATION := 0.9
 const HIGH_PERFORMANCE_THRESHOLD := 80
 const MEDIUM_PERFORMANCE_THRESHOLD := 50
+const RANKING_ROW_HEIGHT := 52.0
+const RANKING_POSITION_WIDTH := 44.0
+const RANKING_SCORE_WIDTH := 88.0
 
 @onready var painel_central: Panel = $PainelCentral
 @onready var panel_margin: MarginContainer = $PainelCentral/MarginContainer
@@ -176,48 +179,74 @@ func _render_room_ranking(items: Array[Dictionary]) -> void:
 		return
 
 	ranking_status.text = "%d alunos com partida finalizada." % finalizados.size()
-	for item in finalizados:
-		ranking_list.add_child(_create_ranking_row(item))
+	for index in range(finalizados.size()):
+		ranking_list.add_child(_create_ranking_row(finalizados[index]))
+		if index < finalizados.size() - 1:
+			ranking_list.add_child(HSeparator.new())
 
 func _create_ranking_row(item: Dictionary) -> HBoxContainer:
 	var row := HBoxContainer.new()
-	row.custom_minimum_size = Vector2(0, 48)
+	row.custom_minimum_size = Vector2(0, RANKING_ROW_HEIGHT)
+	row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_theme_constant_override("separation", 8)
 	var is_current_player := int(item.get("jogadorId", 0)) == GameState.player_id
 	var text_color := Color(0.50, 0.32, 0.06, 1.0) if is_current_player else Color(0.12, 0.16, 0.27, 1.0)
 
 	var position_label := Label.new()
-	position_label.custom_minimum_size = Vector2(34, 0)
+	position_label.custom_minimum_size = Vector2(RANKING_POSITION_WIDTH, 0)
+	position_label.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	position_label.text = "#%d" % int(item.get("posicao", 0))
+	position_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	position_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	UITheme.apply_font_only(position_label, 18)
 	position_label.add_theme_color_override("font_color", text_color)
 	row.add_child(position_label)
 
 	var identity := VBoxContainer.new()
 	identity.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	identity.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	identity.add_theme_constant_override("separation", 0)
 	var name_label := Label.new()
-	name_label.text = str(item.get("nome", "Aluno"))
+	var display_name := _normalize_ranking_name(item.get("nome", "Aluno"))
+	name_label.text = display_name
+	name_label.tooltip_text = display_name
+	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	name_label.clip_text = true
 	name_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-	name_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	name_label.autowrap_mode = TextServer.AUTOWRAP_OFF
 	UITheme.apply_font_only(name_label, 16)
 	name_label.add_theme_color_override("font_color", text_color)
 	identity.add_child(name_label)
 	var status_label := Label.new()
 	status_label.text = "Finalizado%s" % (" | Voce" if is_current_player else "")
+	status_label.clip_text = true
+	status_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	UITheme.apply_font_only(status_label, 14)
 	status_label.add_theme_color_override("font_color", Color(0.15, 0.60, 0.38, 1.0))
 	identity.add_child(status_label)
 	row.add_child(identity)
 
 	var score_label := Label.new()
-	score_label.custom_minimum_size = Vector2(72, 0)
+	score_label.custom_minimum_size = Vector2(RANKING_SCORE_WIDTH, 0)
+	score_label.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	score_label.text = "%d pts" % int(item.get("pontuacao", 0))
 	score_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	score_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	UITheme.apply_font_only(score_label, 16)
 	score_label.add_theme_color_override("font_color", text_color)
 	row.add_child(score_label)
 	return row
+
+func _normalize_ranking_name(value: Variant) -> String:
+	if value == null:
+		return "Aluno"
+	var normalized := str(value)
+	for separator in ["\r", "\n", "\t"]:
+		normalized = normalized.replace(separator, " ")
+	normalized = normalized.strip_edges()
+	while normalized.contains("  "):
+		normalized = normalized.replace("  ", " ")
+	return normalized if not normalized.is_empty() else "Aluno"
 
 func _show_ranking_message(message: String) -> void:
 	ranking_status.text = message
