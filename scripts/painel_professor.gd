@@ -264,7 +264,7 @@ func _on_dashboard_auto_refresh_timeout() -> void:
 		return
 	if not ProfessorSession.has_current_room():
 		return
-	await _refresh_dashboard()
+	await _refresh_dashboard(false)
 
 func _connect_signals() -> void:
 	sidebar_toggle.pressed.connect(_on_sidebar_toggle_pressed)
@@ -864,7 +864,7 @@ func _on_confirmacao_apagar_sala_confirmed() -> void:
 	_show_status(response.get("data", {}).get("mensagem", "Sala apagada com sucesso."), STATUS_OK)
 	await _fetch_rooms(true)
 
-func _refresh_dashboard() -> void:
+func _refresh_dashboard(interactive: bool = true) -> void:
 	if panel_exiting or carregando or dashboard_refresh_in_progress:
 		return
 
@@ -877,24 +877,29 @@ func _refresh_dashboard() -> void:
 
 	var requested_room_id := ProfessorSession.current_room_id
 	dashboard_refresh_in_progress = true
-	_set_loading_state(true)
-	_show_status("Atualizando indicadores da sala...", STATUS_INFO)
+	if interactive:
+		_set_loading_state(true)
+		_show_status("Atualizando indicadores da sala...", STATUS_INFO)
 	var dashboard_response: Dictionary = await ApiClient.fetch_room_dashboard(requested_room_id)
 	if panel_exiting or not is_inside_tree():
+		dashboard_refresh_in_progress = false
 		return
 	var answers_response: Dictionary = await ApiClient.fetch_room_answers(requested_room_id)
 	if panel_exiting or not is_inside_tree():
+		dashboard_refresh_in_progress = false
 		return
-	_set_loading_state(false)
+	if interactive:
+		_set_loading_state(false)
 	dashboard_refresh_in_progress = false
 
 	if not ProfessorSession.has_current_room() or ProfessorSession.current_room_id != requested_room_id:
 		return
 
 	if not dashboard_response.get("ok", false):
-		_render_empty_dashboard()
-		_render_students([])
-		_show_status(dashboard_response.get("error", "Nao foi possivel carregar o dashboard."), STATUS_ERROR)
+		if interactive:
+			_render_empty_dashboard()
+			_render_students([])
+			_show_status(dashboard_response.get("error", "Nao foi possivel carregar o dashboard."), STATUS_ERROR)
 		return
 
 	dashboard_payload = dashboard_response.get("data", {})
@@ -903,13 +908,15 @@ func _refresh_dashboard() -> void:
 		respostas_sala = _normalize_answer_list(answers_payload.get("respostas", []))
 		alunos_sala = _normalize_answer_list(answers_payload.get("alunos", []))
 	else:
-		respostas_sala.clear()
-		alunos_sala.clear()
-		_show_status(answers_response.get("error", "Nao foi possivel carregar as respostas da sala."), STATUS_WARNING)
+		if interactive:
+			respostas_sala.clear()
+			alunos_sala.clear()
+			_show_status(answers_response.get("error", "Nao foi possivel carregar as respostas da sala."), STATUS_WARNING)
 
 	_render_dashboard_data(dashboard_payload)
 	_render_students(_build_student_models(respostas_sala, alunos_sala))
-	_show_status("Dashboard atualizado.", STATUS_OK)
+	if interactive:
+		_show_status("Dashboard atualizado.", STATUS_OK)
 
 func _render_empty_dashboard() -> void:
 	dashboard_payload.clear()

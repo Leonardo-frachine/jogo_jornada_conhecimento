@@ -34,6 +34,7 @@ const BOARD_BOTTOM_PADDING_MIN := 28.0
 const BOARD_BOTTOM_PADDING_MAX := 52.0
 const BOARD_PATH_SHADOW_NAME := "BoardPathShadow"
 const BOARD_PATH_LINE_NAME := "BoardPathLine"
+const BOARD_PLAYER_Z_INDEX := 8
 const BOARD_HOUSE_SPRITE_SCALE := Vector2(0.18, 0.135)
 const BOARD_BACKGROUND_TINT := Color(0.76, 0.76, 0.76, 1.0)
 const CHALLENGE_HOUSE_TEXTURE := preload("res://imagens/chao/challenge_house.png")
@@ -165,6 +166,7 @@ func _ready() -> void:
 	_decorate_challenge_houses()
 
 	if player != null:
+		player.z_index = BOARD_PLAYER_Z_INDEX
 		if player.has_method("setup"):
 			player.setup(board_positions)
 		if player.has_signal("step_reached") and not player.step_reached.is_connected(_on_step_reached):
