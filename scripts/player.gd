@@ -70,9 +70,9 @@ func _apply_selected_character() -> void:
 	sprite.sprite_frames = frames
 	sprite.animation = &"idle"
 
-	var scale_ratio := 1536.0 / maxf(float(texture.get_width()), 1.0)
-	idle_sprite_scale = Vector2(0.085, 0.1) * scale_ratio
-	walk_sprite_scale = Vector2(0.095, 0.115) * scale_ratio
+	var token_scale := 104.0 / maxf(float(texture.get_height()), 1.0)
+	idle_sprite_scale = Vector2.ONE * token_scale
+	walk_sprite_scale = Vector2.ONE * token_scale * 1.12
 	sprite.scale = idle_sprite_scale
 
 func _play_walk() -> void:

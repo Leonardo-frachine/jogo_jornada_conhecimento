@@ -11,7 +11,7 @@
 [ext_resource type="Texture2D" uid="uid://cqw2od8y8ev4" path="res://imagens/chao/token_hexagon_3d_white.png" id="7_ym5sv"]
 [ext_resource type="Texture2D" uid="uid://c3esur46a71up" path="res://imagens/chao/token_hexagon_3d_red.png" id="8_sng2h"]
 [ext_resource type="Texture2D" uid="uid://b17x576082u88" path="res://imagens/Fundo/fundogame.png" id="12_5g16k"]
-[ext_resource type="Texture2D" uid="uid://cbpn68ac6bol8" path="res://imagens/configuracoes/configuracoes.png" id="18_ux4dc"]
+[ext_resource type="Texture2D" path="res://imagens/icons/professor_sidebar/configuracoes_ui.png" id="18_ux4dc"]
 [ext_resource type="Script" uid="uid://crxkgvki2ihn4" path="res://scripts/game.gd" id="19_game"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_33cqm"]
@@ -354,25 +354,22 @@ texture = ExtResource("4_yq8tf")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=661387975]
 
-[node name="SpriteDado" type="Sprite2D" parent="CanvasLayer" unique_id=836262882]
-position = Vector2(678, 73)
-scale = Vector2(1.21691, 1.09191)
-texture = ExtResource("2_dbls1")
-
 [node name="BotaoConfiguracao" type="TextureButton" parent="CanvasLayer" unique_id=1787448071]
-custom_minimum_size = Vector2(128, 128)
-anchors_preset = -1
-anchor_top = 0.807
-anchor_right = 0.113
+custom_minimum_size = Vector2(96, 96)
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 1248.0
-offset_top = 20.96
-offset_right = 1221.64
-offset_bottom = 10.0
+offset_left = -168.0
+offset_top = -168.0
+offset_right = -72.0
+offset_bottom = -72.0
+grow_horizontal = 0
 grow_vertical = 0
 texture_normal = ExtResource("18_ux4dc")
 ignore_texture_size = true
-stretch_mode = 6
+stretch_mode = 0
 
 [node name="DialogBackdrop" type="ColorRect" parent="CanvasLayer" unique_id=2146682398]
 visible = false
@@ -509,79 +506,246 @@ grow_vertical = 2
 mouse_filter = 2
 
 [node name="TopPanel" type="PanelContainer" parent="HUD/Root" unique_id=1663054027]
-custom_minimum_size = Vector2(520, 88)
+custom_minimum_size = Vector2(380, 104)
 layout_mode = 0
-offset_right = 540.0
-offset_bottom = 96.0
+offset_left = 24.0
+offset_top = 24.0
+offset_right = 424.0
+offset_bottom = 128.0
 mouse_filter = 2
 
 [node name="Margin" type="MarginContainer" parent="HUD/Root/TopPanel" unique_id=515076551]
 layout_mode = 2
 mouse_filter = 2
-theme_override_constants/margin_left = 18
+theme_override_constants/margin_left = 16
 theme_override_constants/margin_top = 14
-theme_override_constants/margin_right = 18
+theme_override_constants/margin_right = 20
 theme_override_constants/margin_bottom = 14
 
 [node name="HBox" type="HBoxContainer" parent="HUD/Root/TopPanel/Margin" unique_id=2079671031]
 layout_mode = 2
 mouse_filter = 2
-theme_override_constants/separation = 24
+theme_override_constants/separation = 14
 
-[node name="Left" type="VBoxContainer" parent="HUD/Root/TopPanel/Margin/HBox" unique_id=917015835]
+[node name="PlayerBadge" type="PanelContainer" parent="HUD/Root/TopPanel/Margin/HBox"]
+custom_minimum_size = Vector2(58, 58)
 layout_mode = 2
-size_flags_horizontal = 3
+size_flags_vertical = 4
 mouse_filter = 2
-theme_override_constants/separation = 6
 
-[node name="PlayerLabel" type="Label" parent="HUD/Root/TopPanel/Margin/HBox/Left" unique_id=502848632]
+[node name="PlayerBadgeLabel" type="Label" parent="HUD/Root/TopPanel/Margin/HBox/PlayerBadge"]
 layout_mode = 2
-text = "Jogador: Aluno"
-
-[node name="RoomLabel" type="Label" parent="HUD/Root/TopPanel/Margin/HBox/Left" unique_id=1973024659]
-layout_mode = 2
-text = "Sala: Sem codigo"
-
-[node name="SubtitleLabel" type="Label" parent="HUD/Root/TopPanel/Margin/HBox/Left" unique_id=2019906254]
-layout_mode = 2
-text = "Role o dado para abrir uma pergunta."
-
-[node name="Right" type="VBoxContainer" parent="HUD/Root/TopPanel/Margin/HBox" unique_id=494968360]
-layout_mode = 2
-mouse_filter = 2
-theme_override_constants/separation = 4
-
-[node name="ScoreLabel" type="Label" parent="HUD/Root/TopPanel/Margin/HBox/Right" unique_id=1753910116]
-layout_mode = 2
-text = "Score: 0"
-
-[node name="LevelLabel" type="Label" parent="HUD/Root/TopPanel/Margin/HBox/Right" unique_id=2101986709]
-layout_mode = 2
-text = "Nivel: 1"
-
-[node name="ProgressLabel" type="Label" parent="HUD/Root/TopPanel/Margin/HBox/Right" unique_id=1205231366]
-layout_mode = 2
-text = "Casa: 0/28"
-
-[node name="AccuracyLabel" type="Label" parent="HUD/Root/TopPanel/Margin/HBox/Right" unique_id=467314804]
-layout_mode = 2
-text = "Acertos: 0%"
-
-[node name="FeedbackLabel" type="Label" parent="HUD/Root" unique_id=938120440]
-layout_mode = 0
-offset_top = 156.0
-offset_right = 560.0
-offset_bottom = 198.0
-text = "Role o dado para abrir uma pergunta."
+text = "A"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="RollButton" type="Button" parent="HUD/Root" unique_id=1474487045]
+[node name="Identity" type="VBoxContainer" parent="HUD/Root/TopPanel/Margin/HBox" unique_id=917015835]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+mouse_filter = 2
+theme_override_constants/separation = 1
+
+[node name="IdentityLabel" type="Label" parent="HUD/Root/TopPanel/Margin/HBox/Identity"]
+layout_mode = 2
+text = "JOGADOR"
+
+[node name="PlayerLabel" type="Label" parent="HUD/Root/TopPanel/Margin/HBox/Identity" unique_id=502848632]
+layout_mode = 2
+text = "Aluno"
+
+[node name="RoomLabel" type="Label" parent="HUD/Root/TopPanel/Margin/HBox/Identity" unique_id=1973024659]
+layout_mode = 2
+text = "Sala  •  SEM CÓDIGO"
+
+[node name="StatsPanel" type="PanelContainer" parent="HUD/Root"]
+custom_minimum_size = Vector2(620, 104)
 layout_mode = 0
-offset_top = 640.0
-offset_right = 214.0
-offset_bottom = 694.0
-text = "ROLAR DADO"
+offset_left = 650.0
+offset_top = 24.0
+offset_right = 1270.0
+offset_bottom = 128.0
+mouse_filter = 2
+
+[node name="Margin" type="MarginContainer" parent="HUD/Root/StatsPanel"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 10
+
+[node name="HBox" type="HBoxContainer" parent="HUD/Root/StatsPanel/Margin"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 8
+
+[node name="ScoreCard" type="PanelContainer" parent="HUD/Root/StatsPanel/Margin/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="VBox" type="VBoxContainer" parent="HUD/Root/StatsPanel/Margin/HBox/ScoreCard"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 0
+
+[node name="Title" type="Label" parent="HUD/Root/StatsPanel/Margin/HBox/ScoreCard/VBox"]
+layout_mode = 2
+text = "PONTOS"
+horizontal_alignment = 1
+
+[node name="ScoreLabel" type="Label" parent="HUD/Root/StatsPanel/Margin/HBox/ScoreCard/VBox" unique_id=1753910116]
+layout_mode = 2
+text = "0"
+horizontal_alignment = 1
+
+[node name="LevelCard" type="PanelContainer" parent="HUD/Root/StatsPanel/Margin/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="VBox" type="VBoxContainer" parent="HUD/Root/StatsPanel/Margin/HBox/LevelCard"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 0
+
+[node name="Title" type="Label" parent="HUD/Root/StatsPanel/Margin/HBox/LevelCard/VBox"]
+layout_mode = 2
+text = "NÍVEL"
+horizontal_alignment = 1
+
+[node name="LevelLabel" type="Label" parent="HUD/Root/StatsPanel/Margin/HBox/LevelCard/VBox" unique_id=2101986709]
+layout_mode = 2
+text = "1"
+horizontal_alignment = 1
+
+[node name="ProgressCard" type="PanelContainer" parent="HUD/Root/StatsPanel/Margin/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="VBox" type="VBoxContainer" parent="HUD/Root/StatsPanel/Margin/HBox/ProgressCard"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 0
+
+[node name="Title" type="Label" parent="HUD/Root/StatsPanel/Margin/HBox/ProgressCard/VBox"]
+layout_mode = 2
+text = "PROGRESSO"
+horizontal_alignment = 1
+
+[node name="ProgressLabel" type="Label" parent="HUD/Root/StatsPanel/Margin/HBox/ProgressCard/VBox" unique_id=1205231366]
+layout_mode = 2
+text = "1 / 28"
+horizontal_alignment = 1
+
+[node name="AccuracyCard" type="PanelContainer" parent="HUD/Root/StatsPanel/Margin/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="VBox" type="VBoxContainer" parent="HUD/Root/StatsPanel/Margin/HBox/AccuracyCard"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 0
+
+[node name="Title" type="Label" parent="HUD/Root/StatsPanel/Margin/HBox/AccuracyCard/VBox"]
+layout_mode = 2
+text = "ACERTOS"
+horizontal_alignment = 1
+
+[node name="AccuracyLabel" type="Label" parent="HUD/Root/StatsPanel/Margin/HBox/AccuracyCard/VBox" unique_id=467314804]
+layout_mode = 2
+text = "0%"
+horizontal_alignment = 1
+
+[node name="FeedbackToast" type="PanelContainer" parent="HUD/Root"]
+custom_minimum_size = Vector2(560, 52)
+layout_mode = 0
+offset_left = 680.0
+offset_top = 142.0
+offset_right = 1240.0
+offset_bottom = 194.0
+mouse_filter = 2
+
+[node name="Margin" type="MarginContainer" parent="HUD/Root/FeedbackToast"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 8
+
+[node name="HBox" type="HBoxContainer" parent="HUD/Root/FeedbackToast/Margin"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 10
+
+[node name="StatusDot" type="Label" parent="HUD/Root/FeedbackToast/Margin/HBox"]
+custom_minimum_size = Vector2(30, 30)
+layout_mode = 2
+text = "✓"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="FeedbackLabel" type="Label" parent="HUD/Root/FeedbackToast/Margin/HBox" unique_id=938120440]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Role o dado para abrir uma pergunta."
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="ActionDock" type="PanelContainer" parent="HUD/Root"]
+custom_minimum_size = Vector2(420, 108)
+layout_mode = 0
+offset_left = 750.0
+offset_top = 946.0
+offset_right = 1170.0
+offset_bottom = 1054.0
+
+[node name="Margin" type="MarginContainer" parent="HUD/Root/ActionDock"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 10
+
+[node name="HBox" type="HBoxContainer" parent="HUD/Root/ActionDock/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="DiceFrame" type="PanelContainer" parent="HUD/Root/ActionDock/Margin/HBox"]
+custom_minimum_size = Vector2(84, 84)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+
+[node name="SpriteDado" type="TextureRect" parent="HUD/Root/ActionDock/Margin/HBox/DiceFrame" unique_id=836262882]
+custom_minimum_size = Vector2(76, 76)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("2_dbls1")
+expand_mode = 3
+stretch_mode = 5
+
+[node name="RollContent" type="VBoxContainer" parent="HUD/Root/ActionDock/Margin/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+theme_override_constants/separation = 4
+
+[node name="RollStatusLabel" type="Label" parent="HUD/Root/ActionDock/Margin/HBox/RollContent"]
+layout_mode = 2
+text = "SUA VEZ  •  ROLE O DADO"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="RollButton" type="Button" parent="HUD/Root/ActionDock/Margin/HBox/RollContent" unique_id=1474487045]
+custom_minimum_size = Vector2(288, 54)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "ROLAR O DADO"
 
 [node name="BoardCamera" type="Camera2D" parent="." unique_id=1535546678]
 position = Vector2(685, 371)

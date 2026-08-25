@@ -5,12 +5,18 @@ const UITheme := preload("res://scripts/UITheme.gd")
 @onready var painel_central: Panel = $PainelCentral
 @onready var titulo: Label = $PainelCentral/MarginContainer/VBoxContainer/Titulo
 @onready var subtitulo: Label = $PainelCentral/MarginContainer/VBoxContainer/Subtitulo
-@onready var label_nome: Label = $PainelCentral/MarginContainer/VBoxContainer/LabelNome
-@onready var input_nome: LineEdit = $PainelCentral/MarginContainer/VBoxContainer/InputNome
-@onready var label_codigo: Label = $PainelCentral/MarginContainer/VBoxContainer/LabelCodigo
-@onready var input_codigo: LineEdit = $PainelCentral/MarginContainer/VBoxContainer/InputCodigo
-@onready var botao_personagem_1: Button = $PainelCentral/MarginContainer/VBoxContainer/PersonagensContainer/BotaoPersonagem1
-@onready var botao_personagem_2: Button = $PainelCentral/MarginContainer/VBoxContainer/PersonagensContainer/BotaoPersonagem2
+@onready var label_personagem: Label = $PainelCentral/MarginContainer/VBoxContainer/LabelPersonagem
+@onready var label_nome: Label = $PainelCentral/MarginContainer/VBoxContainer/FieldsRow/NameField/LabelNome
+@onready var input_nome: LineEdit = $PainelCentral/MarginContainer/VBoxContainer/FieldsRow/NameField/InputNome
+@onready var label_codigo: Label = $PainelCentral/MarginContainer/VBoxContainer/FieldsRow/RoomField/LabelCodigo
+@onready var input_codigo: LineEdit = $PainelCentral/MarginContainer/VBoxContainer/FieldsRow/RoomField/InputCodigo
+@onready var botoes_personagem: Array[Button] = [
+	$PainelCentral/MarginContainer/VBoxContainer/PersonagensContainer/BotaoPersonagem1,
+	$PainelCentral/MarginContainer/VBoxContainer/PersonagensContainer/BotaoPersonagem2,
+	$PainelCentral/MarginContainer/VBoxContainer/PersonagensContainer/BotaoPersonagem3,
+	$PainelCentral/MarginContainer/VBoxContainer/PersonagensContainer/BotaoPersonagem4,
+	$PainelCentral/MarginContainer/VBoxContainer/PersonagensContainer/BotaoPersonagem5,
+]
 @onready var botao_jogar: Button = $PainelCentral/MarginContainer/VBoxContainer/BotoesAcao/BotaoJogar
 @onready var botao_voltar: Button = $PainelCentral/MarginContainer/VBoxContainer/BotoesAcao/BotaoVoltar
 @onready var botao_configuracao: TextureButton = $BotaoConfiguracao
@@ -20,6 +26,8 @@ var codigo_sala: String = ""
 var personagem_selecionado: int = 1
 var estilo_personagem_normal: StyleBox
 var estilo_personagem_selecionado: StyleBox
+
+const NOMES_PERSONAGENS: Array[String] = ["Cachorro", "Leão", "Tartaruga", "Águia", "Gato"]
 
 func _ready() -> void:
 	SettingsManager.pause_tree_when_open = false
@@ -45,6 +53,7 @@ func _apply_visual_refresh() -> void:
 	UITheme.apply_font_tree(painel_central)
 	UITheme.apply_title(titulo, 38)
 	UITheme.apply_subtitle(subtitulo, 16)
+	UITheme.apply_font_only(label_personagem, 18)
 	UITheme.apply_field_label(label_nome)
 	UITheme.apply_field_label(label_codigo)
 	UITheme.apply_line_edit(input_nome, 18)
@@ -52,31 +61,36 @@ func _apply_visual_refresh() -> void:
 	UITheme.apply_button(botao_jogar, UITheme.BUTTON_PRIMARY, 20)
 	UITheme.apply_button(botao_voltar, UITheme.BUTTON_SECONDARY, 19)
 	subtitulo.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	for botao in botoes_personagem:
+		var nome_personagem := botao.get_node("Content/Nome") as Label
+		UITheme.apply_font_only(nome_personagem, 15)
+		nome_personagem.add_theme_color_override("font_color", UITheme.TEXT_PRIMARY)
 
 func _update_responsive_layout() -> void:
 	var viewport_size := get_viewport_rect().size
 	var font_scale := SettingsManager.font_scale
-	var panel_width := clampf(viewport_size.x * 0.86, 540.0, 620.0 + 100.0 * (font_scale - 1.0))
-	var panel_height := minf(viewport_size.y - 32.0, 720.0 + 100.0 * (font_scale - 1.0))
+	var panel_width := minf(viewport_size.x - 32.0, 1120.0 + 100.0 * (font_scale - 1.0))
+	var panel_height := minf(viewport_size.y - 24.0, 540.0 + 100.0 * (font_scale - 1.0))
 	painel_central.offset_left = -panel_width * 0.5
 	painel_central.offset_right = panel_width * 0.5
 	painel_central.offset_top = -panel_height * 0.5
 	painel_central.offset_bottom = panel_height * 0.5
 	painel_central.custom_minimum_size = Vector2(panel_width, panel_height)
-	var character_height := 125.0 if viewport_size.y <= 720.0 else 145.0
-	botao_personagem_1.custom_minimum_size.y = character_height
-	botao_personagem_2.custom_minimum_size.y = character_height
+	var character_height := 165.0 if viewport_size.y <= 720.0 else 190.0
+	var character_width := maxf(100.0, floorf((panel_width - 108.0) / float(botoes_personagem.size())))
+	for botao in botoes_personagem:
+		botao.custom_minimum_size = Vector2(character_width, character_height)
 
 func _on_font_scale_changed(_value: float) -> void:
 	_apply_visual_refresh()
 	call_deferred("_update_responsive_layout")
 
 func _preparar_botoes_personagem() -> void:
-	estilo_personagem_selecionado = botao_personagem_1.get_theme_stylebox("normal").duplicate()
-	estilo_personagem_normal = botao_personagem_2.get_theme_stylebox("normal").duplicate()
+	estilo_personagem_selecionado = botoes_personagem[0].get_theme_stylebox("normal").duplicate()
+	estilo_personagem_normal = botoes_personagem[1].get_theme_stylebox("normal").duplicate()
 
-	botao_personagem_1.pressed.connect(_selecionar_personagem.bind(1))
-	botao_personagem_2.pressed.connect(_selecionar_personagem.bind(2))
+	for indice in botoes_personagem.size():
+		botoes_personagem[indice].pressed.connect(_selecionar_personagem.bind(indice + 1))
 	_atualizar_selecao_personagem()
 
 func _selecionar_personagem(indice: int) -> void:
@@ -84,8 +98,9 @@ func _selecionar_personagem(indice: int) -> void:
 	_atualizar_selecao_personagem()
 
 func _atualizar_selecao_personagem() -> void:
-	_aplicar_estilo_personagem(botao_personagem_1, personagem_selecionado == 1)
-	_aplicar_estilo_personagem(botao_personagem_2, personagem_selecionado == 2)
+	label_personagem.text = "Seu companheiro: %s" % NOMES_PERSONAGENS[personagem_selecionado - 1]
+	for indice in botoes_personagem.size():
+		_aplicar_estilo_personagem(botoes_personagem[indice], personagem_selecionado == indice + 1)
 
 func _aplicar_estilo_personagem(botao: Button, selecionado: bool) -> void:
 	var estilo_base: StyleBox = estilo_personagem_selecionado if selecionado else estilo_personagem_normal

@@ -116,6 +116,8 @@ func _on_font_scale_changed(_value: float) -> void:
 	call_deferred("_update_responsive_layout")
 
 func _apply_session_data() -> void:
+	if character != null:
+		character.texture = load(GameState.get_selected_character_texture_path()) as Texture2D
 	_final_score = GameState.score
 	_final_accuracy = GameState.get_accuracy_percent()
 	result_value.text = "0"

@@ -2,8 +2,12 @@ extends Node2D
 
 const UITheme := preload("res://scripts/UITheme.gd")
 const TOTAL_CASAS := 28
-const HUD_BG := Color(0.08, 0.10, 0.18, 0.90)
-const HUD_ACCENT := Color(0.96, 0.66, 0.16, 1.0)
+const HUD_BG := Color(0.045, 0.071, 0.125, 0.96)
+const HUD_SURFACE_ALT := Color(0.105, 0.15, 0.245, 0.94)
+const HUD_BORDER := Color(0.36, 0.47, 0.67, 0.58)
+const HUD_TEXT_MUTED := Color(0.72, 0.79, 0.90, 1.0)
+const HUD_ACCENT := Color(0.98, 0.73, 0.20, 1.0)
+const DICE_ROLLING_COLOR := Color(0.42, 0.75, 1.0, 1.0)
 const FEEDBACK_OK := Color(0.29, 0.85, 0.45, 0.95)
 const FEEDBACK_FAIL := Color(0.93, 0.33, 0.33, 0.95)
 const HUD_LAYER := 20
@@ -21,6 +25,8 @@ const ANSWER_EXTRA_TALL_HEIGHT := 104.0
 const ANSWER_ULTRA_TALL_HEIGHT := 128.0
 const ANSWER_SLOT_LABELS: Array[String] = ["A", "B", "C", "D"]
 const DEFAULT_QUESTION_TIME_LIMIT := 30
+const DICE_ANIMATION_STEPS := 11
+const DICE_RESULT_HOLD_SECONDS := 1.15
 const QUESTION_TIMER_WARNING_SECONDS := 10
 const QUESTION_TIMER_DANGER_SECONDS := 5
 const BOARD_HORIZONTAL_PADDING_RATIO := 0.015
@@ -43,8 +49,11 @@ const CHALLENGE_HOUSES: Array[int] = [5, 10, 15, 20, 25]
 const CHALLENGE_COLOR := Color(0.92, 0.22, 0.18, 1.0)
 const ROOM_PLAYERS_REFRESH_SECONDS := 3.0
 const REMOTE_PLAYER_TEXTURE_PATHS: Array[String] = [
-	"res://imagens/Player/personagem.png",
-	"res://imagens/personagem/personagem_feminina2.png",
+	"res://imagens/personagens_animais/cachorro.png",
+	"res://imagens/personagens_animais/leao.png",
+	"res://imagens/personagens_animais/tartaruga.png",
+	"res://imagens/personagens_animais/aguia.png",
+	"res://imagens/personagens_animais/gato.png",
 ]
 const BOARD_PATH_SCREEN_POINTS: Array[Vector2] = [
 	Vector2(0.22, 0.83),
@@ -79,6 +88,7 @@ const BOARD_PATH_SCREEN_POINTS: Array[Vector2] = [
 
 enum TurnState {
 	WAITING_ROLL,
+	ROLLING_DICE,
 	SHOWING_QUESTION,
 	MOVING_PLAYER,
 	MOVING_TO_CHALLENGE,
@@ -88,7 +98,7 @@ enum TurnState {
 @onready var casas_root: Node = get_node_or_null("Casas")
 @onready var player = get_node_or_null("Player")
 @onready var canvas_layer: CanvasLayer = get_node_or_null("CanvasLayer") as CanvasLayer
-@onready var sprite_dado: Sprite2D = get_node_or_null("CanvasLayer/SpriteDado") as Sprite2D
+@onready var sprite_dado: TextureRect = get_node_or_null("HUD/Root/ActionDock/Margin/HBox/DiceFrame/SpriteDado") as TextureRect
 @onready var dialog_panel: Control = get_node_or_null("CanvasLayer/JanelaPergunta") as Control
 @onready var dialog_backdrop: ColorRect = get_node_or_null("CanvasLayer/DialogBackdrop") as ColorRect
 @onready var dialog_title_label: Label = get_node_or_null("CanvasLayer/JanelaPergunta/Margin/VBox/HeaderRow/DialogTitle") as Label
@@ -107,15 +117,23 @@ enum TurnState {
 @onready var hud_canvas: CanvasLayer = get_node_or_null("HUD") as CanvasLayer
 @onready var hud_root: Control = get_node_or_null("HUD/Root") as Control
 @onready var top_panel: PanelContainer = get_node_or_null("HUD/Root/TopPanel") as PanelContainer
-@onready var roll_button: Button = get_node_or_null("HUD/Root/RollButton") as Button
-@onready var feedback_label: Label = get_node_or_null("HUD/Root/FeedbackLabel") as Label
-@onready var score_label: Label = get_node_or_null("HUD/Root/TopPanel/Margin/HBox/Right/ScoreLabel") as Label
-@onready var level_label: Label = get_node_or_null("HUD/Root/TopPanel/Margin/HBox/Right/LevelLabel") as Label
-@onready var progress_label: Label = get_node_or_null("HUD/Root/TopPanel/Margin/HBox/Right/ProgressLabel") as Label
-@onready var player_label: Label = get_node_or_null("HUD/Root/TopPanel/Margin/HBox/Left/PlayerLabel") as Label
-@onready var room_label: Label = get_node_or_null("HUD/Root/TopPanel/Margin/HBox/Left/RoomLabel") as Label
-@onready var accuracy_label: Label = get_node_or_null("HUD/Root/TopPanel/Margin/HBox/Right/AccuracyLabel") as Label
-@onready var subtitle_label: Label = get_node_or_null("HUD/Root/TopPanel/Margin/HBox/Left/SubtitleLabel") as Label
+@onready var stats_panel: PanelContainer = get_node_or_null("HUD/Root/StatsPanel") as PanelContainer
+@onready var feedback_toast: PanelContainer = get_node_or_null("HUD/Root/FeedbackToast") as PanelContainer
+@onready var feedback_status: Label = get_node_or_null("HUD/Root/FeedbackToast/Margin/HBox/StatusDot") as Label
+@onready var action_dock: PanelContainer = get_node_or_null("HUD/Root/ActionDock") as PanelContainer
+@onready var dice_frame: PanelContainer = get_node_or_null("HUD/Root/ActionDock/Margin/HBox/DiceFrame") as PanelContainer
+@onready var roll_status_label: Label = get_node_or_null("HUD/Root/ActionDock/Margin/HBox/RollContent/RollStatusLabel") as Label
+@onready var roll_button: Button = get_node_or_null("HUD/Root/ActionDock/Margin/HBox/RollContent/RollButton") as Button
+@onready var feedback_label: Label = get_node_or_null("HUD/Root/FeedbackToast/Margin/HBox/FeedbackLabel") as Label
+@onready var score_label: Label = get_node_or_null("HUD/Root/StatsPanel/Margin/HBox/ScoreCard/VBox/ScoreLabel") as Label
+@onready var level_label: Label = get_node_or_null("HUD/Root/StatsPanel/Margin/HBox/LevelCard/VBox/LevelLabel") as Label
+@onready var progress_label: Label = get_node_or_null("HUD/Root/StatsPanel/Margin/HBox/ProgressCard/VBox/ProgressLabel") as Label
+@onready var player_label: Label = get_node_or_null("HUD/Root/TopPanel/Margin/HBox/Identity/PlayerLabel") as Label
+@onready var room_label: Label = get_node_or_null("HUD/Root/TopPanel/Margin/HBox/Identity/RoomLabel") as Label
+@onready var accuracy_label: Label = get_node_or_null("HUD/Root/StatsPanel/Margin/HBox/AccuracyCard/VBox/AccuracyLabel") as Label
+@onready var player_badge: PanelContainer = get_node_or_null("HUD/Root/TopPanel/Margin/HBox/PlayerBadge") as PanelContainer
+@onready var player_badge_label: Label = get_node_or_null("HUD/Root/TopPanel/Margin/HBox/PlayerBadge/PlayerBadgeLabel") as Label
+@onready var identity_label: Label = get_node_or_null("HUD/Root/TopPanel/Margin/HBox/Identity/IdentityLabel") as Label
 @onready var screen_background: TextureRect = get_node_or_null("BackgroundLayer/Background") as TextureRect
 @onready var board_camera: Camera2D = get_node_or_null("BoardCamera") as Camera2D
 @onready var settings_button: TextureButton = get_node_or_null("CanvasLayer/BotaoConfiguracao") as TextureButton
@@ -195,47 +213,69 @@ func _bind_scene_ui() -> void:
 
 	if top_panel != null:
 		top_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		var panel_style: StyleBoxFlat = StyleBoxFlat.new()
-		panel_style.bg_color = HUD_BG
-		panel_style.corner_radius_top_left = 20
-		panel_style.corner_radius_top_right = 20
-		panel_style.corner_radius_bottom_left = 20
-		panel_style.corner_radius_bottom_right = 20
-		panel_style.border_width_left = 2
-		panel_style.border_width_top = 2
-		panel_style.border_width_right = 2
-		panel_style.border_width_bottom = 2
-		panel_style.border_color = HUD_ACCENT
-		panel_style.shadow_color = Color(0, 0, 0, 0.25)
-		panel_style.shadow_size = 8
-		top_panel.add_theme_stylebox_override("panel", panel_style)
+		top_panel.add_theme_stylebox_override("panel", _make_hud_surface(HUD_BG, HUD_BORDER, 1, 22, 12))
 
-	for label in [player_label, room_label, subtitle_label]:
-		if label != null:
-			label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-			UITheme.apply_font_only(label, 22 if label == player_label else (16 if label == room_label else 15))
-			label.add_theme_color_override("font_color", Color.WHITE)
-			label.clip_text = false
-	if subtitle_label != null:
-		subtitle_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	if player_badge != null:
+		player_badge.add_theme_stylebox_override("panel", _make_hud_surface(HUD_ACCENT, Color(1.0, 0.86, 0.50, 0.8), 1, 18, 0))
+	if player_badge_label != null:
+		UITheme.apply_font_only(player_badge_label, 24)
+		player_badge_label.add_theme_color_override("font_color", Color(0.15, 0.12, 0.08, 1.0))
+	if identity_label != null:
+		UITheme.apply_font_only(identity_label, 11)
+		identity_label.add_theme_color_override("font_color", HUD_ACCENT)
+	if player_label != null:
+		player_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		UITheme.apply_font_only(player_label, 22)
+		player_label.add_theme_color_override("font_color", Color.WHITE)
+		player_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	if room_label != null:
+		room_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		UITheme.apply_font_only(room_label, 13)
+		room_label.add_theme_color_override("font_color", HUD_TEXT_MUTED)
 
-	for label in [score_label, level_label, progress_label, accuracy_label]:
-		if label != null:
-			label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-			UITheme.apply_font_only(label, 15)
-			label.add_theme_color_override("font_color", Color.WHITE)
+	if stats_panel != null:
+		stats_panel.add_theme_stylebox_override("panel", _make_hud_surface(HUD_BG, HUD_BORDER, 1, 22, 12))
+	var stat_cards: Array[PanelContainer] = []
+	var stat_colors: Array[Color] = [HUD_ACCENT, Color(0.42, 0.75, 1.0, 1.0), Color(0.67, 0.55, 1.0, 1.0), FEEDBACK_OK]
+	if stats_panel != null:
+		for card_name in ["ScoreCard", "LevelCard", "ProgressCard", "AccuracyCard"]:
+			var stat_card := stats_panel.get_node_or_null("Margin/HBox/%s" % card_name) as PanelContainer
+			if stat_card != null:
+				stat_cards.append(stat_card)
+	for index in range(stat_cards.size()):
+		var stat_card := stat_cards[index]
+		stat_card.add_theme_stylebox_override("panel", _make_hud_surface(HUD_SURFACE_ALT, Color(stat_colors[index], 0.22), 1, 14, 0))
+		var title := stat_card.get_node_or_null("VBox/Title") as Label
+		if title != null:
+			UITheme.apply_font_only(title, 11)
+			title.add_theme_color_override("font_color", HUD_TEXT_MUTED)
+	for index in range(mini(stat_cards.size(), 4)):
+		var value_label := [score_label, level_label, progress_label, accuracy_label][index] as Label
+		if value_label != null:
+			value_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			UITheme.apply_font_only(value_label, 21)
+			value_label.add_theme_color_override("font_color", stat_colors[index])
 
 	if feedback_label != null:
 		feedback_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		UITheme.apply_font_only(feedback_label, 20)
+		UITheme.apply_font_only(feedback_label, 17)
 		feedback_label.add_theme_color_override("font_color", Color.WHITE)
-		feedback_label.add_theme_color_override("font_outline_color", Color(0.02, 0.03, 0.07, 0.95))
-		feedback_label.add_theme_constant_override("outline_size", 4)
-		feedback_label.add_theme_stylebox_override("normal", _make_emphasis_style(HUD_BG, HUD_ACCENT, 2, 14))
+	if feedback_status != null:
+		UITheme.apply_font_only(feedback_status, 18)
+	_style_feedback_toast(FEEDBACK_OK)
+
+	if action_dock != null:
+		action_dock.add_theme_stylebox_override("panel", _make_hud_surface(HUD_BG, HUD_BORDER, 1, 24, 14))
+	if dice_frame != null:
+		dice_frame.add_theme_stylebox_override("panel", _make_hud_surface(Color(1.0, 0.97, 0.88, 1.0), Color(HUD_ACCENT, 0.75), 2, 18, 0))
+	if roll_status_label != null:
+		UITheme.apply_font_only(roll_status_label, 14)
+		roll_status_label.add_theme_color_override("font_color", HUD_ACCENT)
 
 	if roll_button != null:
 		roll_button.focus_mode = Control.FOCUS_NONE
-		UITheme.apply_button(roll_button, UITheme.BUTTON_PRIMARY, 20)
+		UITheme.apply_button(roll_button, UITheme.BUTTON_PRIMARY, 19)
+		roll_button.add_theme_color_override("font_disabled_color", UITheme.TEXT_PRIMARY)
 		if not roll_button.pressed.is_connected(Callable(self, "roll_dice")):
 			roll_button.pressed.connect(Callable(self, "roll_dice"))
 
@@ -311,6 +351,31 @@ func _make_emphasis_style(background: Color, border: Color, border_width: int, r
 	style.content_margin_top = 6.0
 	style.content_margin_bottom = 6.0
 	return style
+
+func _make_hud_surface(
+	background: Color,
+	border: Color,
+	border_width: int,
+	radius: int,
+	shadow_size: int
+) -> StyleBoxFlat:
+	var style := _make_emphasis_style(background, border, border_width, radius)
+	style.content_margin_left = 0.0
+	style.content_margin_right = 0.0
+	style.content_margin_top = 0.0
+	style.content_margin_bottom = 0.0
+	style.shadow_color = Color(0.01, 0.02, 0.05, 0.30 if shadow_size > 0 else 0.0)
+	style.shadow_size = shadow_size
+	style.shadow_offset = Vector2(0, 5)
+	return style
+
+func _style_feedback_toast(accent_color: Color) -> void:
+	if feedback_toast != null:
+		var toast_background := HUD_BG.lerp(accent_color, 0.08)
+		feedback_toast.add_theme_stylebox_override("panel", _make_hud_surface(toast_background, Color(accent_color, 0.72), 1, 18, 10))
+	if feedback_status != null:
+		feedback_status.add_theme_color_override("font_color", accent_color)
+		feedback_status.add_theme_stylebox_override("normal", _make_emphasis_style(Color(accent_color, 0.13), Color(accent_color, 0.0), 0, 12))
 
 func _setup_question_timer() -> void:
 	if question_timer != null and is_instance_valid(question_timer):
@@ -640,8 +705,8 @@ func _create_remote_player(jogador_id: int) -> Node2D:
 	var texture := load(texture_path) as Texture2D
 	if texture != null:
 		sprite.texture = texture
-		var scale_ratio := 1536.0 / maxf(float(texture.get_width()), 1.0)
-		sprite.scale = Vector2(0.072, 0.085) * scale_ratio
+		var token_scale := 86.0 / maxf(float(texture.get_height()), 1.0)
+		sprite.scale = Vector2.ONE * token_scale
 	sprite.modulate = Color(1.0, 1.0, 1.0, 0.82)
 	avatar.add_child(sprite)
 
@@ -682,36 +747,52 @@ func _layout_hud() -> void:
 		return
 
 	var viewport_size: Vector2 = _get_layout_size()
-	var top_panel: PanelContainer = hud_root.get_node_or_null("TopPanel") as PanelContainer
 	var font_scale: float = SettingsManager.font_scale
-	var top_panel_height := 102.0 + roundf(42.0 * (font_scale - 1.0))
+	var panel_height := 104.0 + roundf(28.0 * (font_scale - 1.0))
+	var compact_layout := viewport_size.x < 1100.0
+	var outer_margin := 16.0 if compact_layout else 24.0
+	var feedback_y := outer_margin + panel_height + 14.0
 
-	if top_panel:
-		top_panel.position = Vector2(16, 16)
-		top_panel.size = Vector2(
-			clampf(viewport_size.x * 0.44, 420.0, 760.0),
-			top_panel_height
-		)
+	if compact_layout:
+		if top_panel != null:
+			top_panel.position = Vector2(outer_margin, outer_margin)
+			top_panel.size = Vector2(minf(360.0, viewport_size.x - outer_margin * 2.0), panel_height)
+		if stats_panel != null:
+			stats_panel.position = Vector2(outer_margin, outer_margin + panel_height + 10.0)
+			stats_panel.size = Vector2(viewport_size.x - outer_margin * 2.0, panel_height)
+		feedback_y = outer_margin + panel_height * 2.0 + 24.0
+	else:
+		var identity_width := clampf(viewport_size.x * 0.22, 360.0, 420.0)
+		var stats_width := clampf(viewport_size.x * 0.34, 560.0, 680.0)
+		var stats_x := (viewport_size.x - stats_width) * 0.5
+		var identity_x := outer_margin + 24.0
+		stats_x = maxf(stats_x, identity_x + identity_width + 18.0)
+		if top_panel != null:
+			top_panel.position = Vector2(identity_x, outer_margin)
+			top_panel.size = Vector2(identity_width, panel_height)
+		if stats_panel != null:
+			stats_panel.position = Vector2(stats_x, outer_margin)
+			stats_panel.size = Vector2(stats_width, panel_height)
 
+	if feedback_toast != null:
+		var toast_width := minf(660.0, viewport_size.x - outer_margin * 2.0)
+		feedback_toast.position = Vector2((viewport_size.x - toast_width) * 0.5, feedback_y)
+		feedback_toast.size = Vector2(toast_width, 52.0 * minf(font_scale, 1.2))
 	if feedback_label != null:
-		feedback_label.position = Vector2(18, 34.0 + top_panel_height)
-		feedback_label.size = Vector2(maxf(420.0, minf(720.0, viewport_size.x - 36.0)), 64.0 * font_scale)
 		feedback_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 
-	if roll_button != null:
-		var bottom_margin: float = 24.0
-		var action_y: float = viewport_size.y - roll_button.size.y - bottom_margin
-		roll_button.position = Vector2(
-			(viewport_size.x - roll_button.size.x) * 0.5,
-			action_y
+	if action_dock != null:
+		var dock_width := minf(420.0, viewport_size.x - 90.0)
+		var dock_height := 108.0
+		action_dock.position = Vector2(
+			(viewport_size.x - dock_width) * 0.5,
+			viewport_size.y - dock_height - 22.0
 		)
-
-	if sprite_dado != null:
-		sprite_dado.position = Vector2(viewport_size.x - 86.0, 82.0)
+		action_dock.size = Vector2(dock_width, dock_height)
 
 	if settings_button != null:
 		var settings_size: float = 84.0 if viewport_size.y <= 720.0 else 96.0
-		var settings_margin: float = 18.0
+		var settings_margin := 72.0
 		settings_button.anchor_left = 0.0
 		settings_button.anchor_top = 0.0
 		settings_button.anchor_right = 0.0
@@ -813,8 +894,8 @@ func _hide_dialog() -> void:
 
 	_set_question_buttons_enabled(false)
 	answering_locked = false
-	if feedback_label != null:
-		feedback_label.show()
+	if feedback_toast != null:
+		feedback_toast.show()
 
 func _show_dialog() -> void:
 	if dialog_panel == null:
@@ -822,8 +903,8 @@ func _show_dialog() -> void:
 
 	if dialog_backdrop != null:
 		dialog_backdrop.show()
-	if feedback_label != null:
-		feedback_label.hide()
+	if feedback_toast != null:
+		feedback_toast.hide()
 
 	dialog_panel.show()
 	canvas_layer.move_child(dialog_panel, canvas_layer.get_child_count() - 1)
@@ -849,9 +930,28 @@ func _set_turn_state(new_state: int) -> void:
 
 	if roll_button != null:
 		roll_button.disabled = not accepting_roll
+		if new_state == TurnState.WAITING_ROLL:
+			roll_button.text = "ROLAR O DADO"
+		elif new_state == TurnState.ROLLING_DICE:
+			roll_button.text = "ROLANDO..."
+
+	if new_state == TurnState.WAITING_ROLL:
+		_set_roll_status("SUA VEZ  •  ROLE O DADO", HUD_ACCENT)
+		if action_dock != null:
+			action_dock.add_theme_stylebox_override("panel", _make_hud_surface(HUD_BG, HUD_BORDER, 1, 24, 14))
+	elif new_state == TurnState.ROLLING_DICE:
+		_set_roll_status("O DADO ESTÁ ROLANDO...", DICE_ROLLING_COLOR)
+		if action_dock != null:
+			action_dock.add_theme_stylebox_override("panel", _make_hud_surface(HUD_BG, Color(DICE_ROLLING_COLOR, 0.9), 2, 24, 16))
 
 	if settings_button != null:
 		settings_button.disabled = new_state != TurnState.WAITING_ROLL
+
+func _set_roll_status(text_value: String, color_value: Color) -> void:
+	if roll_status_label == null:
+		return
+	roll_status_label.text = text_value
+	roll_status_label.add_theme_color_override("font_color", color_value)
 
 func roll_dice() -> void:
 	if turn_state != TurnState.WAITING_ROLL:
@@ -861,22 +961,29 @@ func roll_dice() -> void:
 	if (dialog_panel != null and dialog_panel.visible) or get_tree().paused:
 		return
 
+	_set_turn_state(TurnState.ROLLING_DICE)
+	_show_feedback("O dado está rolando... acompanhe os números!", DICE_ROLLING_COLOR)
 	AudioManager.play_dice_sfx()
 	rng_roll.randomize()
-	var rng_roll: float = rng_roll.randf() #gera um numero aleatorio entre 0 e 1
-	if rng_roll <= 0.1: current_roll = 6 #10%
-	elif rng_roll <= 0.2: current_roll= 5	#20%
-	elif rng_roll <= 0.3: current_roll= 4	#30%
-	elif rng_roll <= 0.4: current_roll= 3	#40%
-	elif rng_roll <= 0.5: current_roll= 2	#50%
+	var roll_chance: float = rng_roll.randf()
+	if roll_chance <= 0.1: current_roll = 6 #10%
+	elif roll_chance <= 0.2: current_roll = 5 #10%
+	elif roll_chance <= 0.3: current_roll = 4 #10%
+	elif roll_chance <= 0.4: current_roll = 3 #10%
+	elif roll_chance <= 0.5: current_roll = 2 #10%
 	else: current_roll= 1	 # >50%
 	
 	pending_start_house = player.current_house
 	pending_target_house = mini(pending_start_house + current_roll, TOTAL_CASAS)
 	pending_is_challenge = _is_challenge_house(pending_target_house)
 
-	if sprite_dado != null:
-		sprite_dado.texture = dice_textures[current_roll - 1]
+	await _animate_dice_roll(current_roll)
+	if not is_inside_tree():
+		return
+	_show_dice_result(current_roll)
+	await get_tree().create_timer(DICE_RESULT_HOLD_SECONDS).timeout
+	if not is_inside_tree():
+		return
 
 	if pending_is_challenge:
 		_set_turn_state(TurnState.MOVING_TO_CHALLENGE)
@@ -887,6 +994,60 @@ func roll_dice() -> void:
 
 	_set_turn_state(TurnState.SHOWING_QUESTION)
 	_present_question(pending_target_house)
+
+func _animate_dice_roll(result: int) -> void:
+	if sprite_dado == null or dice_textures.is_empty():
+		await get_tree().create_timer(0.65).timeout
+		return
+
+	sprite_dado.pivot_offset = sprite_dado.size * 0.5
+	sprite_dado.rotation = 0.0
+	sprite_dado.scale = Vector2.ONE
+	var animation_steps := DICE_ANIMATION_STEPS if SettingsManager.vfx_enabled else 6
+	var previous_face := -1
+
+	for step in range(animation_steps):
+		var face_index := rng_roll.randi_range(0, dice_textures.size() - 1)
+		if face_index == previous_face:
+			face_index = (face_index + 1) % dice_textures.size()
+		previous_face = face_index
+		sprite_dado.texture = dice_textures[face_index]
+
+		var step_duration := 0.045 + float(step) * 0.004
+		if SettingsManager.vfx_enabled:
+			var target_angle := deg_to_rad(16.0 if step % 2 == 0 else -16.0)
+			var step_tween := create_tween().set_parallel(true)
+			step_tween.tween_property(sprite_dado, "rotation", target_angle, step_duration).set_trans(Tween.TRANS_SINE)
+			step_tween.tween_property(sprite_dado, "scale", Vector2(1.13, 1.13), step_duration).set_trans(Tween.TRANS_SINE)
+			await step_tween.finished
+		else:
+			await get_tree().create_timer(step_duration).timeout
+
+	sprite_dado.texture = dice_textures[clampi(result - 1, 0, dice_textures.size() - 1)]
+	if SettingsManager.vfx_enabled:
+		var reveal_tween := create_tween().set_parallel(true)
+		reveal_tween.tween_property(sprite_dado, "rotation", 0.0, 0.16).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		reveal_tween.tween_property(sprite_dado, "scale", Vector2(1.34, 1.34), 0.16).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		await reveal_tween.finished
+		var settle_tween := create_tween()
+		settle_tween.tween_property(sprite_dado, "scale", Vector2.ONE, 0.20).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		await settle_tween.finished
+	else:
+		sprite_dado.rotation = 0.0
+		sprite_dado.scale = Vector2.ONE
+
+func _show_dice_result(result: int) -> void:
+	_set_roll_status("RESULTADO DO DADO", HUD_ACCENT)
+	if roll_button != null:
+		roll_button.text = "VOCÊ TIROU %d!" % result
+	if action_dock != null:
+		action_dock.add_theme_stylebox_override("panel", _make_hud_surface(HUD_BG, HUD_ACCENT, 2, 24, 18))
+	_show_feedback("Você tirou %d! Acerte a pergunta para avançar." % result, HUD_ACCENT)
+	if SettingsManager.vfx_enabled and action_dock != null:
+		action_dock.pivot_offset = action_dock.size * 0.5
+		var dock_tween := create_tween()
+		dock_tween.tween_property(action_dock, "scale", Vector2(1.04, 1.04), 0.10)
+		dock_tween.tween_property(action_dock, "scale", Vector2.ONE, 0.16)
 
 func _present_question(house_index: int) -> void:
 	if dialog_panel == null:
@@ -948,9 +1109,6 @@ func _present_question(house_index: int) -> void:
 	_fit_question_content(question_label.text, buttons)
 	_show_dialog()
 	_start_question_timer(_get_question_time_limit(question))
-
-	if SettingsManager.subtitles_enabled:
-		subtitle_label.text = "Leia a pergunta e escolha a resposta correta."
 
 func _cancel_unavailable_challenge() -> void:
 	_set_turn_state(TurnState.RETURNING_FROM_CHALLENGE)
@@ -1087,12 +1245,13 @@ func _resolve_answer(correct: bool, timed_out: bool) -> void:
 	_refresh_hud()
 
 func _pulse_feedback() -> void:
-	if feedback_label == null:
+	if feedback_toast == null:
 		return
 
 	var tween: Tween = create_tween()
-	tween.tween_property(feedback_label, "scale", Vector2(1.08, 1.08), 0.08)
-	tween.tween_property(feedback_label, "scale", Vector2.ONE, 0.12)
+	feedback_toast.pivot_offset = feedback_toast.size * 0.5
+	tween.tween_property(feedback_toast, "scale", Vector2(1.03, 1.03), 0.08)
+	tween.tween_property(feedback_toast, "scale", Vector2.ONE, 0.12)
 
 func _on_step_reached(house_index: int) -> void:
 	GameState.update_progress(house_index)
@@ -1120,45 +1279,58 @@ func _finalize_turn() -> void:
 
 func _show_feedback(text_value: String, color_value: Color) -> void:
 	if feedback_label != null:
-		feedback_label.text = text_value
-		feedback_label.add_theme_color_override("font_color", color_value)
-
-	if subtitle_label != null:
-		if SettingsManager.subtitles_enabled:
-			subtitle_label.text = _build_feedback_subtitle()
+		var display_text := text_value
+		if not GameState.sync_warning.is_empty():
+			display_text = "%s  •  %s" % [display_text, GameState.sync_warning]
+		feedback_label.text = display_text
+		feedback_label.add_theme_color_override("font_color", Color.WHITE)
+	_style_feedback_toast(color_value)
+	if feedback_status != null:
+		if color_value.is_equal_approx(FEEDBACK_FAIL):
+			feedback_status.text = "!"
+		elif color_value.is_equal_approx(DICE_ROLLING_COLOR):
+			feedback_status.text = "..."
 		else:
-			subtitle_label.text = ""
-
-func _build_feedback_subtitle() -> String:
-	var subtitle: String = GameState.last_feedback
-	if not GameState.sync_warning.is_empty():
-		subtitle = "%s | %s" % [subtitle, GameState.sync_warning]
-	return subtitle
+			feedback_status.text = "✓"
 
 func _refresh_hud() -> void:
 	if player_label != null:
-		player_label.text = "Jogador: %s" % (GameState.player_name if not GameState.player_name.is_empty() else "Aluno")
+		player_label.text = GameState.player_name if not GameState.player_name.is_empty() else "Aluno"
+	if player_badge_label != null:
+		player_badge_label.text = _get_player_initials(GameState.player_name)
 
 	if room_label != null:
-		room_label.text = "Sala: %s" % (GameState.room_code if not GameState.room_code.is_empty() else "Sem codigo")
+		room_label.text = "SALA  •  %s" % (GameState.room_code.to_upper() if not GameState.room_code.is_empty() else "SEM CÓDIGO")
 
 	if score_label != null:
-		score_label.text = "Score: %d" % GameState.score
+		score_label.text = _format_hud_number(GameState.score)
 
 	if level_label != null:
-		level_label.text = "Nivel: %d" % GameState.level
+		level_label.text = "%02d" % GameState.level
 
 	if progress_label != null:
-		progress_label.text = "Casa: %d/%d" % [GameState.current_house, TOTAL_CASAS]
+		progress_label.text = "%02d / %02d" % [GameState.current_house, TOTAL_CASAS]
 
 	if accuracy_label != null:
-		accuracy_label.text = "Acertos: %d%%" % GameState.get_accuracy_percent()
+		accuracy_label.text = "%d%%" % GameState.get_accuracy_percent()
 
-	if subtitle_label != null:
-		if SettingsManager.subtitles_enabled:
-			subtitle_label.text = _build_feedback_subtitle()
-		else:
-			subtitle_label.text = ""
+func _get_player_initials(player_name_value: String) -> String:
+	var clean_name := player_name_value.strip_edges()
+	if clean_name.is_empty():
+		return "A"
+	var words := clean_name.split(" ", false)
+	if words.size() == 1:
+		return words[0].substr(0, 1).to_upper()
+	return (words[0].substr(0, 1) + words[words.size() - 1].substr(0, 1)).to_upper()
+
+func _format_hud_number(value: int) -> String:
+	var digits := str(absi(value))
+	var formatted := ""
+	while digits.length() > 3:
+		formatted = ".%s%s" % [digits.right(3), formatted]
+		digits = digits.left(digits.length() - 3)
+	formatted = digits + formatted
+	return "-%s" % formatted if value < 0 else formatted
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_WM_CLOSE_REQUEST:

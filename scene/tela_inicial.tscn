@@ -3,9 +3,12 @@
 [ext_resource type="Script" uid="uid://y7et67s3t0hk" path="res://scripts/tela_inicial.gd" id="1"]
 [ext_resource type="Texture2D" uid="uid://3ljo201dpbbx" path="res://imagens/fundo_tabuleiro/fundo_embacado.png" id="2"]
 [ext_resource type="FontFile" uid="uid://cnk767mck3js2" path="res://fonts/Fredoka-Bold.ttf" id="3_hyw51"]
-[ext_resource type="Texture2D" uid="uid://ctyknso0bfdn6" path="res://imagens/personagem/personagem_logo.png" id="4"]
-[ext_resource type="Texture2D" uid="uid://cbpn68ac6bol8" path="res://imagens/configuracoes/configuracoes.png" id="5"]
-[ext_resource type="Texture2D" uid="uid://biav5vuc0aqh0" path="res://imagens/personagem/personagem_feminina2.png" id="6_8paku"]
+[ext_resource type="Texture2D" path="res://imagens/personagens_animais/cachorro.png" id="4"]
+[ext_resource type="Texture2D" path="res://imagens/icons/professor_sidebar/configuracoes_ui.png" id="5"]
+[ext_resource type="Texture2D" path="res://imagens/personagens_animais/leao.png" id="6_8paku"]
+[ext_resource type="Texture2D" path="res://imagens/personagens_animais/tartaruga.png" id="7_turtle"]
+[ext_resource type="Texture2D" path="res://imagens/personagens_animais/aguia.png" id="8_eagle"]
+[ext_resource type="Texture2D" path="res://imagens/personagens_animais/gato.png" id="9_cat"]
 
 [sub_resource type="StyleBoxFlat" id="1"]
 bg_color = Color(1, 0.647059, 0, 1)
@@ -82,17 +85,17 @@ texture = ExtResource("2")
 stretch_mode = 6
 
 [node name="PainelCentral" type="Panel" parent="." unique_id=113190086]
-custom_minimum_size = Vector2(540, 660)
+custom_minimum_size = Vector2(1080, 540)
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -270.0
-offset_top = -330.0
-offset_right = 270.0
-offset_bottom = 330.0
+offset_left = -540.0
+offset_top = -270.0
+offset_right = 540.0
+offset_bottom = 270.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("1")
@@ -104,14 +107,14 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 35
-theme_override_constants/margin_top = 34
-theme_override_constants/margin_right = 35
-theme_override_constants/margin_bottom = 34
+theme_override_constants/margin_left = 30
+theme_override_constants/margin_top = 26
+theme_override_constants/margin_right = 30
+theme_override_constants/margin_bottom = 26
 
 [node name="VBoxContainer" type="VBoxContainer" parent="PainelCentral/MarginContainer" unique_id=1548866900]
 layout_mode = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 10
 
 [node name="Titulo" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer" unique_id=408363842]
 layout_mode = 2
@@ -122,7 +125,7 @@ horizontal_alignment = 1
 [node name="Subtitulo" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer" unique_id=831141664]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("3_hyw51")
-text = "Preencha os dados e escolha seu personagem para continuar."
+text = "Escolha seu companheiro animal e prepare-se para aprender!"
 horizontal_alignment = 1
 autowrap_mode = 3
 
@@ -134,82 +137,231 @@ layout_mode = 2
 layout_mode = 2
 theme_override_colors/font_color = Color(0.12, 0.16, 0.27, 1)
 theme_override_fonts/font = ExtResource("3_hyw51")
-text = "Selecione seu personagem"
+text = "Seu companheiro: Cachorro"
 horizontal_alignment = 1
 
 [node name="PersonagensContainer" type="HBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer" unique_id=676595663]
 layout_mode = 2
-theme_override_constants/separation = 16
+theme_override_constants/separation = 12
 alignment = 1
 
 [node name="BotaoPersonagem1" type="Button" parent="PainelCentral/MarginContainer/VBoxContainer/PersonagensContainer" unique_id=780668073]
-custom_minimum_size = Vector2(170, 145)
+custom_minimum_size = Vector2(180, 190)
 layout_mode = 2
 size_flags_horizontal = 3
+tooltip_text = "Escolher Cachorro"
 theme_override_styles/normal = SubResource("4")
 theme_override_styles/pressed = SubResource("4")
 theme_override_styles/hover = SubResource("4")
 theme_override_styles/focus = SubResource("4")
 
-[node name="ImagemPersonagem1" type="TextureRect" parent="PainelCentral/MarginContainer/VBoxContainer/PersonagensContainer/BotaoPersonagem1" unique_id=184348694]
+[node name="Content" type="VBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer/PersonagensContainer/BotaoPersonagem1"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 12.0
+offset_left = 10.0
 offset_top = 8.0
-offset_right = -12.0
+offset_right = -10.0
 offset_bottom = -8.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
+
+[node name="Imagem" type="TextureRect" parent="PainelCentral/MarginContainer/VBoxContainer/PersonagensContainer/BotaoPersonagem1/Content" unique_id=184348694]
+custom_minimum_size = Vector2(0, 140)
+layout_mode = 2
+size_flags_vertical = 3
 mouse_filter = 2
 texture = ExtResource("4")
 expand_mode = 1
 stretch_mode = 5
 
+[node name="Nome" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer/PersonagensContainer/BotaoPersonagem1/Content"]
+layout_mode = 2
+text = "CACHORRO"
+horizontal_alignment = 1
+
 [node name="BotaoPersonagem2" type="Button" parent="PainelCentral/MarginContainer/VBoxContainer/PersonagensContainer" unique_id=1759656262]
-custom_minimum_size = Vector2(170, 145)
+custom_minimum_size = Vector2(180, 190)
 layout_mode = 2
 size_flags_horizontal = 3
+tooltip_text = "Escolher Leão"
 theme_override_styles/normal = SubResource("3")
 theme_override_styles/pressed = SubResource("4")
 theme_override_styles/hover = SubResource("4")
 theme_override_styles/focus = SubResource("4")
 
-[node name="ImagemPersonagem2" type="TextureRect" parent="PainelCentral/MarginContainer/VBoxContainer/PersonagensContainer/BotaoPersonagem2" unique_id=37474018]
+[node name="Content" type="VBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer/PersonagensContainer/BotaoPersonagem2"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 12.0
+offset_left = 10.0
 offset_top = 8.0
-offset_right = -12.0
+offset_right = -10.0
 offset_bottom = -8.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
+
+[node name="Imagem" type="TextureRect" parent="PainelCentral/MarginContainer/VBoxContainer/PersonagensContainer/BotaoPersonagem2/Content" unique_id=37474018]
+custom_minimum_size = Vector2(0, 140)
+layout_mode = 2
+size_flags_vertical = 3
 mouse_filter = 2
 texture = ExtResource("6_8paku")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="LabelNome" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer" unique_id=38524072]
+[node name="Nome" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer/PersonagensContainer/BotaoPersonagem2/Content"]
+layout_mode = 2
+text = "LEÃO"
+horizontal_alignment = 1
+
+[node name="BotaoPersonagem3" type="Button" parent="PainelCentral/MarginContainer/VBoxContainer/PersonagensContainer"]
+custom_minimum_size = Vector2(180, 190)
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "Escolher Tartaruga"
+theme_override_styles/normal = SubResource("3")
+theme_override_styles/pressed = SubResource("4")
+theme_override_styles/hover = SubResource("4")
+theme_override_styles/focus = SubResource("3")
+
+[node name="Content" type="VBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer/PersonagensContainer/BotaoPersonagem3"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = 8.0
+offset_right = -10.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Imagem" type="TextureRect" parent="PainelCentral/MarginContainer/VBoxContainer/PersonagensContainer/BotaoPersonagem3/Content"]
+custom_minimum_size = Vector2(0, 140)
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+texture = ExtResource("7_turtle")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Nome" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer/PersonagensContainer/BotaoPersonagem3/Content"]
+layout_mode = 2
+text = "TARTARUGA"
+horizontal_alignment = 1
+
+[node name="BotaoPersonagem4" type="Button" parent="PainelCentral/MarginContainer/VBoxContainer/PersonagensContainer"]
+custom_minimum_size = Vector2(180, 190)
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "Escolher Águia"
+theme_override_styles/normal = SubResource("3")
+theme_override_styles/pressed = SubResource("4")
+theme_override_styles/hover = SubResource("4")
+theme_override_styles/focus = SubResource("3")
+
+[node name="Content" type="VBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer/PersonagensContainer/BotaoPersonagem4"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = 8.0
+offset_right = -10.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Imagem" type="TextureRect" parent="PainelCentral/MarginContainer/VBoxContainer/PersonagensContainer/BotaoPersonagem4/Content"]
+custom_minimum_size = Vector2(0, 140)
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+texture = ExtResource("8_eagle")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Nome" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer/PersonagensContainer/BotaoPersonagem4/Content"]
+layout_mode = 2
+text = "ÁGUIA"
+horizontal_alignment = 1
+
+[node name="BotaoPersonagem5" type="Button" parent="PainelCentral/MarginContainer/VBoxContainer/PersonagensContainer"]
+custom_minimum_size = Vector2(180, 190)
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "Escolher Gato"
+theme_override_styles/normal = SubResource("3")
+theme_override_styles/pressed = SubResource("4")
+theme_override_styles/hover = SubResource("4")
+theme_override_styles/focus = SubResource("3")
+
+[node name="Content" type="VBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer/PersonagensContainer/BotaoPersonagem5"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = 8.0
+offset_right = -10.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Imagem" type="TextureRect" parent="PainelCentral/MarginContainer/VBoxContainer/PersonagensContainer/BotaoPersonagem5/Content"]
+custom_minimum_size = Vector2(0, 140)
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+texture = ExtResource("9_cat")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Nome" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer/PersonagensContainer/BotaoPersonagem5/Content"]
+layout_mode = 2
+text = "GATO"
+horizontal_alignment = 1
+
+[node name="FieldsRow" type="HBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="NameField" type="VBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer/FieldsRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 5
+
+[node name="LabelNome" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer/FieldsRow/NameField" unique_id=38524072]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("3_hyw51")
 text = "Nome do Aluno"
 
-[node name="InputNome" type="LineEdit" parent="PainelCentral/MarginContainer/VBoxContainer" unique_id=331699580]
-custom_minimum_size = Vector2(0, 60)
+[node name="InputNome" type="LineEdit" parent="PainelCentral/MarginContainer/VBoxContainer/FieldsRow/NameField" unique_id=331699580]
+custom_minimum_size = Vector2(0, 54)
 layout_mode = 2
 theme_override_fonts/font = ExtResource("3_hyw51")
 placeholder_text = "Insira seu nome"
 
-[node name="LabelCodigo" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer" unique_id=833600111]
+[node name="RoomField" type="VBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer/FieldsRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 5
+
+[node name="LabelCodigo" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer/FieldsRow/RoomField" unique_id=833600111]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("3_hyw51")
 text = "Codigo da Sala"
 
-[node name="InputCodigo" type="LineEdit" parent="PainelCentral/MarginContainer/VBoxContainer" unique_id=1839047877]
-custom_minimum_size = Vector2(0, 60)
+[node name="InputCodigo" type="LineEdit" parent="PainelCentral/MarginContainer/VBoxContainer/FieldsRow/RoomField" unique_id=1839047877]
+custom_minimum_size = Vector2(0, 54)
 layout_mode = 2
 theme_override_fonts/font = ExtResource("3_hyw51")
 placeholder_text = "Digite o codigo"
@@ -235,18 +387,19 @@ theme_override_styles/normal = SubResource("2")
 text = "JOGAR"
 
 [node name="BotaoConfiguracao" type="TextureButton" parent="." unique_id=1853276311]
-custom_minimum_size = Vector2(128, 128)
+custom_minimum_size = Vector2(96, 96)
 layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.89
-anchor_top = 0.797
-anchor_right = 1.002
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 0.259888
-offset_top = 0.159973
-offset_right = -0.550171
-offset_bottom = -4.104
+offset_left = -168.0
+offset_top = -168.0
+offset_right = -72.0
+offset_bottom = -72.0
+grow_horizontal = 0
 grow_vertical = 0
 texture_normal = ExtResource("5")
 ignore_texture_size = true
-stretch_mode = 6
+stretch_mode = 0

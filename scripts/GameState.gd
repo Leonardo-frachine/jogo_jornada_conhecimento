@@ -7,8 +7,18 @@ const STATUS_INICIADO := "iniciado"
 const STATUS_JOGANDO := "jogando"
 const STATUS_FINALIZADO := "finalizado"
 const CHARACTER_TEXTURE_PATHS := {
-	1: "res://imagens/Player/personagem.png",
-	2: "res://imagens/personagem/personagem_feminina2.png",
+	1: "res://imagens/personagens_animais/cachorro.png",
+	2: "res://imagens/personagens_animais/leao.png",
+	3: "res://imagens/personagens_animais/tartaruga.png",
+	4: "res://imagens/personagens_animais/aguia.png",
+	5: "res://imagens/personagens_animais/gato.png",
+}
+const CHARACTER_NAMES := {
+	1: "Cachorro",
+	2: "Leão",
+	3: "Tartaruga",
+	4: "Águia",
+	5: "Gato",
 }
 
 var player_name: String = ""
@@ -87,6 +97,9 @@ func start_session(name: String, code: String, character_index: int = 0) -> void
 
 func get_selected_character_texture_path() -> String:
 	return selected_character_texture_path
+
+func get_selected_character_name() -> String:
+	return str(CHARACTER_NAMES.get(selected_character_index, "Cachorro"))
 
 func prepare_session() -> Dictionary:
 	session_prepared = false

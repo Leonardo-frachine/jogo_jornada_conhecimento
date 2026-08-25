@@ -447,7 +447,7 @@ func _apply_theme() -> void:
 	_apply_button_palette(ia_botao_aprovar_todas, STATUS_OK, _shade_color(STATUS_OK, 0.22))
 	_apply_button_palette(ia_botao_rejeitar_todas, STATUS_ERROR, _shade_color(STATUS_ERROR, 0.22))
 
-	sidebar_toggle.modulate = COLOR_SIDEBAR_TEXT
+	sidebar_toggle.modulate = Color.WHITE
 	_apply_surface_panel(current_room_badge, _tint_color(COLOR_ACCENT, 0.88), COLOR_ACCENT, 999, 0.0)
 
 	_apply_sidebar_styles()
@@ -579,27 +579,29 @@ func _apply_sidebar_styles() -> void:
 	_apply_sidebar_button_style(botao_configuracoes_menu, settings_label, settings_icon, _is_settings_overlay_open())
 
 func _apply_sidebar_button_style(button: Button, label: Label, icon: TextureRect, active: bool) -> void:
-	var background := COLOR_SIDEBAR
-	var border := COLOR_SIDEBAR_BORDER
+	var background := _tint_color(COLOR_SIDEBAR, 0.025)
+	var border := _tint_color(COLOR_SIDEBAR_BORDER, 0.04)
 	var text_color := COLOR_SIDEBAR_MUTED
+	var shadow_opacity := 0.02
 	if active:
 		background = COLOR_ACCENT
-		border = _shade_color(COLOR_ACCENT, 0.22)
-		text_color = Color(1.0, 1.0, 1.0, 1.0)
+		border = COLOR_ACCENT_DARK
+		text_color = COLOR_TEXT
+		shadow_opacity = 0.12
 
-	button.add_theme_stylebox_override("normal", _create_surface_style(background, border, 1, 18, 14, 12, 0.0))
-	button.add_theme_stylebox_override("hover", _create_surface_style(_tint_color(background, 0.08), border, 1, 18, 14, 12, 0.0))
-	button.add_theme_stylebox_override("pressed", _create_surface_style(_shade_color(background, 0.08), border, 1, 18, 14, 12, 0.0))
-	button.add_theme_stylebox_override("focus", _create_surface_style(_tint_color(background, 0.04), border, 2, 18, 14, 12, 0.0))
+	button.add_theme_stylebox_override("normal", _create_surface_style(background, border, 1, 18, 14, 12, shadow_opacity))
+	button.add_theme_stylebox_override("hover", _create_surface_style(_tint_color(background, 0.08), border, 1, 18, 14, 12, maxf(shadow_opacity, 0.05)))
+	button.add_theme_stylebox_override("pressed", _create_surface_style(_shade_color(background, 0.08), border, 1, 18, 14, 12, shadow_opacity))
+	button.add_theme_stylebox_override("focus", _create_surface_style(_tint_color(background, 0.04), border, 2, 18, 14, 12, maxf(shadow_opacity, 0.06)))
 	button.add_theme_stylebox_override("disabled", _create_surface_style(_tint_color(background, 0.18), _tint_color(border, 0.12), 1, 18, 14, 12, 0.0))
 	button.add_theme_color_override("font_color", Color(0, 0, 0, 0))
 	button.add_theme_color_override("font_hover_color", Color(0, 0, 0, 0))
 	button.add_theme_color_override("font_pressed_color", Color(0, 0, 0, 0))
 	if label != null:
-		UITheme.apply_font_only(label, 15)
+		UITheme.apply_font_only(label, 16)
 		label.add_theme_color_override("font_color", text_color)
 	if icon != null:
-		icon.modulate = text_color
+		icon.modulate = Color.WHITE
 
 func _on_navigation_pressed(view_name: String) -> void:
 	_set_current_view(view_name)

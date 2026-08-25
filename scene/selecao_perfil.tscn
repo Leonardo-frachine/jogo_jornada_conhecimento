@@ -4,9 +4,9 @@
 [ext_resource type="Texture2D" uid="uid://3ljo201dpbbx" path="res://imagens/fundo_tabuleiro/fundo_embacado.png" id="2"]
 [ext_resource type="Texture2D" uid="uid://bv2xmb27g64al" path="res://imagens/logo_jogo/logo_jogo.png" id="3"]
 [ext_resource type="FontFile" uid="uid://cnk767mck3js2" path="res://fonts/Fredoka-Bold.ttf" id="3_0urkj"]
-[ext_resource type="Texture2D" uid="uid://cbpn68ac6bol8" path="res://imagens/configuracoes/configuracoes.png" id="5"]
-[ext_resource type="Texture2D" uid="uid://bk5kcgfby3gk3" path="res://imagens/icons/graduate-hat.png" id="6_8m3mk"]
-[ext_resource type="Texture2D" uid="uid://dqwpmhpu11x2k" path="res://imagens/icons/teacher.png" id="7_f6a37"]
+[ext_resource type="Texture2D" path="res://imagens/icons/professor_sidebar/configuracoes_ui.png" id="5"]
+[ext_resource type="Texture2D" path="res://imagens/icons/perfil_aluno.png" id="6_8m3mk"]
+[ext_resource type="Texture2D" path="res://imagens/icons/perfil_professor.png" id="7_f6a37"]
 
 [sub_resource type="StyleBoxFlat" id="1"]
 bg_color = Color(1, 0.647059, 0, 1)
@@ -108,7 +108,7 @@ text = "SOU ALUNO"
 
 [node name="AlunoIcone" type="Sprite2D" parent="PainelCentral/MarginContainer/VBoxContainer/BotaoAluno" unique_id=1140701484]
 position = Vector2(31, 29)
-scale = Vector2(0.115234, 0.107422)
+scale = Vector2(0.043, 0.043)
 texture = ExtResource("6_8m3mk")
 
 [node name="BotaoProfessor" type="Button" parent="PainelCentral/MarginContainer/VBoxContainer" unique_id=728430690]
@@ -119,22 +119,24 @@ text = "SOU PROFESSOR"
 
 [node name="Teacher" type="Sprite2D" parent="PainelCentral/MarginContainer/VBoxContainer/BotaoProfessor" unique_id=826377317]
 position = Vector2(31.5, 29.75)
-scale = Vector2(0.123047, 0.139648)
+scale = Vector2(0.043, 0.043)
 texture = ExtResource("7_f6a37")
 
 [node name="BotaoConfiguracao" type="TextureButton" parent="." unique_id=1020042101]
-custom_minimum_size = Vector2(128, 128)
+custom_minimum_size = Vector2(96, 96)
 layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.89
-anchor_top = 0.797
-anchor_right = 1.002
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 0.259888
-offset_top = 0.159973
-offset_right = -0.550171
-offset_bottom = -4.104
+offset_left = -168.0
+offset_top = -168.0
+offset_right = -72.0
+offset_bottom = -72.0
+grow_horizontal = 0
 grow_vertical = 0
+mouse_default_cursor_shape = 2
 texture_normal = ExtResource("5")
 ignore_texture_size = true
-stretch_mode = 6
+stretch_mode = 0
