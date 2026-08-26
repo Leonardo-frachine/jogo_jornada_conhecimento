@@ -5,6 +5,7 @@ const BASE_URL_SETTING := "application/config/api_base_url"
 const REQUEST_TIMEOUT_SECONDS := 10.0
 const IMPORT_REQUEST_TIMEOUT_SECONDS := 30.0
 const AI_REQUEST_TIMEOUT_SECONDS := 45.0
+const SERVER_UNAVAILABLE_MESSAGE := "Servidor temporariamente indisponivel. Tente novamente em alguns minutos."
 
 var base_url: String = DEFAULT_BASE_URL
 
@@ -178,10 +179,12 @@ func _request_json(method: HTTPClient.Method, path: String, payload: Variant = n
 	var parsed_body: Variant = _parse_json_body(body_text)
 
 	if result != HTTPRequest.RESULT_SUCCESS:
-		return _error_response(response_code, "Falha de conexao com a API.")
+		return _error_response(response_code, SERVER_UNAVAILABLE_MESSAGE)
 
 	if response_code < 200 or response_code >= 300:
-		return _error_response(response_code, _extract_error_message(parsed_body, body_text))
+		if _is_server_unavailable_response(response_code, parsed_body):
+			return _error_response(response_code, SERVER_UNAVAILABLE_MESSAGE)
+		return _error_response(response_code, _extract_error_message(parsed_body))
 
 	return {
 		"ok": true,
@@ -211,7 +214,17 @@ func _parse_json_body(body_text: String) -> Variant:
 	var parsed: Variant = JSON.parse_string(body_text)
 	return parsed if parsed != null else {"raw": body_text}
 
-func _extract_error_message(parsed_body: Variant, raw_body: String) -> String:
+func _is_server_unavailable_response(response_code: int, parsed_body: Variant) -> bool:
+	if parsed_body is Dictionary:
+		var dictionary: Dictionary = parsed_body as Dictionary
+		if bool(dictionary.get("cloudflare_error", false)):
+			return true
+		if dictionary.has("message"):
+			return false
+
+	return response_code in [502, 503, 504, 520, 521, 522, 523, 524, 525, 526, 527, 530]
+
+func _extract_error_message(parsed_body: Variant) -> String:
 	if parsed_body is Dictionary:
 		var dictionary: Dictionary = parsed_body as Dictionary
 		var message: Variant = dictionary.get("message", "")
@@ -223,10 +236,7 @@ func _extract_error_message(parsed_body: Variant, raw_body: String) -> String:
 		if message is String and not String(message).is_empty():
 			return String(message)
 
-	if not raw_body.strip_edges().is_empty():
-		return raw_body
-
-	return "A API retornou um erro inesperado."
+	return "Nao foi possivel concluir a solicitacao. Tente novamente."
 
 func _error_response(status_code: int, message: String) -> Dictionary:
 	return {
