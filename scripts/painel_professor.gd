@@ -1,5 +1,6 @@
 extends Control
 
+# Painel administrativo: gerencia salas, alunos, perguntas, importacao, IA e indicadores.
 const UITheme := preload("res://scripts/UITheme.gd")
 const MetricCardScene := preload("res://scene/professor/components/MetricCard.tscn")
 const QuestionCardScene := preload("res://scene/professor/components/QuestionCard.tscn")
@@ -205,9 +206,11 @@ var pergunta_exclusao_sala_id := 0
 var pergunta_exclusao_todas := false
 
 func _ready() -> void:
+	# Valida sessao antes de montar controles que dependem do professor autenticado.
 	SettingsManager.pause_tree_when_open = false
 	SettingsManager.close_menu()
 
+	# Sem sessao valida retorna ao login e impede acesso ao painel.
 	if not ProfessorSession.has_session():
 		get_tree().change_scene_to_file("res://scene/acesso_professor.tscn")
 		return
@@ -230,8 +233,10 @@ func _ready() -> void:
 	_show_ia_feedback("Preencha os dados para gerar uma previa de perguntas.", STATUS_INFO)
 	_show_status("Painel pronto para carregar as salas do professor.", STATUS_INFO)
 
+	# Resize de desktop/Web recalcula grids e largura da barra lateral.
 	if not get_viewport().size_changed.is_connected(_update_responsive_layout):
 		get_viewport().size_changed.connect(_update_responsive_layout)
+	# Escala de fonte altera os limites considerados compactos.
 	if not SettingsManager.font_scale_changed.is_connected(_on_font_scale_changed):
 		SettingsManager.font_scale_changed.connect(_on_font_scale_changed)
 
@@ -239,10 +244,12 @@ func _ready() -> void:
 	call_deferred("_load_initial_data")
 
 func _exit_tree() -> void:
+	# Marca encerramento antes de parar timers para descartar respostas HTTP tardias.
 	panel_exiting = true
 	_stop_dashboard_auto_refresh()
 
 func _setup_dashboard_auto_refresh() -> void:
+	# Reutiliza o timer existente para nao duplicar atualizacoes a cada cinco segundos.
 	if dashboard_refresh_timer != null and is_instance_valid(dashboard_refresh_timer):
 		return
 
@@ -255,13 +262,16 @@ func _setup_dashboard_auto_refresh() -> void:
 	dashboard_refresh_timer.start()
 
 func _stop_dashboard_auto_refresh() -> void:
+	# Encerramento e seguro mesmo se o timer nunca foi criado ou ja foi liberado.
 	if dashboard_refresh_timer == null or not is_instance_valid(dashboard_refresh_timer):
 		return
 	dashboard_refresh_timer.stop()
 
 func _on_dashboard_auto_refresh_timeout() -> void:
+	# Nao sobrepoe refresh nem atualiza enquanto a tela carrega/sai.
 	if panel_exiting or carregando or dashboard_refresh_in_progress:
 		return
+	# Sem sala selecionada nao existe dashboard isolado para consultar.
 	if not ProfessorSession.has_current_room():
 		return
 	await _refresh_dashboard(false)
@@ -304,6 +314,7 @@ func _connect_signals() -> void:
 
 func _prepare_dashboard_layout() -> void:
 	var painel_atividades := dashboard_secondary_grid.get_node_or_null("PainelAtividades") as Control
+	# Move atividades para o grid secundario apenas quando a cena antiga ainda usa outro pai.
 	if painel_atividades != null and painel_atividades.get_parent() != dashboard_body_grid:
 		dashboard_secondary_grid.remove_child(painel_atividades)
 		dashboard_body_grid.add_child(painel_atividades)
@@ -315,14 +326,18 @@ func _load_initial_data() -> void:
 	await _refresh_question_bank()
 
 func _bind_settings_overlay_signals() -> void:
+	# Vinculo global e feito uma unica vez por instancia do painel.
 	if settings_overlay_bound:
 		return
 	var overlay = SettingsManager.overlay
+	# O overlay pode ainda nao ter sido instanciado pelo SettingsManager.
 	if overlay == null or not is_instance_valid(overlay):
 		call_deferred("_bind_settings_overlay_signals")
 		return
+	# Abertura ativa o destaque do item Configuracoes na sidebar.
 	if overlay.has_signal("menu_opened") and not overlay.menu_opened.is_connected(_on_settings_overlay_opened):
 		overlay.menu_opened.connect(_on_settings_overlay_opened)
+	# Fechamento restaura o destaque da pagina corrente.
 	if overlay.has_signal("menu_closed") and not overlay.menu_closed.is_connected(_on_settings_overlay_closed):
 		overlay.menu_closed.connect(_on_settings_overlay_closed)
 	settings_overlay_bound = true
@@ -336,6 +351,7 @@ func _apply_theme() -> void:
 	_apply_surface_panel(header, COLOR_SURFACE, COLOR_BORDER, 24, 0.08)
 	_apply_surface_panel(content_shell, COLOR_SURFACE, COLOR_BORDER, 26, 0.06)
 
+	# Aplica superficie consistente aos cards estaticos das seis paginas.
 	for panel in [
 		dashboard_hero_card,
 		get_node("SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/GerenciarSalaPage/GerenciarSalaHero"),
@@ -375,6 +391,7 @@ func _apply_theme() -> void:
 	UITheme.apply_title(get_node("SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/ImportarPerguntasPage/ImportarIntroCard/ImportarIntroMargin/ImportarIntroVBox/TituloImportar"), 22, COLOR_TEXT)
 	UITheme.apply_title(get_node("SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/GerarIAPage/IaIntroCard/IaIntroMargin/IaIntroVBox/TituloIa"), 22, COLOR_TEXT)
 
+	# Aplica tipografia secundaria aos textos descritivos do painel.
 	for label in [
 		sidebar_brand_title,
 		sidebar_brand_subtitle,
@@ -420,6 +437,7 @@ func _apply_theme() -> void:
 	_apply_spin_box_palette(ia_quantidade_input)
 	_apply_spin_box_palette(ia_pontuacao_input)
 	_apply_spin_box_palette(ia_tempo_input)
+	# Estiliza todos os rotulos do formulario de geracao por IA.
 	for label_name in [
 		"IaSalaLabel",
 		"IaTemaLabel",
@@ -455,6 +473,7 @@ func _apply_theme() -> void:
 
 func _setup_ia_form() -> void:
 	ia_dificuldade_select.clear()
+	# Preenche o seletor com os quatro niveis aceitos pelo jogo.
 	for difficulty in IA_DIFFICULTIES:
 		ia_dificuldade_select.add_item(difficulty)
 	ia_dificuldade_select.select(1)
@@ -466,10 +485,12 @@ func _setup_ia_form() -> void:
 	ia_tempo_input.suffix = " segundos"
 
 func _update_responsive_layout() -> void:
+	# Define grades e tamanhos a partir da largura efetiva apos escala de fonte.
 	var viewport_size: Vector2 = get_viewport().get_visible_rect().size
 	var font_scale: float = SettingsManager.font_scale
 	var compact := viewport_size.x < 1260.0 * font_scale
 	var content_width: float = content_shell.size.x
+	# Antes do primeiro frame estima a largura porque o container ainda pode medir zero.
 	if content_width <= 0.0:
 		content_width = viewport_size.x - (sidebar.custom_minimum_size.x + (32.0 if compact else 48.0))
 	var effective_content_width := content_width / font_scale
@@ -519,16 +540,20 @@ func _configure_action_groups() -> void:
 
 	perguntas_filters_grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	perguntas_filters_grid.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	# Filtros compartilham as mesmas regras de largura e expansao.
 	for filter_control in [input_busca_perguntas, filtro_materia_perguntas, filtro_dificuldade_perguntas]:
 		filter_control.custom_minimum_size.x = 180.0
 		filter_control.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		filter_control.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 
 func _configure_action_grid(grid: GridContainer, buttons: Array) -> void:
+	# Uniformiza botoes de acao para que grids responsivos nao cortem os textos.
 	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	grid.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	# Percorre as referencias recebidas e configura somente Buttons validos.
 	for button_value in buttons:
 		var button := button_value as Button
+		# Variantes de cena podem omitir uma acao sem quebrar as demais.
 		if button == null:
 			continue
 		button.custom_minimum_size.x = 160.0
@@ -547,6 +572,7 @@ func _on_sidebar_toggle_pressed() -> void:
 	_apply_sidebar_styles()
 
 func _apply_sidebar_styles() -> void:
+	# Expansao controla largura, textos e estado ativo de toda a navegacao.
 	sidebar.custom_minimum_size.x = 278 if sidebar_expanded else 94
 	sidebar.size.x = sidebar.custom_minimum_size.x
 	sidebar_description.visible = sidebar_expanded
@@ -564,6 +590,7 @@ func _apply_sidebar_styles() -> void:
 		VIEW_AI: botao_gerar_ia_pagina,
 	}
 
+	# Percorre cada pagina para aplicar visibilidade e destaque correspondente.
 	for view_name in buttons.keys():
 		var button: Button = buttons[view_name]
 		var label: Label = button.get_node("Layout/Label") as Label
@@ -583,6 +610,7 @@ func _apply_sidebar_button_style(button: Button, label: Label, icon: TextureRect
 	var border := _tint_color(COLOR_SIDEBAR_BORDER, 0.04)
 	var text_color := COLOR_SIDEBAR_MUTED
 	var shadow_opacity := 0.02
+	# Item ativo troca a superficie escura pelo destaque amarelo.
 	if active:
 		background = COLOR_ACCENT
 		border = COLOR_ACCENT_DARK
@@ -597,9 +625,11 @@ func _apply_sidebar_button_style(button: Button, label: Label, icon: TextureRect
 	button.add_theme_color_override("font_color", Color(0, 0, 0, 0))
 	button.add_theme_color_override("font_hover_color", Color(0, 0, 0, 0))
 	button.add_theme_color_override("font_pressed_color", Color(0, 0, 0, 0))
+	# Label opcional recebe fonte e cor calculada.
 	if label != null:
 		UITheme.apply_font_only(label, 16)
 		label.add_theme_color_override("font_color", text_color)
+	# Icone opcional permanece branco para contraste nos dois estados.
 	if icon != null:
 		icon.modulate = Color.WHITE
 
@@ -607,6 +637,7 @@ func _on_navigation_pressed(view_name: String) -> void:
 	_set_current_view(view_name)
 
 func _set_current_view(view_name: String) -> void:
+	# Somente a pagina selecionada permanece visivel e o scroll volta ao topo.
 	current_view = view_name
 	dashboard_page.visible = view_name == VIEW_DASHBOARD
 	gerenciar_sala_page.visible = view_name == VIEW_ROOM
@@ -619,10 +650,12 @@ func _set_current_view(view_name: String) -> void:
 	_refresh_header_context()
 
 func _refresh_header_context() -> void:
+	# Cabecalho combina metadados da pagina com a sala ativa da sessao.
 	var page_info: Dictionary = PAGE_META.get(current_view, PAGE_META[VIEW_DASHBOARD])
 	page_title.text = str(page_info.get("title", "Painel do Professor"))
 	page_subtitle.text = str(page_info.get("subtitle", ""))
 
+	# Sala ativa atualiza badge, pagina de gerenciamento e rodape lateral.
 	if ProfessorSession.has_current_room():
 		var room_name := ProfessorSession.current_room_name.strip_edges()
 		var room_code := ProfessorSession.current_room_code.strip_edges().to_upper()
@@ -632,6 +665,7 @@ func _refresh_header_context() -> void:
 		resumo_gerenciar_sala.text = "Sala atual selecionada: %s. As acoes desta pagina afetam o contexto usado nas outras telas." % (room_name if not room_name.is_empty() else "selecionada")
 		sidebar_footer_subtitle.text = "Trabalhando na sala %s." % (room_name if not room_name.is_empty() else "selecionada")
 		_apply_badge_panel(current_room_badge, _tint_color(COLOR_ACCENT, 0.88), COLOR_ACCENT)
+	# Sem sala, exibe instrucoes neutras e remove o destaque de contexto.
 	else:
 		current_room_label.text = "Sem sala ativa"
 		sala_atual_info.text = "Sala ativa: nenhuma"
@@ -656,7 +690,9 @@ func _set_loading_state(enabled: bool) -> void:
 	_update_ia_controls_state()
 
 func _ensure_import_dialog() -> void:
+	# Cria dialogos em runtime para aceitar cenas antigas que ainda nao os possuem.
 	import_dialog = get_node_or_null("ImportDialog")
+	# Dialogo de abertura permite escolher CSV ou XLSX no desktop.
 	if import_dialog == null:
 		import_dialog = FileDialog.new()
 		import_dialog.name = "ImportDialog"
@@ -668,10 +704,12 @@ func _ensure_import_dialog() -> void:
 		import_dialog.add_filter("*.xlsx", "Planilhas Excel")
 		add_child(import_dialog)
 
+	# Selecao de arquivo inicia uma unica importacao.
 	if not import_dialog.file_selected.is_connected(_on_import_file_selected):
 		import_dialog.file_selected.connect(_on_import_file_selected)
 
 	template_download_dialog = get_node_or_null("TemplateDownloadDialog")
+	# Dialogo separado escolhe onde salvar o CSV modelo.
 	if template_download_dialog == null:
 		template_download_dialog = FileDialog.new()
 		template_download_dialog.name = "TemplateDownloadDialog"
@@ -683,10 +721,12 @@ func _ensure_import_dialog() -> void:
 		template_download_dialog.add_filter("*.csv", "Arquivos CSV")
 		add_child(template_download_dialog)
 
+	# Caminho escolhido e processado uma unica vez por confirmacao.
 	if not template_download_dialog.file_selected.is_connected(_on_template_download_file_selected):
 		template_download_dialog.file_selected.connect(_on_template_download_file_selected)
 
 func _fetch_rooms(refresh_dashboard_after_load: bool) -> void:
+	# Impede consultas concorrentes acionadas por botoes ou inicializacao.
 	if carregando:
 		return
 
@@ -695,6 +735,7 @@ func _fetch_rooms(refresh_dashboard_after_load: bool) -> void:
 	var response: Dictionary = await ApiClient.fetch_rooms_by_teacher(ProfessorSession.professor_id)
 	_set_loading_state(false)
 
+	# Falha limpa o contexto para nao manter uma sala antiga como se estivesse valida.
 	if not response.get("ok", false):
 		salas.clear()
 		_populate_room_selector()
@@ -707,6 +748,7 @@ func _fetch_rooms(refresh_dashboard_after_load: bool) -> void:
 
 	salas = _extract_dictionary_array(response.get("data", []))
 	_populate_room_selector()
+	# Lista vazia limpa sala ativa e orienta a criar a primeira turma.
 	if salas.is_empty():
 		ProfessorSession.set_current_room({})
 		_refresh_header_context()
@@ -716,23 +758,28 @@ func _fetch_rooms(refresh_dashboard_after_load: bool) -> void:
 		return
 
 	var selected_index := _find_selected_room_index()
+	# Se a sala anterior nao existe mais, seleciona a primeira disponivel.
 	if selected_index < 0:
 		selected_index = 0
 	seletor_salas.select(selected_index)
 	_apply_selected_room(selected_index)
 	_show_status("Salas carregadas com sucesso.", STATUS_OK)
 
+	# Chamadores interativos podem pedir dados da sala logo apos a listagem.
 	if refresh_dashboard_after_load:
 		await _refresh_dashboard()
 
 func _populate_room_selector() -> void:
+	# Reconstrói o seletor principal a partir do snapshot de salas.
 	seletor_salas.clear()
+	# Estado vazio desabilita selecao e tambem atualiza seletores de destino.
 	if salas.is_empty():
 		seletor_salas.add_item("Nenhuma sala criada")
 		seletor_salas.disabled = true
 		_populate_question_room_selectors()
 		return
 
+	# Cada sala recebe texto amigavel e o dicionario completo como metadata.
 	for index in range(salas.size()):
 		var sala: Dictionary = salas[index]
 		var nome: String = str(sala.get("nome", "Sala"))
@@ -743,6 +790,7 @@ func _populate_room_selector() -> void:
 	_populate_question_room_selectors()
 
 func _populate_question_room_selectors() -> void:
+	# Importacao segue a sala atual; previa de IA preserva sua sala de origem.
 	var preferred_room_id := ProfessorSession.current_room_id if ProfessorSession.has_current_room() else 0
 	_populate_question_room_selector(import_room_selector, preferred_room_id)
 	var ia_preferred_room_id := perguntas_geradas_sala_id if not perguntas_geradas.is_empty() and perguntas_geradas_sala_id > 0 else preferred_room_id
@@ -752,6 +800,7 @@ func _populate_question_room_selectors() -> void:
 
 func _populate_question_room_selector(selector: OptionButton, preferred_room_id: int) -> void:
 	selector.clear()
+	# Sem salas, desabilita o destino para impedir importacao/geracao solta.
 	if salas.is_empty():
 		selector.add_item("Nenhuma sala disponivel")
 		selector.set_item_metadata(0, 0)
@@ -759,6 +808,7 @@ func _populate_question_room_selector(selector: OptionButton, preferred_room_id:
 		return
 
 	var selected_index := 0
+	# Adiciona todas as salas e procura simultaneamente a preferida.
 	for index in range(salas.size()):
 		var sala: Dictionary = salas[index]
 		var sala_id := int(sala.get("id", 0))
@@ -766,43 +816,56 @@ func _populate_question_room_selector(selector: OptionButton, preferred_room_id:
 		var codigo := str(sala.get("codigo", "")).strip_edges().to_upper()
 		selector.add_item("Sala de destino: %s (%s)" % [nome, codigo])
 		selector.set_item_metadata(index, sala_id)
+		# Guarda o indice que corresponde ao contexto atual.
 		if sala_id == preferred_room_id:
 			selected_index = index
 	selector.select(selected_index)
 
 func _select_question_target_room(sala_id: int) -> void:
 	var selectors: Array[OptionButton] = [import_room_selector]
+	# Se existe previa de IA, nao troca seu destino silenciosamente.
 	if perguntas_geradas.is_empty():
 		selectors.append(ia_room_selector)
+	# Sincroniza os seletores permitidos com a sala escolhida no cabecalho.
 	for selector in selectors:
+		# Procura a metadata do ID dentro de cada seletor.
 		for index in range(selector.item_count):
+			# Ao encontrar, seleciona e interrompe a busca neste controle.
 			if int(selector.get_item_metadata(index)) == sala_id:
 				selector.select(index)
 				break
 
 func _get_question_target_room_id(selector: OptionButton) -> int:
+	# Seletor vazio ou sem escolha nao representa uma sala valida.
 	if selector.item_count == 0 or selector.selected < 0:
 		return 0
 	return int(selector.get_item_metadata(selector.selected))
 
 func _find_selected_room_index() -> int:
+	# Sem contexto anterior nao existe indice para restaurar.
 	if not ProfessorSession.has_current_room():
 		return -1
+	# Procura o ID da sessao no snapshot recem-carregado.
 	for index in range(salas.size()):
+		# O primeiro ID correspondente e o item que deve permanecer selecionado.
 		if int(salas[index].get("id", 0)) == ProfessorSession.current_room_id:
 			return index
 	return -1
 
 func _apply_selected_room(index: int) -> void:
+	# Indice fora da lista limpa o contexto em vez de acessar item invalido.
 	if index < 0 or index >= salas.size():
 		ProfessorSession.set_current_room({})
+	# Indice valido copia metadados da sala para a sessao global.
 	else:
 		ProfessorSession.set_current_room(salas[index])
+	# Sala valida tambem vira destino padrao de perguntas.
 	if ProfessorSession.has_current_room():
 		_select_question_target_room(ProfessorSession.current_room_id)
 	_refresh_header_context()
 
 func _on_seletor_salas_item_selected(index: int) -> void:
+	# Ignora mudanca durante carga ou indice invalido emitido pelo controle.
 	if carregando or index < 0 or index >= salas.size():
 		return
 	_apply_selected_room(index)
@@ -813,6 +876,7 @@ func _on_botao_atualizar_salas_pressed() -> void:
 	await _fetch_rooms(true)
 
 func _on_botao_criar_sala_pressed() -> void:
+	# Bloqueia criacao duplicada enquanto outra operacao de sala esta ativa.
 	if carregando:
 		return
 	var nome_sala := input_nome_sala.text.strip_edges()
@@ -821,6 +885,7 @@ func _on_botao_criar_sala_pressed() -> void:
 	var response: Dictionary = await ApiClient.create_room(ProfessorSession.professor_id, nome_sala)
 	_set_loading_state(false)
 
+	# Falha mantem o formulario e exibe a mensagem do backend.
 	if not response.get("ok", false):
 		_show_status(response.get("error", "Nao foi possivel criar a sala."), STATUS_ERROR)
 		return
@@ -828,12 +893,14 @@ func _on_botao_criar_sala_pressed() -> void:
 	input_nome_sala.text = ""
 	var payload: Dictionary = response.get("data", {})
 	var sala: Dictionary = payload.get("sala", {})
+	# Sucesso com payload de sala atualiza imediatamente o contexto preferido.
 	if not sala.is_empty():
 		ProfessorSession.set_current_room(sala)
 	_show_status(payload.get("mensagem", "Sala criada com sucesso."), STATUS_OK)
 	await _fetch_rooms(true)
 
 func _on_botao_apagar_sala_pressed() -> void:
+	# Exclusao so pode ser solicitada com sala ativa e painel livre.
 	if carregando or not ProfessorSession.has_current_room():
 		return
 	var room_name := ProfessorSession.current_room_name.strip_edges()
@@ -845,6 +912,7 @@ func _on_botao_apagar_sala_pressed() -> void:
 	confirmacao_apagar_sala.popup_centered()
 
 func _on_confirmacao_apagar_sala_confirmed() -> void:
+	# Revalida o contexto porque ele pode mudar enquanto o dialogo estava aberto.
 	if carregando or not ProfessorSession.has_current_room():
 		return
 
@@ -853,6 +921,7 @@ func _on_confirmacao_apagar_sala_confirmed() -> void:
 	var response: Dictionary = await ApiClient.delete_room(ProfessorSession.current_room_id)
 	_set_loading_state(false)
 
+	# Falha preserva a sala e seus dados na interface.
 	if not response.get("ok", false):
 		_show_status(response.get("error", "Nao foi possivel apagar a sala."), STATUS_ERROR)
 		return
@@ -867,9 +936,11 @@ func _on_confirmacao_apagar_sala_confirmed() -> void:
 	await _fetch_rooms(true)
 
 func _refresh_dashboard(interactive: bool = true) -> void:
+	# Impede atualizacao concorrente, durante carga ou apos inicio da saida.
 	if panel_exiting or carregando or dashboard_refresh_in_progress:
 		return
 
+	# Sem sala ativa limpa indicadores em vez de consultar dados globais.
 	if not ProfessorSession.has_current_room():
 		alunos_sala.clear()
 		respostas_sala.clear()
@@ -879,25 +950,32 @@ func _refresh_dashboard(interactive: bool = true) -> void:
 
 	var requested_room_id := ProfessorSession.current_room_id
 	dashboard_refresh_in_progress = true
+	# Refresh manual exibe bloqueio e status; automatico trabalha silenciosamente.
 	if interactive:
 		_set_loading_state(true)
 		_show_status("Atualizando indicadores da sala...", STATUS_INFO)
 	var dashboard_response: Dictionary = await ApiClient.fetch_room_dashboard(requested_room_id)
+	# Descarta resposta do dashboard se o painel foi destruido durante o await.
 	if panel_exiting or not is_inside_tree():
 		dashboard_refresh_in_progress = false
 		return
 	var answers_response: Dictionary = await ApiClient.fetch_room_answers(requested_room_id)
+	# Faz a mesma guarda depois de carregar respostas/alunos.
 	if panel_exiting or not is_inside_tree():
 		dashboard_refresh_in_progress = false
 		return
+	# Somente chamada manual precisa liberar os controles bloqueados.
 	if interactive:
 		_set_loading_state(false)
 	dashboard_refresh_in_progress = false
 
+	# Se o professor trocou de sala, nao aplica resposta antiga na nova selecao.
 	if not ProfessorSession.has_current_room() or ProfessorSession.current_room_id != requested_room_id:
 		return
 
+	# Dashboard e a resposta principal; sua falha interrompe a renderizacao.
 	if not dashboard_response.get("ok", false):
+		# Refresh manual informa e limpa visualmente a falha.
 		if interactive:
 			_render_empty_dashboard()
 			_render_students([])
@@ -905,11 +983,14 @@ func _refresh_dashboard(interactive: bool = true) -> void:
 		return
 
 	dashboard_payload = dashboard_response.get("data", {})
+	# Respostas bem-sucedidas alimentam atividades e acompanhamento individual.
 	if answers_response.get("ok", false):
 		var answers_payload: Dictionary = answers_response.get("data", {})
 		respostas_sala = _normalize_answer_list(answers_payload.get("respostas", []))
 		alunos_sala = _normalize_answer_list(answers_payload.get("alunos", []))
+	# Falha secundaria ainda permite renderizar indicadores agregados.
 	else:
+		# Apenas refresh manual mostra o aviso da consulta secundaria.
 		if interactive:
 			respostas_sala.clear()
 			alunos_sala.clear()
@@ -917,6 +998,7 @@ func _refresh_dashboard(interactive: bool = true) -> void:
 
 	_render_dashboard_data(dashboard_payload)
 	_render_students(_build_student_models(respostas_sala, alunos_sala))
+	# Confirma atualizacao somente quando solicitada pelo professor.
 	if interactive:
 		_show_status("Dashboard atualizado.", STATUS_OK)
 
@@ -940,6 +1022,7 @@ func _render_empty_dashboard() -> void:
 	_refresh_header_context()
 
 func _render_dashboard_data(payload: Dictionary) -> void:
+	# Combina agregados do endpoint com estados individuais das respostas/alunos.
 	var indicadores: Dictionary = payload.get("indicadores", {})
 	var student_models: Array[Dictionary] = _build_student_models(respostas_sala, alunos_sala)
 	var states: Dictionary = _summarize_student_states(student_models)
@@ -949,8 +1032,10 @@ func _render_dashboard_data(payload: Dictionary) -> void:
 	var room_name := ProfessorSession.current_room_name.strip_edges()
 
 	dashboard_hero_title.text = "Visao geral da sala %s" % (room_name if not room_name.is_empty() else "selecionada")
+	# Sala sem atividade recebe texto de orientacao inicial.
 	if total_respostas <= 0:
 		dashboard_hero_description.text = "A estrutura da sala ja esta pronta. Assim que a turma responder perguntas, este dashboard mostrara medias, distribuicoes e atividade recente."
+	# Sala ativa resume participacao e numero de respostas.
 	else:
 		dashboard_hero_description.text = "%d alunos ja registraram %d respostas. Use os cards abaixo para identificar oportunidades de reforco e acompanhar a participacao da turma." % [total_alunos, total_respostas]
 
@@ -971,7 +1056,9 @@ func _render_dashboard_data(payload: Dictionary) -> void:
 	_refresh_header_context()
 
 func _render_metric_cards(metrics: Array[Dictionary]) -> void:
+	# Recria cards a partir do modelo atual para evitar dados residuais.
 	_clear_container(metrics_grid)
+	# Cada metrica instancia o componente reutilizavel e aplica seus valores.
 	for item in metrics:
 		var card: PanelContainer = MetricCardScene.instantiate() as PanelContainer
 		_apply_surface_panel(card, COLOR_SURFACE_ALT, COLOR_BORDER, 22, 0.05)
@@ -998,12 +1085,16 @@ func _render_metric_cards(metrics: Array[Dictionary]) -> void:
 		metrics_grid.add_child(card)
 
 func _render_group_summary_list(container: VBoxContainer, groups: Variant, key_name: String, empty_message: String) -> void:
+	# Substitui a lista anterior por agrupamentos atuais de materia ou dificuldade.
 	_clear_container(container)
+	# Payload ausente/vazio recebe um card explicativo.
 	if groups is not Array or groups.is_empty():
 		container.add_child(_create_empty_state_panel("Sem dados ainda", empty_message))
 		return
 
+	# Converte cada agrupamento valido em uma linha de resumo.
 	for item in groups:
+		# Ignora valores inesperados sem impedir os demais grupos.
 		if item is not Dictionary:
 			continue
 		container.add_child(_create_group_summary_row(item, key_name))
@@ -1037,11 +1128,13 @@ func _create_group_summary_row(item: Dictionary, key_name: String) -> PanelConta
 
 func _render_recent_activity(respostas: Array[Dictionary]) -> void:
 	_clear_container(lista_atividades)
+	# Sem respostas exibe orientacao em vez de lista vazia.
 	if respostas.is_empty():
 		lista_atividades.add_child(_create_empty_state_panel("Sem atividades recentes", "As respostas mais recentes da sala aparecerao aqui assim que os alunos jogarem."))
 		return
 
 	var limit: int = min(5, respostas.size())
+	# Mostra no maximo as cinco respostas mais recentes ja ordenadas pelo backend.
 	for index in range(limit):
 		var resposta: Dictionary = respostas[index]
 		var panel := PanelContainer.new()
@@ -1077,18 +1170,23 @@ func _render_recent_activity(respostas: Array[Dictionary]) -> void:
 		lista_atividades.add_child(panel)
 
 func _render_teacher_ranking(items: Array[Dictionary]) -> void:
+	# Ranking final considera somente partidas oficialmente encerradas e IDs unicos.
 	_clear_container(ranking_final_list)
 	var finalizados: Array[Dictionary] = []
 	var jogadores_exibidos := {}
+	# Filtra os itens devolvidos pelo endpoint da sala.
 	for item in items:
+		# Jogador iniciado/em andamento nao participa da classificacao final.
 		if _normalize_student_status(str(item.get("statusPartida", ""))) != STUDENT_STATUS_FINALIZADO:
 			continue
 		var jogador_id := int(item.get("jogadorId", 0))
+		# ID invalido ou duplicado nao gera outra colocacao.
 		if jogador_id <= 0 or jogadores_exibidos.has(jogador_id):
 			continue
 		jogadores_exibidos[jogador_id] = true
 		finalizados.append(item)
 
+	# Nenhuma conclusao oficial produz estado vazio informativo.
 	if finalizados.is_empty():
 		ranking_final_summary.text = "Nenhum aluno possui encerramento oficial nesta sala."
 		var empty_label := Label.new()
@@ -1100,8 +1198,10 @@ func _render_teacher_ranking(items: Array[Dictionary]) -> void:
 		return
 
 	ranking_final_summary.text = "%d alunos finalizados, ordenados pela pontuacao e pelo horario de termino em caso de empate." % finalizados.size()
+	# Renderiza uma linha por colocacao recebida do backend.
 	for index in range(finalizados.size()):
 		ranking_final_list.add_child(_create_teacher_ranking_row(finalizados[index]))
+		# Adiciona separadores apenas entre participantes.
 		if index < finalizados.size() - 1:
 			ranking_final_list.add_child(HSeparator.new())
 
@@ -1146,6 +1246,7 @@ func _create_teacher_ranking_row(item: Dictionary) -> HBoxContainer:
 
 func _render_students(models: Array[Dictionary]) -> void:
 	_clear_container(acompanhamento_grid)
+	# Sala sem alunos recebe explicacao do que aparecera apos o inicio.
 	if models.is_empty():
 		resumo_acompanhamento.text = "Nenhum aluno apareceu no acompanhamento ainda."
 		resumo_acompanhamento.add_theme_color_override("font_color", COLOR_MUTED)
@@ -1154,6 +1255,7 @@ func _render_students(models: Array[Dictionary]) -> void:
 
 	resumo_acompanhamento.text = "%d alunos na sala. O status atual vem do backend e separa inicio, jogo em andamento e encerramento oficial." % models.size()
 	resumo_acompanhamento.add_theme_color_override("font_color", COLOR_TEXT)
+	# Cada modelo consolidado vira um card individual de acompanhamento.
 	for item in models:
 		acompanhamento_grid.add_child(_create_student_card(item))
 
@@ -1213,19 +1315,25 @@ func _create_student_card(item: Dictionary) -> PanelContainer:
 	return panel
 
 func _build_student_models(respostas: Array[Dictionary], alunos: Array[Dictionary] = []) -> Array[Dictionary]:
+	# Une estado corrente do jogador com seu historico de respostas.
 	var grouped := {}
+	# Primeiro cria modelos para todos os alunos, inclusive quem ainda nao respondeu.
 	for aluno in alunos:
 		var aluno_id: int = int(aluno.get("jogadorId", aluno.get("id", 0)))
+		# Identidade sem ID nao pode agrupar respostas com seguranca.
 		if aluno_id <= 0:
 			continue
 		var aluno_model := _create_student_model_base(aluno)
 		aluno_model["estadoAtualBackend"] = true
 		grouped[aluno_id] = aluno_model
 
+	# Depois agrega cada resposta ao modelo do respectivo jogador.
 	for resposta in respostas:
 		var jogador_id: int = int(resposta.get("jogadorId", 0))
+		# Resposta sem jogador identificavel e ignorada.
 		if jogador_id <= 0:
 			continue
+		# Historico legado pode conter jogador ausente no endpoint de alunos.
 		if not grouped.has(jogador_id):
 			grouped[jogador_id] = _create_student_model_base({
 				"jogadorId": jogador_id,
@@ -1238,21 +1346,26 @@ func _build_student_models(respostas: Array[Dictionary], alunos: Array[Dictionar
 		row["erros"] = int(row.get("erros", 0)) + (0 if bool(resposta.get("acertou", false)) else 1)
 		row["respostas"] = int(row.get("respostas", 0)) + 1
 		row["maxFase"] = max(int(row.get("maxFase", 0)), int(resposta.get("fase", 0)))
+		# Sem snapshot atual, deriva casa e status a partir do historico.
 		if not bool(row.get("estadoAtualBackend", false)):
 			row["casaAtual"] = max(int(row.get("casaAtual", 1)), int(resposta.get("casaAtual", 1)))
+			# Qualquer resposta transforma um estado legado de aguardando em jogando.
 			if _normalize_student_status(str(row.get("statusPartida", ""))) == STUDENT_STATUS_AGUARDANDO:
 				row["statusPartida"] = STUDENT_STATUS_JOGANDO
+		# Como respostas chegam recentes primeiro, a primeira data e a ultima atividade.
 		if str(row.get("ultimaRespostaRaw", "")).is_empty():
 			row["ultimaRespostaRaw"] = resposta.get("respondidoEm", "")
 		grouped[jogador_id] = row
 
 	var students: Array[Dictionary] = []
+	# Finaliza calculos derivados e converte o Map em lista renderizavel.
 	for item in grouped.values():
 		var respostas_total: int = int(item.get("respostas", 0))
 		var acertos_total: int = int(item.get("acertos", 0))
 		var casa_atual: int = clampi(int(item.get("casaAtual", 1)), 1, STUDENT_TOTAL_BOARD_HOUSES)
 		var aproveitamento := 0 if respostas_total == 0 else int(round((float(acertos_total) / float(respostas_total)) * 100.0))
 		var status := _normalize_student_status(str(item.get("statusPartida", STUDENT_STATUS_AGUARDANDO)))
+		# Sem estado atual, respostas existentes indicam partida em andamento.
 		if not bool(item.get("estadoAtualBackend", false)) and status != STUDENT_STATUS_FINALIZADO:
 			status = STUDENT_STATUS_JOGANDO if respostas_total > 0 or status == STUDENT_STATUS_JOGANDO else STUDENT_STATUS_AGUARDANDO
 		item["pontuacao"] = int(item.get("pontuacao", 0)) if respostas_total > 0 else int(item.get("pontuacaoBackend", 0))
@@ -1263,6 +1376,7 @@ func _build_student_models(respostas: Array[Dictionary], alunos: Array[Dictionar
 		students.append(item)
 
 	students.sort_custom(func(a, b):
+		# Empate de pontuacao usa o nome para manter ordem deterministica.
 		if int(a.get("pontuacao", 0)) == int(b.get("pontuacao", 0)):
 			return str(a.get("nome", "")) < str(b.get("nome", ""))
 		return int(a.get("pontuacao", 0)) > int(b.get("pontuacao", 0))
@@ -1286,13 +1400,16 @@ func _create_student_model_base(source: Dictionary) -> Dictionary:
 	}
 
 func _summarize_student_states(models: Array[Dictionary]) -> Dictionary:
+	# Conta os tres estados exibidos nos cards do dashboard.
 	var summary := {
 		STUDENT_STATUS_AGUARDANDO: 0,
 		STUDENT_STATUS_JOGANDO: 0,
 		STUDENT_STATUS_FINALIZADO: 0,
 	}
+	# Cada aluno incrementa exatamente o estado normalizado correspondente.
 	for item in models:
 		var status: String = _normalize_student_status(str(item.get("status", STUDENT_STATUS_AGUARDANDO)))
+		# Guarda contra status desconhecido que nao pertence ao resumo.
 		if summary.has(status):
 			summary[status] = int(summary[status]) + 1
 	return summary
@@ -1322,8 +1439,10 @@ func _normalize_answer_list(payload: Variant) -> Array[Dictionary]:
 	return _extract_dictionary_array(payload)
 
 func _refresh_question_bank() -> void:
+	# Impede duas consultas simultaneas do mesmo banco.
 	if carregando_banco_perguntas:
 		return
+	# Sem sala limpa dados e solicita ao professor escolher um contexto.
 	if not ProfessorSession.has_current_room():
 		banco_perguntas.clear()
 		_populate_question_filters()
@@ -1338,9 +1457,11 @@ func _refresh_question_bank() -> void:
 	var response: Dictionary = await ApiClient.fetch_questions(requested_room_id)
 	carregando_banco_perguntas = false
 	_update_question_bank_controls_state()
+	# Troca de sala durante o await descarta a resposta antiga.
 	if not ProfessorSession.has_current_room() or ProfessorSession.current_room_id != requested_room_id:
 		return
 
+	# Falha zera o snapshot para nao exibir perguntas desatualizadas como atuais.
 	if not response.get("ok", false):
 		banco_perguntas.clear()
 		_render_question_bank()
@@ -1350,17 +1471,22 @@ func _refresh_question_bank() -> void:
 	banco_perguntas = _normalize_questions(response.get("data", []))
 	_populate_question_filters()
 	_render_question_bank()
+	# Contagem de perguntas atualiza os cards vazios ou o dashboard ja carregado.
 	if dashboard_payload.is_empty():
 		_render_empty_dashboard()
+	# Quando existem indicadores, renderiza novamente preservando os demais dados.
 	else:
 		_render_dashboard_data(dashboard_payload)
 
 func _normalize_questions(raw_questions: Variant) -> Array[Dictionary]:
 	var normalized: Array[Dictionary] = []
+	# Payload que nao e lista nao contem um banco valido.
 	if raw_questions is not Array:
 		return normalized
 
+	# Normaliza tipos e defaults de cada pergunta recebida.
 	for item in raw_questions:
+		# Ignora itens malformados sem perder os demais.
 		if item is not Dictionary:
 			continue
 		var question: Dictionary = item
@@ -1381,16 +1507,20 @@ func _normalize_questions(raw_questions: Variant) -> Array[Dictionary]:
 	return normalized
 
 func _populate_question_filters() -> void:
+	# Preserva selecoes atuais enquanto recompila valores unicos do banco.
 	var selected_materia := _get_selected_option_metadata(filtro_materia_perguntas)
 	var selected_dificuldade := _get_selected_option_metadata(filtro_dificuldade_perguntas)
 
 	var materias := {}
 	var dificuldades := {}
+	# Coleta materias e dificuldades distintas sem duplicacao.
 	for question in banco_perguntas:
 		var materia := str(question.get("materia", "")).strip_edges()
 		var dificuldade := str(question.get("dificuldade", "")).strip_edges()
+		# Materia vazia nao vira uma opcao de filtro sem nome.
 		if not materia.is_empty():
 			materias[materia] = true
+		# Dificuldade vazia tambem e omitida do seletor.
 		if not dificuldade.is_empty():
 			dificuldades[dificuldade] = true
 
@@ -1403,22 +1533,27 @@ func _populate_filter_option_button(option_button: OptionButton, default_label: 
 	option_button.set_item_metadata(0, "")
 	var sorted_values: Array = values.duplicate()
 	sorted_values.sort()
+	# Adiciona valores em ordem alfabetica para facilitar localizacao.
 	for value in sorted_values:
 		option_button.add_item(str(value))
 		option_button.set_item_metadata(option_button.item_count - 1, str(value))
 	_select_option_button_by_metadata(option_button, selected_value)
 
 func _select_option_button_by_metadata(option_button: OptionButton, expected: String) -> void:
+	# Procura a metadata anteriormente selecionada apos reconstruir o controle.
 	for index in range(option_button.item_count):
+		# Ao encontrar, seleciona e encerra a busca.
 		if str(option_button.get_item_metadata(index)) == expected:
 			option_button.select(index)
 			return
 	option_button.select(0)
 
 func _get_selected_option_metadata(option_button: OptionButton) -> String:
+	# Controle vazio representa filtro neutro.
 	if option_button.item_count == 0:
 		return ""
 	var selected := option_button.selected
+	# Indice invalido tambem volta ao filtro neutro.
 	if selected < 0 or selected >= option_button.item_count:
 		return ""
 	return str(option_button.get_item_metadata(selected))
@@ -1427,11 +1562,13 @@ func _on_question_filter_changed(_unused: Variant = null) -> void:
 	_render_question_bank()
 
 func _get_filtered_question_entries() -> Array[Dictionary]:
+	# Aplica busca textual, materia e dificuldade em conjunto.
 	var filtered: Array[Dictionary] = []
 	var search_term := input_busca_perguntas.text.strip_edges().to_lower()
 	var materia_filter := _get_selected_option_metadata(filtro_materia_perguntas)
 	var dificuldade_filter := _get_selected_option_metadata(filtro_dificuldade_perguntas)
 
+	# Avalia cada pergunta mantendo seu indice original para edicao/exclusao.
 	for index in range(banco_perguntas.size()):
 		var question: Dictionary = banco_perguntas[index]
 		var composite := "%s %s %s" % [
@@ -1439,10 +1576,13 @@ func _get_filtered_question_entries() -> Array[Dictionary]:
 			str(question.get("enunciado", "")),
 			str(question.get("materia", "")),
 		]
+		# Busca nao encontrada elimina o item antes dos outros filtros.
 		if not search_term.is_empty() and composite.to_lower().find(search_term) == -1:
 			continue
+		# Materia selecionada exige correspondencia exata.
 		if not materia_filter.is_empty() and str(question.get("materia", "")) != materia_filter:
 			continue
+		# Dificuldade selecionada exige correspondencia exata.
 		if not dificuldade_filter.is_empty() and str(question.get("dificuldade", "")) != dificuldade_filter:
 			continue
 		filtered.append({
@@ -1452,21 +1592,25 @@ func _get_filtered_question_entries() -> Array[Dictionary]:
 	return filtered
 
 func _render_question_bank() -> void:
+	# Renderiza o snapshot filtrado e estados vazios distintos.
 	_clear_container(lista_banco_perguntas)
 	_update_question_count_badge()
 	var entries: Array[Dictionary] = _get_filtered_question_entries()
 
+	# Banco realmente vazio sugere importar ou gerar conteudo.
 	if banco_perguntas.is_empty():
 		_set_question_bank_feedback("Nenhuma pergunta salva no banco ainda.", COLOR_MUTED)
 		lista_banco_perguntas.add_child(_create_empty_state_panel("Banco vazio", "Importe uma planilha ou aprove perguntas geradas pela IA para comecar a montar seu banco oficial."))
 		return
 
+	# Banco com itens, mas sem correspondencia, indica filtros restritivos.
 	if entries.is_empty():
 		_set_question_bank_feedback("Nenhuma pergunta combina com os filtros aplicados.", STATUS_WARNING)
 		lista_banco_perguntas.add_child(_create_empty_state_panel("Sem resultados", "Tente limpar a busca ou ajustar os filtros de materia e dificuldade."))
 		return
 
 	_set_question_bank_feedback("%d perguntas visiveis para revisao." % entries.size(), COLOR_TEXT)
+	# Cada resultado filtrado vira um card editavel.
 	for entry in entries:
 		lista_banco_perguntas.add_child(_create_bank_question_card(entry))
 
@@ -1494,6 +1638,7 @@ func _create_bank_question_card(entry: Dictionary) -> PanelContainer:
 	badge_row.add_child(_create_inline_badge("Materia: %s" % str(question.get("materia", "Sem materia")), _tint_color(STATUS_INFO, 0.90), STATUS_INFO))
 	badge_row.add_child(_create_inline_badge("Dificuldade: %s" % str(question.get("dificuldade", "Facil")), _tint_color(STATUS_WARNING, 0.90), STATUS_WARNING))
 	badge_row.add_child(_create_inline_badge("Pontuacao: %d" % int(question.get("pontuacao", 100)), _tint_color(STATUS_OK, 0.90), STATUS_OK))
+	# Badge de tempo aparece apenas quando existe limite configurado.
 	if int(question.get("tempoLimite", 0)) > 0:
 		badge_row.add_child(_create_inline_badge("Tempo: %ds" % int(question.get("tempoLimite", 0)), _tint_color(COLOR_ACCENT, 0.90), COLOR_ACCENT))
 
@@ -1537,54 +1682,72 @@ func _create_bank_question_card(entry: Dictionary) -> PanelContainer:
 	toggle_button.pressed.connect(_on_bank_card_toggle_pressed.bind(question_id))
 	return card
 
+# Alterna a abertura de um card sem perder o estado dos demais cards do banco.
 func _on_bank_card_toggle_pressed(question_id: int) -> void:
+	# Remove o identificador quando o card ja esta aberto para que ele seja recolhido.
 	if expanded_bank_question_ids.has(question_id):
 		expanded_bank_question_ids.erase(question_id)
+	# Registra o identificador quando o card ainda esta fechado para exibir seus detalhes.
 	else:
 		expanded_bank_question_ids[question_id] = true
 	_render_question_bank()
 
+# Abre todos os cards das perguntas atualmente carregadas no banco.
 func _on_botao_expandir_todas_pressed() -> void:
 	expanded_bank_question_ids.clear()
+	# Registra cada pergunta pelo ID para que a renderizacao considere todos os cards abertos.
 	for question in banco_perguntas:
 		expanded_bank_question_ids[int(question.get("id", 0))] = true
 	_render_question_bank()
 
+# Fecha todos os cards ao limpar o conjunto de identificadores expandidos.
 func _on_botao_recolher_todas_pressed() -> void:
 	expanded_bank_question_ids.clear()
 	_render_question_bank()
 
+# Mantem detalhes, acoes e texto do botao coerentes com o estado aberto ou fechado do card.
 func _set_question_card_expanded(detail_container: VBoxContainer, action_row: HBoxContainer, toggle_button: Button, expanded: bool) -> void:
 	detail_container.visible = expanded
 	action_row.visible = expanded
 	toggle_button.text = "Recolher" if expanded else "Expandir"
 	_apply_button_palette(toggle_button, COLOR_SURFACE, COLOR_BORDER, COLOR_TEXT)
 
+# Atualiza no modelo local um campo de texto simples editado no card da pergunta.
 func _on_bank_question_text_changed(new_text: String, index: int, field_name: String) -> void:
+	# Ignora eventos atrasados de controles cujo indice nao existe mais apos uma nova renderizacao.
 	if not _has_bank_question(index):
 		return
 	banco_perguntas[index][field_name] = new_text.strip_edges()
 
+# Atualiza no modelo local um campo de texto multilinha editado no card.
 func _on_bank_question_text_edit_changed(index: int, field_name: String, text_edit: TextEdit) -> void:
+	# Ignora eventos atrasados de controles cujo indice nao existe mais apos uma nova renderizacao.
 	if not _has_bank_question(index):
 		return
 	banco_perguntas[index][field_name] = text_edit.text.strip_edges()
 
+# Armazena no modelo local a opcao escolhida em um seletor da pergunta.
 func _on_bank_question_option_selected(selected_index: int, index: int, field_name: String, option_button: OptionButton) -> void:
+	# Ignora eventos atrasados de controles cujo indice nao existe mais apos uma nova renderizacao.
 	if not _has_bank_question(index):
 		return
 	banco_perguntas[index][field_name] = option_button.get_item_text(selected_index)
 
+# Converte o valor numerico do controle para inteiro antes de atualizar o modelo local.
 func _on_bank_question_number_changed(value: float, index: int, field_name: String) -> void:
+	# Ignora eventos atrasados de controles cujo indice nao existe mais apos uma nova renderizacao.
 	if not _has_bank_question(index):
 		return
 	banco_perguntas[index][field_name] = int(round(value))
 
+# Valida e persiste somente a pergunta correspondente ao card acionado.
 func _on_bank_question_save_pressed(index: int) -> void:
+	# Impede salvamentos concorrentes e eventos de cards que deixaram de existir.
 	if carregando_banco_perguntas or not _has_bank_question(index):
 		return
 	var question: Dictionary = banco_perguntas[index]
 	var validation_error := _validate_question_payload(question, index + 1)
+	# Interrompe antes da API quando algum campo viola as regras minimas da pergunta.
 	if not validation_error.is_empty():
 		_set_question_bank_feedback(validation_error, STATUS_ERROR)
 		return
@@ -1593,6 +1756,7 @@ func _on_bank_question_save_pressed(index: int) -> void:
 	_update_question_bank_controls_state()
 	_set_question_bank_feedback("Salvando alteracoes de %s..." % _question_title(question), STATUS_INFO)
 	var sala_id := ProfessorSession.current_room_id if ProfessorSession.has_current_room() else 0
+	# Exige uma sala ativa porque toda pergunta deve permanecer isolada em seu banco de origem.
 	if sala_id <= 0:
 		carregando_banco_perguntas = false
 		_update_question_bank_controls_state()
@@ -1602,6 +1766,7 @@ func _on_bank_question_save_pressed(index: int) -> void:
 	carregando_banco_perguntas = false
 	_update_question_bank_controls_state()
 
+	# Mantem a edicao na tela e apresenta o erro quando o backend rejeita a atualizacao.
 	if not response.get("ok", false):
 		_set_question_bank_feedback(response.get("error", "Nao foi possivel salvar a pergunta."), STATUS_ERROR)
 		return
@@ -1609,10 +1774,13 @@ func _on_bank_question_save_pressed(index: int) -> void:
 	_set_question_bank_feedback("%s atualizada com sucesso." % _question_title(question), STATUS_OK)
 	await _refresh_question_bank()
 
+# Prepara a confirmacao para exclusao logica de uma unica pergunta da sala atual.
 func _on_bank_question_delete_pressed(index: int) -> void:
+	# Ignora a acao durante outra operacao ou quando o card ja nao corresponde a uma pergunta valida.
 	if carregando_banco_perguntas or not _has_bank_question(index):
 		return
 	var sala_id := ProfessorSession.current_room_id if ProfessorSession.has_current_room() else 0
+	# Nao permite excluir sem sala, evitando que uma pergunta de outro banco seja atingida.
 	if sala_id <= 0:
 		_set_question_bank_feedback("Selecione uma sala antes de eliminar a pergunta.", STATUS_ERROR)
 		return
@@ -1630,7 +1798,9 @@ func _on_bank_question_delete_pressed(index: int) -> void:
 	]
 	confirmacao_apagar_perguntas.popup_centered()
 
+# Prepara uma confirmacao explicita antes de excluir todas as perguntas ativas da sala selecionada.
 func _on_botao_eliminar_perguntas_pressed() -> void:
+	# Desabilita a exclusao quando ha operacao em curso, banco vazio ou nenhuma sala selecionada.
 	if carregando_banco_perguntas or banco_perguntas.is_empty() or not ProfessorSession.has_current_room():
 		return
 
@@ -1646,20 +1816,26 @@ func _on_botao_eliminar_perguntas_pressed() -> void:
 	]
 	confirmacao_apagar_perguntas.popup_centered()
 
+# Direciona a confirmacao para exclusao individual ou em lote conforme a acao que abriu o dialogo.
 func _on_confirmacao_apagar_perguntas_confirmed() -> void:
+	# Descarta confirmacoes atrasadas e requisicoes sem uma sala de destino valida.
 	if carregando_banco_perguntas or pergunta_exclusao_sala_id <= 0:
 		return
+	# Usa o fluxo em lote quando o professor confirmou a limpeza completa da sala.
 	if pergunta_exclusao_todas:
 		await _eliminar_todas_perguntas_confirmadas()
+	# Caso contrario, remove somente a pergunta registrada no momento da abertura do dialogo.
 	else:
 		await _eliminar_pergunta_confirmada()
 	pergunta_exclusao_id = 0
 	pergunta_exclusao_sala_id = 0
 	pergunta_exclusao_todas = false
 
+# Executa a exclusao logica de uma pergunta e atualiza banco e indicadores sem apagar o historico.
 func _eliminar_pergunta_confirmada() -> void:
 	var question_id := pergunta_exclusao_id
 	var sala_id := pergunta_exclusao_sala_id
+	# Cancela quando o dialogo nao preservou um identificador de pergunta valido.
 	if question_id <= 0:
 		return
 
@@ -1670,6 +1846,7 @@ func _eliminar_pergunta_confirmada() -> void:
 	carregando_banco_perguntas = false
 	_update_question_bank_controls_state()
 
+	# Mantem os dados locais quando a API nao confirma a exclusao.
 	if not response.get("ok", false):
 		_set_question_bank_feedback(response.get("error", "Nao foi possivel eliminar a pergunta."), STATUS_ERROR)
 		return
@@ -1679,6 +1856,7 @@ func _eliminar_pergunta_confirmada() -> void:
 	await _refresh_dashboard()
 	_set_question_bank_feedback("Pergunta #%d eliminada. O historico foi preservado." % question_id, STATUS_OK)
 
+# Exclui logicamente todas as perguntas ativas da sala confirmada e preserva seus registros historicos.
 func _eliminar_todas_perguntas_confirmadas() -> void:
 	var sala_id := pergunta_exclusao_sala_id
 	carregando_banco_perguntas = true
@@ -1688,6 +1866,7 @@ func _eliminar_todas_perguntas_confirmadas() -> void:
 	carregando_banco_perguntas = false
 	_update_question_bank_controls_state()
 
+	# Mantem os dados locais quando a API nao confirma a exclusao em lote.
 	if not response.get("ok", false):
 		_set_question_bank_feedback(response.get("error", "Nao foi possivel eliminar as perguntas da sala."), STATUS_ERROR)
 		return
@@ -1698,18 +1877,23 @@ func _eliminar_todas_perguntas_confirmadas() -> void:
 	await _refresh_dashboard()
 	_set_question_bank_feedback("%d perguntas eliminadas da sala. O historico foi preservado." % total, STATUS_OK)
 
+# Confirma se um indice ainda aponta para uma pergunta do banco carregado.
 func _has_bank_question(index: int) -> bool:
 	return index >= 0 and index < banco_perguntas.size()
 
+# Remove campos exclusivos da interface e valores opcionais vazios antes de enviar a pergunta a API.
 func _build_question_payload(question: Dictionary) -> Dictionary:
 	var payload: Dictionary = question.duplicate(true)
 	payload.erase("id")
+	# Omite o titulo vazio para que o backend aplique sua regra de campo opcional.
 	if str(payload.get("titulo", "")).strip_edges().is_empty():
 		payload.erase("titulo")
+	# Omite tempo zero para que a ausencia de limite seja tratada de forma consistente pelo backend.
 	if int(payload.get("tempoLimite", 0)) <= 0:
 		payload.erase("tempoLimite")
 	return payload
 
+# Aplica no cliente as mesmas validacoes essenciais esperadas pelo cadastro de perguntas.
 func _validate_question_payload(question: Dictionary, display_index: int) -> String:
 	var required_fields: Array[String] = [
 		"enunciado",
@@ -1720,19 +1904,25 @@ func _validate_question_payload(question: Dictionary, display_index: int) -> Str
 		"materia",
 		"dificuldade",
 	]
+	# Verifica todos os campos textuais obrigatorios e informa exatamente qual pergunta precisa de ajuste.
 	for field_name in required_fields:
+		# Rejeita valores vazios ou compostos apenas por espacos.
 		if str(question.get(field_name, "")).strip_edges().is_empty():
 			return "A pergunta %d precisa preencher o campo %s antes de salvar." % [display_index, field_name]
 
 	var resposta_correta := str(question.get("respostaCorreta", "")).strip_edges().to_upper()
+	# Limita a resposta correta as quatro alternativas que o jogo consegue apresentar e avaliar.
 	if not QUESTION_CORRECT_OPTIONS.has(resposta_correta):
 		return "A pergunta %d precisa ter uma resposta correta entre A, B, C ou D." % display_index
+	# Exige valor positivo para que uma resposta correta possa contribuir para o ranking.
 	if int(question.get("pontuacao", 0)) <= 0:
 		return "A pergunta %d precisa ter pontuacao maior que zero." % display_index
+	# Aceita zero como ausencia de cronometro, mas nunca um tempo negativo.
 	if int(question.get("tempoLimite", 0)) < 0:
 		return "A pergunta %d possui tempo limite invalido." % display_index
 	return ""
 
+# Centraliza o bloqueio e os rotulos dos controles durante carregamento, importacao ou alteracoes no banco.
 func _update_question_bank_controls_state() -> void:
 	botao_atualizar_perguntas.disabled = carregando or carregando_banco_perguntas or importando_perguntas
 	botao_atualizar_perguntas.text = "Atualizando..." if carregando_banco_perguntas else "Atualizar Banco"
@@ -1745,41 +1935,52 @@ func _update_question_bank_controls_state() -> void:
 	botao_baixar_modelo.text = "Preparando..." if carregando or importando_perguntas else "Baixar Modelo"
 	botao_importar.text = "Importando..." if importando_perguntas else "Selecionar Planilha"
 
+# Mostra quantas perguntas passam pelos filtros em relacao ao total carregado da sala.
 func _update_question_count_badge() -> void:
+	# Durante a requisicao, troca a contagem por um estado que nao sugira dados definitivos.
 	if carregando_banco_perguntas:
 		contador_banco_perguntas.text = "Atualizando..."
 		return
 	var visible_count := _get_filtered_question_entries().size()
 	contador_banco_perguntas.text = "%d de %d perguntas" % [visible_count, banco_perguntas.size()]
 
+# Exibe o retorno da ultima operacao e recalcula o contador do banco.
 func _set_question_bank_feedback(message: String, color_value: Color) -> void:
 	resumo_banco_perguntas.text = message
 	resumo_banco_perguntas.add_theme_color_override("font_color", color_value)
 	_update_question_count_badge()
 
+# Solicita novamente as perguntas ativas da sala selecionada.
 func _on_botao_atualizar_banco_perguntas_pressed() -> void:
 	await _refresh_question_bank()
 
+# Abre a escolha de planilha somente depois de fixar uma sala valida como destino da importacao.
 func _on_botao_importar_pressed() -> void:
+	# Evita abrir dialogos concorrentes ou usar um dialogo que ainda nao foi criado.
 	if carregando or importando_perguntas or import_dialog == null:
 		return
 	importacao_sala_id = _get_question_target_room_id(import_room_selector)
+	# Exige a sala antes do arquivo para impedir a importacao em um banco indefinido.
 	if importacao_sala_id <= 0:
 		_set_import_feedback("Selecione uma sala de destino antes de importar.", STATUS_ERROR)
 		return
 	_set_import_feedback("Selecione uma planilha .csv ou .xlsx para importar perguntas.", STATUS_INFO)
 	import_dialog.popup_centered_ratio(0.72)
 
+# Abre o seletor de destino para salvar uma copia do modelo CSV compativel com a importacao.
 func _on_botao_baixar_modelo_pressed() -> void:
+	# Evita abrir o dialogo enquanto outra operacao utiliza os controles de importacao.
 	if carregando or importando_perguntas or template_download_dialog == null:
 		return
 	_set_import_feedback("Escolha onde salvar o modelo de planilha.", STATUS_INFO)
 	template_download_dialog.current_file = TEMPLATE_SPREADSHEET_FILENAME
 	template_download_dialog.popup_centered_ratio(0.72)
 
+# Grava o cabecalho e um exemplo do modelo CSV no caminho escolhido pelo professor.
 func _on_template_download_file_selected(path: String) -> void:
 	var target_path := path if path.get_extension().to_lower() == "csv" else "%s.csv" % path
 	var target_file := FileAccess.open(target_path, FileAccess.WRITE)
+	# Informa falha de permissao ou caminho sem tentar escrever em um arquivo inexistente.
 	if target_file == null:
 		_set_import_feedback("Nao foi possivel salvar o modelo no local escolhido.", STATUS_ERROR)
 		_show_status("Nao foi possivel salvar o modelo no local escolhido.", STATUS_ERROR)
@@ -1788,6 +1989,7 @@ func _on_template_download_file_selected(path: String) -> void:
 	target_file.store_string("%s\r\n%s\r\n" % [TEMPLATE_SPREADSHEET_HEADER, TEMPLATE_SPREADSHEET_EXAMPLE])
 	var write_error := target_file.get_error()
 	target_file.close()
+	# Trata erros ocorridos durante a gravacao mesmo quando o arquivo foi aberto corretamente.
 	if write_error != OK:
 		_set_import_feedback("Nao foi possivel concluir a gravacao do modelo.", STATUS_ERROR)
 		_show_status("Falha ao gravar o modelo de planilha.", STATUS_ERROR)
@@ -1796,9 +1998,12 @@ func _on_template_download_file_selected(path: String) -> void:
 	_set_import_feedback("Modelo CSV salvo com sucesso em %s." % target_path.get_file(), STATUS_OK)
 	_show_status("Modelo de planilha salvo com sucesso.", STATUS_OK)
 
+# Envia a planilha selecionada para a API e atualiza o banco quando a importacao pertence a sala visivel.
 func _on_import_file_selected(path: String) -> void:
+	# Impede que dois arquivos sejam enviados ao mesmo tempo.
 	if importando_perguntas:
 		return
+	# Revalida a sala capturada antes de abrir o seletor para evitar destino obsoleto ou inexistente.
 	if importacao_sala_id <= 0:
 		_set_import_feedback("A sala de destino da importacao nao e valida.", STATUS_ERROR)
 		return
@@ -1813,6 +2018,7 @@ func _on_import_file_selected(path: String) -> void:
 	_update_question_bank_controls_state()
 	_update_ia_controls_state()
 
+	# Exibe a mensagem do backend e preserva a lista atual quando a importacao falha.
 	if not response.get("ok", false):
 		_set_import_feedback(response.get("error", "Nao foi possivel importar a planilha."), STATUS_ERROR)
 		_show_status(response.get("error", "Nao foi possivel importar a planilha."), STATUS_ERROR)
@@ -1822,20 +2028,25 @@ func _on_import_file_selected(path: String) -> void:
 	var imported_count: int = int(payload.get("total", 0))
 	_set_import_feedback("%d perguntas importadas com sucesso." % imported_count, STATUS_OK)
 	_show_status("%d perguntas importadas com sucesso." % imported_count, STATUS_OK)
+	# Recarrega imediatamente somente se a sala importada ainda e a que o professor esta consultando.
 	if ProfessorSession.has_current_room() and ProfessorSession.current_room_id == importacao_sala_id:
 		await _refresh_question_bank()
 
+# Atualiza a mensagem dedicada as operacoes de planilha.
 func _set_import_feedback(message: String, color_value: Color) -> void:
 	importar_feedback.text = message
 	importar_feedback.add_theme_color_override("font_color", color_value)
 
+# Valida os parametros, solicita a geracao por IA e mantem as perguntas em revisao antes de salvar.
 func _on_botao_gerar_ia_pressed() -> void:
+	# Impede uma nova geracao durante requisicao, salvamento ou atualizacao geral do painel.
 	if ia_processando or ia_salvando or carregando:
 		return
 
 	var tema := ia_tema_input.text.strip_edges()
 	var materia := ia_materia_input.text.strip_edges()
 	var dificuldade := ""
+	# Le a dificuldade somente quando o seletor possui uma opcao valida.
 	if ia_dificuldade_select.selected >= 0:
 		dificuldade = ia_dificuldade_select.get_item_text(ia_dificuldade_select.selected).strip_edges()
 	var quantidade := int(ia_quantidade_input.value)
@@ -1843,25 +2054,32 @@ func _on_botao_gerar_ia_pressed() -> void:
 	var tempo_limite := int(ia_tempo_input.value)
 	var sala_id := _get_question_target_room_id(ia_room_selector)
 
+	# Toda geracao precisa de uma sala para que as perguntas aprovadas tenham destino definido.
 	if sala_id <= 0:
 		_show_ia_validation_error("Selecione uma sala de destino para as perguntas.", ia_room_selector)
 		return
 
+	# O tema orienta o conteudo e, por isso, nao pode ser vazio.
 	if tema.is_empty():
 		_show_ia_validation_error("Informe um tema para gerar perguntas.", ia_tema_input)
 		return
+	# A materia e obrigatoria para classificar e filtrar as perguntas geradas.
 	if materia.is_empty():
 		_show_ia_validation_error("Informe uma materia para gerar perguntas.", ia_materia_input)
 		return
+	# A dificuldade precisa corresponder a uma opcao conhecida pela interface e pela API.
 	if dificuldade.is_empty():
 		_show_ia_validation_error("Selecione uma dificuldade para a geracao.", ia_dificuldade_select)
 		return
+	# A API so deve ser acionada quando existe ao menos uma pergunta a gerar.
 	if quantidade <= 0:
 		_show_ia_validation_error("A quantidade de perguntas deve ser maior que zero.", ia_quantidade_input)
 		return
+	# Perguntas aprovadas precisam oferecer pontuacao positiva aos alunos.
 	if pontuacao <= 0:
 		_show_ia_validation_error("A pontuacao por pergunta deve ser maior que zero.", ia_pontuacao_input)
 		return
+	# Zero representa pergunta sem limite; valores negativos sao invalidos.
 	if tempo_limite < 0:
 		_show_ia_validation_error("O tempo de resposta nao pode ser negativo.", ia_tempo_input)
 		return
@@ -1875,6 +2093,7 @@ func _on_botao_gerar_ia_pressed() -> void:
 	ia_processando = false
 	_update_ia_controls_state()
 
+	# Mantem a area de revisao intacta e apresenta a falha quando a IA ou a API nao responde corretamente.
 	if not response.get("ok", false):
 		_show_ia_feedback(response.get("error", "Nao foi possivel gerar perguntas com IA."), STATUS_ERROR)
 		_show_status(response.get("error", "Nao foi possivel gerar perguntas com IA."), STATUS_ERROR)
@@ -1888,11 +2107,15 @@ func _on_botao_gerar_ia_pressed() -> void:
 	_show_ia_feedback("%d perguntas foram geradas e estao prontas para revisao." % perguntas_geradas.size(), STATUS_OK)
 	_show_status("Perguntas geradas com IA. Revise, aprove ou rejeite cada item.", STATUS_OK)
 
+# Converte a resposta variavel da API em uma lista segura e padronizada para a etapa de auditoria.
 func _normalize_generated_questions(raw_questions: Variant) -> Array[Dictionary]:
 	var normalized: Array[Dictionary] = []
+	# Uma resposta fora do formato de lista nao pode ser transformada em cards de perguntas.
 	if raw_questions is not Array:
 		return normalized
+	# Normaliza cada item individualmente para limitar os tipos e aplicar valores padrao da interface.
 	for item in raw_questions:
+		# Ignora valores estranhos sem impedir que as demais perguntas validas sejam revisadas.
 		if item is not Dictionary:
 			continue
 		var question: Dictionary = item
@@ -1912,17 +2135,21 @@ func _normalize_generated_questions(raw_questions: Variant) -> Array[Dictionary]
 		})
 	return normalized
 
+# Reconstroi a lista de previa com uma mensagem vazia ou um card para cada pergunta gerada.
 func _render_generated_questions() -> void:
 	_clear_container(ia_lista)
+	# Explica o proximo passo quando ainda nao existe conteudo gerado para auditar.
 	if perguntas_geradas.is_empty():
 		ia_lista.add_child(_create_empty_state_panel("Nenhuma previa gerada", "Depois de preencher o formulario e gerar perguntas, elas aparecerao aqui em cards expansivos para revisao."))
 		_update_ia_summary()
 		return
 
+	# Mantem o indice de cada pergunta associado aos eventos de edicao e aprovacao do respectivo card.
 	for index in range(perguntas_geradas.size()):
 		ia_lista.add_child(_create_generated_question_card(index, perguntas_geradas[index]))
 	_update_ia_summary()
 
+# Monta um card editavel para o professor revisar, aprovar ou rejeitar uma sugestao da IA.
 func _create_generated_question_card(index: int, question: Dictionary) -> PanelContainer:
 	var card: PanelContainer = QuestionCardScene.instantiate() as PanelContainer
 	var status: String = str(question.get("statusAuditoria", IA_STATUS_PENDING))
@@ -1994,53 +2221,72 @@ func _create_generated_question_card(index: int, question: Dictionary) -> PanelC
 	toggle_button.pressed.connect(_on_generated_card_toggle_pressed.bind(index))
 	return card
 
+# Alterna a abertura de um card gerado e preserva o estado dos demais cards.
 func _on_generated_card_toggle_pressed(index: int) -> void:
+	# Remove o indice quando a pergunta ja esta expandida para recolher seus detalhes.
 	if expanded_generated_question_ids.has(index):
 		expanded_generated_question_ids.erase(index)
+	# Adiciona o indice quando a pergunta esta fechada para mostrar a area de auditoria.
 	else:
 		expanded_generated_question_ids[index] = true
 	_render_generated_questions()
 
+# Atualiza um campo simples da pergunta gerada enquanto ela ainda esta em revisao local.
 func _on_generated_question_text_changed(new_text: String, index: int, field_name: String) -> void:
+	# Ignora eventos atrasados de um card removido ou recriado.
 	if not _has_generated_question(index):
 		return
 	perguntas_geradas[index][field_name] = new_text.strip_edges()
 
+# Atualiza um campo multilinha da pergunta gerada enquanto ela ainda esta em revisao local.
 func _on_generated_question_text_edit_changed(index: int, field_name: String, text_edit: TextEdit) -> void:
+	# Ignora eventos atrasados de um card removido ou recriado.
 	if not _has_generated_question(index):
 		return
 	perguntas_geradas[index][field_name] = text_edit.text.strip_edges()
 
+# Registra a opcao selecionada em um dos campos controlados da pergunta gerada.
 func _on_generated_question_option_selected(selected_index: int, index: int, field_name: String, option_button: OptionButton) -> void:
+	# Ignora eventos atrasados de um card removido ou recriado.
 	if not _has_generated_question(index):
 		return
 	perguntas_geradas[index][field_name] = option_button.get_item_text(selected_index)
 
+# Arredonda e registra valores numericos editados na previa da pergunta gerada.
 func _on_generated_question_number_changed(value: float, index: int, field_name: String) -> void:
+	# Ignora eventos atrasados de um card removido ou recriado.
 	if not _has_generated_question(index):
 		return
 	perguntas_geradas[index][field_name] = int(round(value))
 
+# Muda a decisao de auditoria da pergunta e redesenha o card com o novo estado visual.
 func _on_generated_question_status_changed(index: int, new_status: String) -> void:
+	# Nao altera uma posicao que deixou de existir apos uma nova geracao ou salvamento.
 	if not _has_generated_question(index):
 		return
 	perguntas_geradas[index]["statusAuditoria"] = new_status
 	_render_generated_questions()
 
+# Marca de uma vez todas as sugestoes como aprovadas para agilizar a auditoria.
 func _on_botao_aprovar_todas_pressed() -> void:
 	_set_all_generated_questions_status(IA_STATUS_APPROVED)
 
+# Marca de uma vez todas as sugestoes como rejeitadas sem persisti-las no banco.
 func _on_botao_rejeitar_todas_pressed() -> void:
 	_set_all_generated_questions_status(IA_STATUS_REJECTED)
 
+# Aplica a mesma decisao de auditoria a todas as perguntas geradas localmente.
 func _set_all_generated_questions_status(new_status: String) -> void:
+	# Ignora a acao sem previa ou durante operacoes que poderiam concorrer com a alteracao.
 	if perguntas_geradas.is_empty() or ia_processando or ia_salvando:
 		return
+	# Percorre todas as sugestoes para substituir apenas o estado de auditoria.
 	for index in range(perguntas_geradas.size()):
 		perguntas_geradas[index]["statusAuditoria"] = new_status
 	_render_generated_questions()
 	_show_ia_feedback("Todas as perguntas foram marcadas como %s." % _get_bulk_status_text(new_status), _status_color(new_status))
 
+# Recalcula o resumo de pendentes, aprovadas e rejeitadas exibido ao professor.
 func _update_ia_summary() -> void:
 	var pendentes := _count_generated_questions_with_status(IA_STATUS_PENDING)
 	var aprovadas := _count_generated_questions_with_status(IA_STATUS_APPROVED)
@@ -2049,13 +2295,17 @@ func _update_ia_summary() -> void:
 	ia_label_resumo.add_theme_color_override("font_color", COLOR_TEXT)
 	_update_ia_controls_state()
 
+# Conta quantas perguntas geradas possuem um estado de auditoria especifico.
 func _count_generated_questions_with_status(status: String) -> int:
 	var total := 0
+	# Examina cada sugestao porque a contagem controla botoes e o resumo da auditoria.
 	for question in perguntas_geradas:
+		# Incrementa somente quando o estado armazenado corresponde ao estado solicitado.
 		if str(question.get("statusAuditoria", IA_STATUS_PENDING)) == status:
 			total += 1
 	return total
 
+# Bloqueia os campos durante operacoes assincronas e habilita o salvamento apenas com perguntas aprovadas.
 func _update_ia_controls_state() -> void:
 	var controls_locked := carregando or importando_perguntas or ia_processando or ia_salvando or carregando_banco_perguntas
 	ia_tema_input.editable = not controls_locked
@@ -2073,23 +2323,30 @@ func _update_ia_controls_state() -> void:
 	ia_botao_salvar.text = "Salvando..." if ia_salvando else "Salvar Perguntas"
 	botao_sair.disabled = controls_locked
 
+# Exibe uma mensagem especifica da area de geracao e auditoria por IA.
 func _show_ia_feedback(message: String, color_value: Color) -> void:
 	ia_label_feedback.text = message
 	ia_label_feedback.add_theme_color_override("font_color", color_value)
 
+# Mostra a regra de validacao violada e direciona o foco ao campo que precisa ser corrigido.
 func _show_ia_validation_error(message: String, field: Control) -> void:
 	_show_ia_feedback(message, STATUS_ERROR)
 	_show_status(message, STATUS_ERROR)
+	# Move o foco somente quando o erro esta associado a um controle existente.
 	if field != null:
 		field.grab_focus()
 
+# Persiste exclusivamente as perguntas que o professor aprovou durante a auditoria.
 func _on_botao_salvar_aprovadas_pressed() -> void:
+	# Impede salvamento concorrente com outra requisicao da IA.
 	if ia_salvando or ia_processando:
 		return
 	var payload := _build_approved_questions_payload()
+	# Nao chama a API quando nenhuma pergunta passou pela aprovacao do professor.
 	if payload.is_empty():
 		_show_ia_feedback("Nenhuma pergunta aprovada foi selecionada para salvar.", STATUS_ERROR)
 		return
+	# Revalida a sala capturada na geracao para evitar salvar as sugestoes em destino indefinido.
 	if perguntas_geradas_sala_id <= 0:
 		_show_ia_feedback("A sala de destino das perguntas geradas nao e valida.", STATUS_ERROR)
 		return
@@ -2103,6 +2360,7 @@ func _on_botao_salvar_aprovadas_pressed() -> void:
 	ia_salvando = false
 	_update_ia_controls_state()
 
+	# Preserva a previa para nova tentativa quando o backend rejeita o lote aprovado.
 	if not response.get("ok", false):
 		_show_ia_feedback(response.get("error", "Nao foi possivel salvar as perguntas aprovadas."), STATUS_ERROR)
 		_show_status(response.get("error", "Nao foi possivel salvar as perguntas aprovadas."), STATUS_ERROR)
@@ -2111,37 +2369,47 @@ func _on_botao_salvar_aprovadas_pressed() -> void:
 	var saved_count: int = int(response.get("data", {}).get("total", payload.size()))
 	perguntas_geradas.clear()
 	perguntas_geradas_sala_id = 0
+	# Depois do salvamento, volta o seletor para a sala corrente quando ainda existe uma sessao ativa.
 	if ProfessorSession.has_current_room():
 		_select_question_target_room(ProfessorSession.current_room_id)
 	expanded_generated_question_ids.clear()
 	_render_generated_questions()
 	_show_ia_feedback("%d perguntas aprovadas foram salvas com sucesso." % saved_count, STATUS_OK)
 	_show_status("%d perguntas aprovadas foram salvas no banco." % saved_count, STATUS_OK)
+	# Atualiza o banco imediatamente quando as perguntas foram salvas na sala que esta sendo visualizada.
 	if ProfessorSession.has_current_room() and ProfessorSession.current_room_id == sala_destino_id:
 		await _refresh_question_bank()
 
+# Filtra, valida e limpa os metadados locais antes de montar o lote aprovado para a API.
 func _build_approved_questions_payload() -> Array[Dictionary]:
 	var payload: Array[Dictionary] = []
+	# Preserva a ordem visual para que mensagens de validacao indiquem o numero correto do card.
 	for index in range(perguntas_geradas.size()):
 		var question: Dictionary = perguntas_geradas[index]
+		# Ignora pendentes e rejeitadas porque somente a aprovacao explicita autoriza a persistencia.
 		if str(question.get("statusAuditoria", IA_STATUS_PENDING)) != IA_STATUS_APPROVED:
 			continue
 		var validation_error := _validate_question_payload(question, index + 1)
+		# Interrompe todo o lote quando uma aprovada ainda viola as regras obrigatorias.
 		if not validation_error.is_empty():
 			_show_ia_feedback(validation_error, STATUS_ERROR)
 			return []
 		var question_payload: Dictionary = question.duplicate(true)
 		question_payload.erase("statusAuditoria")
+		# Remove o titulo vazio porque ele e opcional no contrato do backend.
 		if str(question_payload.get("titulo", "")).strip_edges().is_empty():
 			question_payload.erase("titulo")
+		# Remove tempo zero para representar corretamente uma pergunta sem limite configurado.
 		if int(question_payload.get("tempoLimite", 0)) <= 0:
 			question_payload.erase("tempoLimite")
 		payload.append(question_payload)
 	return payload
 
+# Confirma se um indice ainda aponta para uma sugestao da IA em memoria.
 func _has_generated_question(index: int) -> bool:
 	return index >= 0 and index < perguntas_geradas.size()
 
+# Traduz o estado interno de auditoria para o rotulo apresentado no card.
 func _get_ia_status_label(status: String) -> String:
 	match status:
 		IA_STATUS_APPROVED:
@@ -2151,6 +2419,7 @@ func _get_ia_status_label(status: String) -> String:
 		_:
 			return "Pendente"
 
+# Traduz o estado interno para a forma plural usada no retorno de acoes em lote.
 func _get_bulk_status_text(status: String) -> String:
 	match status:
 		IA_STATUS_APPROVED:
@@ -2160,6 +2429,7 @@ func _get_bulk_status_text(status: String) -> String:
 		_:
 			return "pendentes"
 
+# Define a cor semantica compartilhada pelos estados de auditoria.
 func _status_color(status: String) -> Color:
 	match status:
 		IA_STATUS_APPROVED:
@@ -2169,38 +2439,49 @@ func _status_color(status: String) -> Color:
 		_:
 			return STATUS_WARNING
 
+# Produz um fundo suave a partir da cor semantica do estado da pergunta.
 func _status_surface_color(status: String) -> Color:
 	return _tint_color(_status_color(status), 0.92)
 
+# Destaca o botao correspondente ao estado atual e suaviza as demais opcoes.
 func _button_bg_for_status(target_status: String, current_status: String) -> Color:
 	return _status_color(target_status) if target_status == current_status else _tint_color(_status_color(target_status), 0.92)
 
+# Garante contraste do texto conforme o botao represente ou nao o estado selecionado.
 func _button_text_for_status(target_status: String, current_status: String) -> Color:
 	return Color(1.0, 1.0, 1.0, 1.0) if target_status == current_status else _shade_color(_status_color(target_status), 0.28)
 
+# Encerra a sessao do professor e interrompe atualizacoes antes de voltar ao acesso.
 func _on_botao_sair_pressed() -> void:
 	panel_exiting = true
 	_stop_dashboard_auto_refresh()
 	ProfessorSession.clear_session()
 	get_tree().change_scene_to_file("res://scene/acesso_professor.tscn")
 
+# Solicita ao gerenciador global a abertura das configuracoes.
 func _on_botao_configuracao_pressed() -> void:
 	SettingsManager.open_menu()
 
+# Reaplica o estilo lateral para refletir visualmente a configuracao aberta.
 func _on_settings_overlay_opened() -> void:
 	_apply_sidebar_styles()
 
+# Reaplica o estilo lateral para refletir visualmente a configuracao fechada.
 func _on_settings_overlay_closed() -> void:
 	_apply_sidebar_styles()
 
+# Consulta com seguranca se o painel global de configuracoes esta aberto.
 func _is_settings_overlay_open() -> bool:
 	var overlay = SettingsManager.overlay
+	# Considera fechado quando o controle ainda nao existe ou ja foi liberado da arvore.
 	if overlay == null or not is_instance_valid(overlay):
 		return false
+	# Usa o metodo publico apenas quando a implementacao atual do overlay o oferece.
 	if overlay.has_method("is_open"):
 		return overlay.is_open()
 	return false
 
+# Cria um campo de texto curto com rotulo e conecta seu evento ao modelo correspondente.
 func _create_labeled_line_edit(label_text: String, value: String, callback: Callable) -> VBoxContainer:
 	var wrapper := VBoxContainer.new()
 	wrapper.add_theme_constant_override("separation", 4)
@@ -2218,6 +2499,7 @@ func _create_labeled_line_edit(label_text: String, value: String, callback: Call
 	wrapper.add_child(line_edit)
 	return wrapper
 
+# Cria um campo multilinha com rotulo para enunciados e outros textos extensos.
 func _create_labeled_text_edit(label_text: String, value: String, callback: Callable) -> VBoxContainer:
 	var wrapper := VBoxContainer.new()
 	wrapper.add_theme_constant_override("separation", 4)
@@ -2235,6 +2517,7 @@ func _create_labeled_text_edit(label_text: String, value: String, callback: Call
 	wrapper.add_child(text_edit)
 	return wrapper
 
+# Cria um seletor rotulado e seleciona o valor atual antes de conectar o callback.
 func _create_labeled_option_button(label_text: String, options: Array[String], current_value: String, callback: Callable) -> VBoxContainer:
 	var wrapper := VBoxContainer.new()
 	wrapper.add_theme_constant_override("separation", 4)
@@ -2247,6 +2530,7 @@ func _create_labeled_option_button(label_text: String, options: Array[String], c
 	var option_button := OptionButton.new()
 	option_button.custom_minimum_size = Vector2(0, 42)
 	_apply_option_button_palette(option_button)
+	# Adiciona todas as opcoes permitidas ao controle na mesma ordem recebida.
 	for option in options:
 		option_button.add_item(option)
 	_select_option_button_by_text(option_button, current_value)
@@ -2254,6 +2538,7 @@ func _create_labeled_option_button(label_text: String, options: Array[String], c
 	wrapper.add_child(option_button)
 	return wrapper
 
+# Cria um campo numerico rotulado dentro dos limites aceitos pela regra correspondente.
 func _create_labeled_spin_box(label_text: String, current_value: int, min_value: float, max_value: float, callback: Callable) -> VBoxContainer:
 	var wrapper := VBoxContainer.new()
 	wrapper.add_theme_constant_override("separation", 4)
@@ -2270,14 +2555,19 @@ func _create_labeled_spin_box(label_text: String, current_value: int, min_value:
 	wrapper.add_child(spin_box)
 	return wrapper
 
+# Seleciona no controle a opcao que corresponde ao valor atual ou usa a primeira como alternativa segura.
 func _select_option_button_by_text(option_button: OptionButton, current_value: String) -> void:
+	# Compara o texto de cada item porque os valores persistidos sao nomes, nao indices da interface.
 	for item_index in range(option_button.item_count):
+		# Encerra assim que encontra a opcao equivalente para nao substituir a selecao correta.
 		if option_button.get_item_text(item_index) == current_value:
 			option_button.select(item_index)
 			return
+	# Quando o valor atual nao existe, seleciona a primeira opcao somente se o controle nao estiver vazio.
 	if option_button.item_count > 0:
 		option_button.select(0)
 
+# Configura um campo numerico inteiro e impede valores fora dos limites definidos pela tela.
 func _configure_spin_box(spin_box: SpinBox, min_value: float, max_value: float, default_value: float) -> void:
 	spin_box.min_value = min_value
 	spin_box.max_value = max_value
@@ -2288,6 +2578,7 @@ func _configure_spin_box(spin_box: SpinBox, min_value: float, max_value: float, 
 	spin_box.rounded = true
 	spin_box.custom_minimum_size = Vector2(0, 42)
 
+# Monta um aviso reutilizavel para secoes que ainda nao possuem dados a exibir.
 func _create_empty_state_panel(title_text: String, description_text: String) -> PanelContainer:
 	var panel := PanelContainer.new()
 	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -2308,6 +2599,7 @@ func _create_empty_state_panel(title_text: String, description_text: String) -> 
 	content.add_child(description)
 	return panel
 
+# Cria um selo compacto usado para comunicar status e metadados dos registros.
 func _create_inline_badge(text_value: String, background: Color, border: Color, text_color: Color = COLOR_TEXT) -> PanelContainer:
 	var badge := PanelContainer.new()
 	_apply_surface_panel(badge, background, border, 999, 0.0)
@@ -2318,37 +2610,49 @@ func _create_inline_badge(text_value: String, background: Color, border: Color, 
 	badge.add_child(label)
 	return badge
 
+# Retorna o titulo informado ou um identificador previsivel para perguntas sem titulo opcional.
 func _question_title(question: Dictionary) -> String:
 	var title := str(question.get("titulo", "")).strip_edges()
+	# Prioriza o titulo editorial quando o professor o preencheu.
 	if not title.is_empty():
 		return title
 	return "Pergunta #%d" % int(question.get("id", 0))
 
+# Encurta textos longos sem modificar o valor original mantido no modelo.
 func _truncate_text(value: String, max_length: int) -> String:
 	var normalized := value.strip_edges()
+	# Mantem o texto completo quando ele ja cabe no limite visual solicitado.
 	if normalized.length() <= max_length:
 		return normalized
 	return "%s..." % normalized.substr(0, max_length)
 
+# Extrai apenas dicionarios de uma resposta variavel para proteger as rotinas que esperam registros estruturados.
 func _extract_dictionary_array(payload: Variant) -> Array[Dictionary]:
 	var extracted: Array[Dictionary] = []
+	# Retorna uma colecao vazia quando a API nao entrega uma lista.
 	if payload is not Array:
 		return extracted
+	# Analisa cada item para aproveitar os registros validos mesmo se houver valores inesperados no retorno.
 	for item in payload:
+		# Adiciona somente dicionarios, que sao o formato usado pelos modelos do painel.
 		if item is Dictionary:
 			extracted.append(item)
 	return extracted
 
+# Converte a data recebida da API em uma representacao curta e legivel no painel.
 func _format_datetime(raw_value: Variant) -> String:
 	var value := str(raw_value).strip_edges()
+	# Evita exibir um campo em branco quando ainda nao existe registro de data.
 	if value.is_empty():
 		return "Sem registro"
 	var normalized := value.replace("T", " ")
 	var dot_index := normalized.find(".")
+	# Remove a fracao de segundos porque ela nao agrega informacao relevante ao acompanhamento do professor.
 	if dot_index != -1:
 		normalized = normalized.substr(0, dot_index)
 	return normalized
 
+# Associa o status normalizado do aluno a uma cor semantica consistente em todos os cards.
 func _get_student_status_color(status: String) -> Color:
 	match _normalize_student_status(status):
 		STUDENT_STATUS_FINALIZADO:
@@ -2358,19 +2662,25 @@ func _get_student_status_color(status: String) -> Color:
 		_:
 			return STATUS_WARNING
 
+# Libera todos os controles dinamicos de um container antes de reconstruir uma lista.
 func _clear_container(container: Node) -> void:
+	# Aceita referencias opcionais para que a limpeza seja segura durante criacao ou destruicao de telas.
 	if container == null:
 		return
+	# Desanexa e agenda a liberacao de cada filho para impedir cards duplicados na proxima renderizacao.
 	for child in container.get_children():
 		container.remove_child(child)
 		child.queue_free()
 
+# Aplica a aparencia padrao dos paineis de conteudo.
 func _apply_surface_panel(panel: PanelContainer, background: Color, border: Color, radius: int, shadow_opacity: float) -> void:
 	panel.add_theme_stylebox_override("panel", _create_surface_style(background, border, 1, radius, 16, 14, shadow_opacity))
 
+# Aplica a aparencia compacta e totalmente arredondada dos selos.
 func _apply_badge_panel(panel: PanelContainer, background: Color, border: Color) -> void:
 	panel.add_theme_stylebox_override("panel", _create_surface_style(background, border, 1, 999, 12, 8, 0.0))
 
+# Constroi um estilo reutilizavel com bordas, espacamento e sombra padronizados.
 func _create_surface_style(background: Color, border: Color, border_width: int = 1, corner_radius: int = 18, horizontal_padding: int = 14, vertical_padding: int = 12, shadow_opacity: float = 0.04) -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()
 	style.bg_color = background
@@ -2392,6 +2702,7 @@ func _create_surface_style(background: Color, border: Color, border_width: int =
 	style.shadow_offset = Vector2(0, 3)
 	return style
 
+# Aplica aos botoes os estados visualmente coerentes de repouso, foco, clique e bloqueio.
 func _apply_button_palette(button: Button, background: Color, border: Color, font_color: Color = Color(1.0, 1.0, 1.0, 1.0)) -> void:
 	UITheme.apply_font_only(button, 16)
 	button.add_theme_stylebox_override("normal", _create_surface_style(background, border, 1, 16, 16, 11, 0.02))
@@ -2405,9 +2716,11 @@ func _apply_button_palette(button: Button, background: Color, border: Color, fon
 	button.add_theme_color_override("font_focus_color", font_color)
 	button.add_theme_color_override("font_disabled_color", font_color.lerp(Color(1.0, 1.0, 1.0, 1.0), 0.45))
 
+# Reutiliza a paleta de botoes nos seletores para manter a identidade visual.
 func _apply_option_button_palette(option_button: OptionButton) -> void:
 	_apply_button_palette(option_button, COLOR_SURFACE, COLOR_BORDER, COLOR_TEXT)
 
+# Aplica tipografia, borda e cores padrao aos campos de texto curto.
 func _apply_line_edit_palette(line_edit: LineEdit) -> void:
 	UITheme.apply_font_only(line_edit, 15)
 	line_edit.add_theme_stylebox_override("normal", _create_surface_style(COLOR_SURFACE, COLOR_BORDER, 1, 14, 12, 10, 0.0))
@@ -2416,19 +2729,24 @@ func _apply_line_edit_palette(line_edit: LineEdit) -> void:
 	line_edit.add_theme_color_override("font_color", COLOR_TEXT)
 	line_edit.add_theme_color_override("font_placeholder_color", COLOR_MUTED)
 
+# Aplica tipografia, borda e cores padrao aos campos de texto multilinha.
 func _apply_text_edit_palette(text_edit: TextEdit) -> void:
 	UITheme.apply_font_only(text_edit, 15)
 	text_edit.add_theme_stylebox_override("normal", _create_surface_style(COLOR_SURFACE, COLOR_BORDER, 1, 14, 12, 10, 0.0))
 	text_edit.add_theme_stylebox_override("focus", _create_surface_style(COLOR_SURFACE, COLOR_ACCENT, 2, 14, 12, 10, 0.0))
 	text_edit.add_theme_color_override("font_color", COLOR_TEXT)
 
+# Estiliza o campo de texto interno que representa o valor do controle numerico.
 func _apply_spin_box_palette(spin_box: SpinBox) -> void:
 	var line_edit := spin_box.get_line_edit()
+	# Algumas configuracoes podem nao expor o campo interno; nesse caso, evita acessar uma referencia nula.
 	if line_edit != null:
 		_apply_line_edit_palette(line_edit)
 
+# Clareia uma cor pela proporcao informada, preservando seu canal de transparencia.
 func _tint_color(color_value: Color, amount: float) -> Color:
 	return color_value.lerp(Color(1.0, 1.0, 1.0, color_value.a), clampf(amount, 0.0, 1.0))
 
+# Escurece uma cor pela proporcao informada, preservando seu canal de transparencia.
 func _shade_color(color_value: Color, amount: float) -> Color:
 	return color_value.lerp(Color(0.0, 0.0, 0.0, color_value.a), clampf(amount, 0.0, 1.0))

@@ -1,5 +1,6 @@
 extends Control
 
+# Tela compartilhada de login e cadastro do professor.
 const UITheme := preload("res://scripts/UITheme.gd")
 const STATUS_INFO := UITheme.STATUS_INFO
 const STATUS_OK := UITheme.STATUS_SUCCESS
@@ -29,6 +30,7 @@ var modo_cadastro := false
 var requisicao_em_andamento := false
 
 func _ready() -> void:
+	# Entrar nesta tela encerra sessao anterior para evitar administrar a conta errada.
 	SettingsManager.pause_tree_when_open = false
 	SettingsManager.close_menu()
 	ProfessorSession.clear_session()
@@ -49,8 +51,10 @@ func _ready() -> void:
 	input_nome.text_submitted.connect(_on_input_nome_submitted)
 
 	_update_layout()
+	# Mantem o formulario responsivo ao redimensionamento da janela/canvas.
 	if not get_viewport().size_changed.is_connected(_update_layout):
 		get_viewport().size_changed.connect(_update_layout)
+	# Escala de fonte exige novo estilo e novas dimensoes.
 	if not SettingsManager.font_scale_changed.is_connected(_on_font_scale_changed):
 		SettingsManager.font_scale_changed.connect(_on_font_scale_changed)
 
@@ -75,6 +79,7 @@ func _apply_visual_refresh() -> void:
 	_update_mode_button_styles()
 
 func _update_layout() -> void:
+	# Calcula limites do painel de acordo com viewport e acessibilidade.
 	var viewport_size: Vector2 = get_viewport_rect().size
 	var font_scale: float = SettingsManager.font_scale
 	var compact_width: bool = viewport_size.x < 1180.0
@@ -88,26 +93,19 @@ func _update_layout() -> void:
 	painel_central.offset_bottom = panel_height * 0.5
 	painel_central.custom_minimum_size = Vector2(panel_width, panel_height)
 
+	# Background opcional acompanha exatamente a area visivel.
 	if background != null:
 		background.size = viewport_size
 
+	# Personagem decorativo aparece somente quando existe espaco suficiente.
 	if personagem != null:
 		personagem.visible = viewport_size.x >= 1180.0 and viewport_size.y >= 700.0
+		# Quando visivel, mantem proporcao e margem inferior responsivas.
 		if personagem.visible:
 			var character_width: float = clampf(viewport_size.x * 0.23, 260.0, 360.0)
 			var character_height: float = character_width * 1.08
 			personagem.position = Vector2(maxf(24.0, viewport_size.x * 0.05), viewport_size.y - character_height - 14.0)
 			personagem.size = Vector2(character_width, character_height)
-
-	if botao_configuracao != null:
-		var settings_size: float = 72.0 if compact_width else 84.0
-		botao_configuracao.anchor_left = 0.0
-		botao_configuracao.anchor_top = 0.0
-		botao_configuracao.anchor_right = 0.0
-		botao_configuracao.anchor_bottom = 0.0
-		botao_configuracao.custom_minimum_size = Vector2(settings_size, settings_size)
-		botao_configuracao.size = Vector2(settings_size, settings_size)
-		botao_configuracao.position = Vector2(viewport_size.x - settings_size - 18.0, 18.0)
 
 func _on_font_scale_changed(_value: float) -> void:
 	_apply_visual_refresh()
@@ -126,6 +124,7 @@ func _update_mode_button_styles() -> void:
 	)
 
 func _set_modo(cadastro: bool) -> void:
+	# Os dois modos reutilizam o mesmo formulario, alterando textos e campo de nome.
 	modo_cadastro = cadastro
 	titulo.text = "Cadastro de Professor" if modo_cadastro else "Login do Professor"
 	subtitulo.text = "Crie seu acesso para gerenciar salas." if modo_cadastro else "Entre para acompanhar a sua turma."
@@ -137,6 +136,7 @@ func _set_modo(cadastro: bool) -> void:
 	label_status.text = ""
 	_update_mode_button_styles()
 
+	# Cadastro comeca no nome; login comeca diretamente no e-mail.
 	if modo_cadastro:
 		input_nome.grab_focus()
 	else:
@@ -161,6 +161,7 @@ func _on_botao_configuracao_pressed() -> void:
 	SettingsManager.open_menu()
 
 func _on_botao_acao_pressed() -> void:
+	# Bloqueia cliques repetidos enquanto a API ainda processa a solicitacao.
 	if requisicao_em_andamento:
 		return
 
@@ -168,21 +169,25 @@ func _on_botao_acao_pressed() -> void:
 	var email: String = input_email.text.strip_edges()
 	var senha: String = input_senha.text.strip_edges()
 
+	# Nome e obrigatorio apenas ao criar uma conta nova.
 	if modo_cadastro and nome.is_empty():
 		_show_status("Informe o nome do professor para continuar.", STATUS_ERROR)
 		input_nome.grab_focus()
 		return
 
+	# Ambos os modos precisam de e-mail.
 	if email.is_empty():
 		_show_status("Informe o e-mail do professor.", STATUS_ERROR)
 		input_email.grab_focus()
 		return
 
+	# Ambos os modos precisam de senha.
 	if senha.is_empty():
 		_show_status("Informe a senha do professor.", STATUS_ERROR)
 		input_senha.grab_focus()
 		return
 
+	# Verificacao local simples evita requisicao obviamente invalida; backend valida de verdade.
 	if not email.contains("@"):
 		_show_status("Digite um e-mail valido.", STATUS_ERROR)
 		input_email.grab_focus()
@@ -193,6 +198,7 @@ func _on_botao_acao_pressed() -> void:
 	_show_status("Conectando ao backend...", STATUS_INFO)
 
 	var response: Dictionary = {}
+	# Escolhe cadastro ou login conforme a aba atualmente ativa.
 	if modo_cadastro:
 		response = await ApiClient.register_teacher(nome, email, senha)
 	else:
@@ -201,12 +207,14 @@ func _on_botao_acao_pressed() -> void:
 	requisicao_em_andamento = false
 	_set_form_enabled(true)
 
+	# Erro HTTP/rede permanece na mesma tela com mensagem curta.
 	if not response.get("ok", false):
 		_show_status(response.get("error", "Nao foi possivel concluir o acesso do professor."), STATUS_ERROR)
 		return
 
 	var payload: Dictionary = response.get("data", {})
 	var professor: Dictionary = payload.get("professor", {})
+	# Sucesso sem dados publicos do professor e contrato incompleto da API.
 	if professor.is_empty():
 		_show_status("A API nao retornou os dados do professor.", STATUS_ERROR)
 		return
@@ -230,3 +238,4 @@ func _set_form_enabled(enabled: bool) -> void:
 func _show_status(message: String, color_value: Color) -> void:
 	label_status.text = message
 	label_status.add_theme_color_override("font_color", color_value)
+	# So inicia a sessao local depois de validar o payload do backend.

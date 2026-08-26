@@ -1,5 +1,6 @@
 extends Control
 
+# Tela intermediaria que prepara sala, jogador e perguntas antes de abrir o tabuleiro.
 @onready var logo: TextureRect = $PainelCentral/MarginContainer/VBoxContainer/Logo
 @onready var loading_card: Panel = $PainelCentral/MarginContainer/VBoxContainer/LoadingCard
 @onready var subtitle: Label = $PainelCentral/MarginContainer/VBoxContainer/Subtitle
@@ -25,16 +26,19 @@ var _step_colors = {
 }
 
 func _ready() -> void:
+	# A tela de carregamento continua ativa e fecha qualquer overlay anterior.
 	SettingsManager.pause_tree_when_open = false
 	SettingsManager.close_menu()
 	_dot_base_y[dot_1] = dot_1.position.y
 	_dot_base_y[dot_2] = dot_2.position.y
 	_dot_base_y[dot_3] = dot_3.position.y
 
+	# Personaliza a mensagem quando a identidade do aluno ja foi informada.
 	if not GameState.player_name.is_empty():
 		subtitle.text = "Preparando o tabuleiro para %s..." % GameState.player_name
 		hint_text.text = "A sala, as perguntas e o progresso do jogador estao sendo preparados."
 
+	# Escuta as etapas emitidas pelo GameState sem criar conexao duplicada.
 	if not GameState.session_preparation_updated.is_connected(_on_session_preparation_updated):
 		GameState.session_preparation_updated.connect(_on_session_preparation_updated)
 
@@ -50,6 +54,7 @@ func _ready() -> void:
 	animate_dot(dot_3, 0.28)
 
 	var result := await GameState.prepare_session()
+	# Falha de sala, jogador, pergunta ou rede interrompe a entrada no tabuleiro.
 	if not result.get("ok", false):
 		await _show_startup_error(result.get("error", "Nao foi possivel iniciar a partida."))
 		return
@@ -60,6 +65,7 @@ func _ready() -> void:
 	get_tree().change_scene_to_file("res://scene/game.tscn")
 
 func _exit_tree() -> void:
+	# Remove o listener para a proxima instancia nao atualizar uma tela destruida.
 	if GameState.session_preparation_updated.is_connected(_on_session_preparation_updated):
 		GameState.session_preparation_updated.disconnect(_on_session_preparation_updated)
 
@@ -78,6 +84,7 @@ func animate_loading_card() -> void:
 	tween.tween_property(loading_card, "scale", base_scale, 0.7).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 
 func animate_character() -> void:
+	# Variantes de cena sem personagem apenas ignoram esta animacao decorativa.
 	if personagem == null:
 		return
 
@@ -99,16 +106,19 @@ func animate_dot(dot: Control, delay: float) -> void:
 func _on_session_preparation_updated(message: String) -> void:
 	subtitle.text = message
 	
-	# Atualizar progresso baseado na mensagem
+	# Mensagens do GameState determinam qual etapa e percentual aproximado exibir.
 	if "Conectando" in message:
 		_update_step_visual(0)
 		_animate_progress_to(25.0, 0.3)
+	# Sala validada leva a barra para a segunda etapa.
 	elif "Validando" in message:
 		_update_step_visual(1)
 		_animate_progress_to(50.0, 0.3)
+	# Carregamento das perguntas completa a maior parte da preparacao.
 	elif "Carregando" in message:
 		_update_step_visual(1)
 		_animate_progress_to(75.0, 0.3)
+	# Mensagem final deixa a barra pronta para a transicao ao jogo.
 	elif "pronto" in message.to_lower() or "Tudo" in message:
 		_update_step_visual(2)
 		_animate_progress_to(95.0, 0.3)
@@ -118,14 +128,16 @@ func _update_step_visual(step: int) -> void:
 	var steps = [step_1, step_2, step_3]
 	var step_labels = [step_1_label, step_2_label, step_3_label]
 	
+	# Percorre as tres etapas para diferenciar concluidas/atuais das futuras.
 	for i in range(steps.size()):
+		# Etapas anteriores ou iguais a atual recebem destaque.
 		if i <= step:
 			# Ativar step
 			var tween = create_tween()
 			tween.tween_property(steps[i], "self_modulate", Color.WHITE, 0.2)
 			step_labels[i].add_theme_color_override("font_color", _step_colors[min(i, 2)])
 		else:
-			# Desativar step
+			# Etapas futuras permanecem visualmente desativadas.
 			var tween = create_tween()
 			tween.tween_property(steps[i], "self_modulate", Color(1, 1, 1, 0.6), 0.2)
 			step_labels[i].add_theme_color_override("font_color", _step_colors[0])

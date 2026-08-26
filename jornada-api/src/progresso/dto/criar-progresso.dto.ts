@@ -12,7 +12,9 @@ import { toBoolean, trimUppercaseString } from '../../common/transformers';
 import { PARTIDA_STATUS } from '../../jogadores/partida-status';
 import type { PartidaStatus } from '../../jogadores/partida-status';
 
+// Contrato do evento enviado quando o aluno responde uma pergunta.
 export class CriarProgressoDto {
+  // Identifica quem respondeu.
   @Type(() => Number)
   @IsInt()
   @Min(1)
@@ -66,3 +68,11 @@ export class CriarProgressoDto {
   @IsOptional()
   salaCodigo?: string;
 }
+  // Identifica qual pergunta foi exibida.
+  // Resultado calculado pelo jogo e normalizado para booleano.
+  // Fase em que a resposta ocorreu.
+  // Campo legado aceito, mas a pontuacao oficial e recalculada no servidor.
+  // Posicao que o aluno alcancou no tabuleiro.
+  // Status enviado e validado, embora uma resposta nova seja normalizada como jogando.
+  // Sala pode ser resolvida pelo ID interno...
+  // ...ou pelo codigo publico digitado pelo aluno.

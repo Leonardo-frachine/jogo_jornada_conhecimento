@@ -1,5 +1,6 @@
 extends Control
 
+# Tela inicial que separa os fluxos de aluno e professor.
 const UITheme := preload("res://scripts/UITheme.gd")
 
 @onready var painel_central: Panel = $PainelCentral
@@ -11,6 +12,7 @@ const UITheme := preload("res://scripts/UITheme.gd")
 @onready var botao_configuracao: TextureButton = $BotaoConfiguracao
 
 func _ready() -> void:
+	# Menu principal nao pausa arvore e inicia a trilha sonora de navegacao.
 	SettingsManager.pause_tree_when_open = false
 	SettingsManager.close_menu()
 	AudioManager.play_menu_music()
@@ -21,10 +23,12 @@ func _ready() -> void:
 	botao_professor.pressed.connect(_on_botao_professor_pressed)
 	botao_configuracao.pressed.connect(_on_botao_configuracao_pressed)
 	botao_aluno.grab_focus()
+	# Evita duplicar o listener do autoload ao reconstruir a cena.
 	if not SettingsManager.font_scale_changed.is_connected(_on_font_scale_changed):
 		SettingsManager.font_scale_changed.connect(_on_font_scale_changed)
 
 func _notification(what: int) -> void:
+	# Recalcula o painel somente depois que a cena esta pronta e a janela muda de tamanho.
 	if what == NOTIFICATION_RESIZED and is_node_ready():
 		_update_responsive_layout()
 
@@ -38,6 +42,7 @@ func _apply_visual_refresh() -> void:
 	subtitulo.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 
 func _update_responsive_layout() -> void:
+	# Limites minimo/maximo mantem o conteudo central legivel em diferentes resolucoes.
 	var viewport_size := get_viewport_rect().size
 	var font_scale := SettingsManager.font_scale
 	var panel_width := clampf(viewport_size.x * 0.86, 380.0, 520.0 + 120.0 * (font_scale - 1.0))

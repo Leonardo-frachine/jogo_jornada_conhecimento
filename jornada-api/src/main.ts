@@ -4,6 +4,7 @@ import { configureApp } from './app.config';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
+  // Cria a aplicacao, aplica configuracoes globais e escuta em todas as interfaces por padrao.
   const app = await NestFactory.create(AppModule);
 
   configureApp(app);
@@ -14,6 +15,7 @@ async function bootstrap() {
 }
 
 bootstrap().catch((error) => {
+  // Falha de inicializacao encerra o processo para que o supervisor possa reinicia-lo.
   console.error('Erro ao iniciar a API:', error);
   process.exit(1);
 });

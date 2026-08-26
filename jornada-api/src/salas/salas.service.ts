@@ -39,6 +39,10 @@ type RankingSalaItem = {
   finalizadoEm: Date | null;
 };
 
+/**
+ * Aplica o isolamento por sala e monta as visoes consumidas pelo professor.
+ * Consultas de dashboard, alunos, respostas e ranking nunca devem misturar turmas.
+ */
 @Injectable()
 export class SalasService {
   constructor(
@@ -63,10 +67,12 @@ export class SalasService {
       where: { id: criarSalaDto.professorId },
     });
 
+    // Uma sala sempre pertence a um professor existente.
     if (!professor) {
       throw new NotFoundException('Professor nao encontrado.');
     }
 
+    // Nome omitido recebe um identificador legivel baseado no codigo publico.
     const codigo = await this.gerarCodigoUnico();
     const nomeSala = criarSalaDto.nome?.trim() || `Sala ${codigo}`;
 
@@ -91,6 +97,7 @@ export class SalasService {
       where: { id: professorId },
     });
 
+    // Evita que um ID invalido seja interpretado apenas como professor sem salas.
     if (!professor) {
       throw new NotFoundException('Professor nao encontrado.');
     }
@@ -111,6 +118,7 @@ export class SalasService {
       relations: ['professor'],
     });
 
+    // Centraliza o 404 usado pelas telas que abrem uma sala pelo identificador interno.
     if (!sala) {
       throw new NotFoundException('Sala nao encontrada.');
     }
@@ -119,12 +127,14 @@ export class SalasService {
   }
 
   async buscarPorCodigo(codigo: string): Promise<SalaResumo> {
+    // Codigos sao case-insensitive para facilitar a digitacao pelo aluno.
     const codigoNormalizado = codigo.trim().toUpperCase();
     const sala = await this.salaRepository.findOne({
       where: { codigo: codigoNormalizado },
       relations: ['professor'],
     });
 
+    // Um codigo desconhecido nao pode cair em uma sala padrao.
     if (!sala) {
       throw new NotFoundException(
         'Sala nao encontrada para o codigo informado.',
@@ -165,10 +175,12 @@ export class SalasService {
       relations: ['professor'],
     });
 
+    // O dashboard so pode agregar dados de uma sala valida.
     if (!sala) {
       throw new NotFoundException('Sala nao encontrada.');
     }
 
+    // Respostas ficam filtradas desde a consulta, antes de qualquer agregacao.
     const respostas = await this.progressoRepository.find({
       where: { salaId: sala.id },
       relations: ['jogador', 'pergunta'],
@@ -177,6 +189,7 @@ export class SalasService {
       },
     });
 
+    // Os indicadores derivam da mesma colecao para permanecerem consistentes entre si.
     const totalPerguntasRespondidas = respostas.length;
     const quantidadeAcertos = respostas.filter(
       (resposta) => resposta.acertou,
@@ -198,6 +211,7 @@ export class SalasService {
         quantidadeAcertos,
         quantidadeErros,
         pontuacaoTotalTurma,
+        // Turma sem respostas exibe 0%, evitando divisao por zero.
         percentualAcertoTurma:
           totalPerguntasRespondidas === 0
             ? 0
@@ -236,6 +250,7 @@ export class SalasService {
       relations: ['professor'],
     });
 
+    // Confirma a sala antes de montar um ranking possivelmente vazio.
     if (!sala) {
       throw new NotFoundException('Sala nao encontrada.');
     }
@@ -270,6 +285,7 @@ export class SalasService {
       relations: ['professor'],
     });
 
+    // Relatorio detalhado nao existe fora do contexto de uma sala.
     if (!sala) {
       throw new NotFoundException('Sala nao encontrada.');
     }
@@ -283,6 +299,7 @@ export class SalasService {
     });
     const alunos = await this.montarAlunosDaSala(sala.id, respostas);
 
+    // Serializa valores legados com fallbacks para a interface nunca receber null inesperado.
     return {
       sala: this.serializarSala(sala, sala.professor?.nome),
       alunos,
@@ -312,6 +329,7 @@ export class SalasService {
       where: { id },
     });
 
+    // Diferencia sala vazia de sala inexistente.
     if (!sala) {
       throw new NotFoundException('Sala nao encontrada.');
     }
@@ -336,10 +354,12 @@ export class SalasService {
       where: { id },
     });
 
+    // Nao executa deletes parciais para uma sala que nao existe.
     if (!sala) {
       throw new NotFoundException('Sala nao encontrada.');
     }
 
+    // Remove primeiro os eventos dependentes para respeitar a integridade referencial.
     const deletedProgressResult = await this.progressoRepository.delete({
       salaId: sala.id,
     });
@@ -356,9 +376,11 @@ export class SalasService {
   private async gerarCodigoUnico(): Promise<string> {
     const caracteres = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
+    // Limita tentativas para que uma colisao anormal nao prenda a requisicao indefinidamente.
     for (let tentativa = 0; tentativa < 20; tentativa += 1) {
       let codigo = '';
 
+      // Monta um codigo de seis caracteres, omitindo simbolos visualmente ambiguos.
       for (let indice = 0; indice < 6; indice += 1) {
         const posicao = Math.floor(Math.random() * caracteres.length);
         codigo += caracteres[posicao];
@@ -368,6 +390,7 @@ export class SalasService {
         where: { codigo },
       });
 
+      // A primeira combinacao ainda nao cadastrada pode ser entregue ao professor.
       if (!salaExistente) {
         return codigo;
       }
@@ -377,6 +400,7 @@ export class SalasService {
   }
 
   private serializarSala(sala: Sala, professorNome?: string): SalaResumo {
+    // Retorna somente os campos que compoem o contrato publico da sala.
     return {
       id: sala.id,
       professorId: sala.professorId,
@@ -400,11 +424,14 @@ export class SalasService {
       },
     });
 
+    // Primeiro inclui todos os cadastros atuais, mesmo quem ainda nao respondeu.
     for (const jogador of jogadores) {
       alunosPorId.set(jogador.id, jogador);
     }
 
+    // Depois incorpora jogadores de respostas legadas que nao apareceram na consulta atual.
     for (const resposta of respostas) {
+      // O Map elimina duplicatas pelo ID sem descartar o objeto relacionado ja carregado.
       if (resposta.jogador && !alunosPorId.has(resposta.jogador.id)) {
         alunosPorId.set(resposta.jogador.id, resposta.jogador);
       }
@@ -416,6 +443,7 @@ export class SalasService {
   }
 
   private serializarAlunoSala(jogador: Jogador): AlunoSalaResumo {
+    // Fallbacks mantem compatibilidade com linhas criadas antes dos novos campos de partida.
     return {
       jogadorId: jogador.id,
       nome: jogador.nome,
@@ -431,6 +459,7 @@ export class SalasService {
   private async montarRankingDaSala(
     salaId: number,
   ): Promise<RankingSalaItem[]> {
+    // Somente quem concluiu oficialmente participa do ranking final.
     const finalizados = await this.jogadorRepository.find({
       where: {
         salaId,
@@ -439,12 +468,14 @@ export class SalasService {
     });
     const alunosUnicos = new Map<string, Jogador>();
 
+    // Deduplica nomes antigos, mantendo a melhor tentativa encontrada para cada aluno.
     for (const jogador of finalizados) {
       const chave = jogador.nome
         .trim()
         .replace(/\s+/g, ' ')
         .toLocaleLowerCase('pt-BR');
       const atual = alunosUnicos.get(chave);
+      // Substitui o representante quando a nova linha vence pelos criterios do ranking.
       if (!atual || this.compararJogadoresRanking(jogador, atual) < 0) {
         alunosUnicos.set(chave, jogador);
       }
@@ -464,16 +495,19 @@ export class SalasService {
 
   private compararJogadoresRanking(a: Jogador, b: Jogador): number {
     const diferencaPontuacao = b.pontuacao - a.pontuacao;
+    // Pontuacao maior e o primeiro criterio de classificacao.
     if (diferencaPontuacao !== 0) {
       return diferencaPontuacao;
     }
 
     const terminoA = a.finalizadoEm?.getTime() ?? Number.MAX_SAFE_INTEGER;
     const terminoB = b.finalizadoEm?.getTime() ?? Number.MAX_SAFE_INTEGER;
+    // Em empate, quem terminou antes ocupa a melhor posicao.
     if (terminoA !== terminoB) {
       return terminoA - terminoB;
     }
 
+    // Nome e ID tornam o resultado deterministico quando todos os demais dados empatam.
     const diferencaNome = a.nome.localeCompare(b.nome, 'pt-BR');
     return diferencaNome !== 0 ? diferencaNome : a.id - b.id;
   }
@@ -497,6 +531,7 @@ export class SalasService {
       }
     >();
 
+    // Cada resposta alimenta exatamente um grupo de materia ou dificuldade.
     for (const resposta of respostas) {
       const valorBruto =
         chave === 'materia'
@@ -509,6 +544,7 @@ export class SalasService {
             ? 'Nao informada'
             : `Nivel ${resposta.fase}`;
 
+      // Cria o acumulador somente na primeira ocorrencia do grupo.
       if (!grupos.has(nomeGrupo)) {
         grupos.set(nomeGrupo, {
           respondidas: 0,
@@ -518,11 +554,13 @@ export class SalasService {
 
       const grupo = grupos.get(nomeGrupo)!;
       grupo.respondidas += 1;
+      // Apenas respostas corretas incrementam acertos; erros sao calculados depois.
       if (resposta.acertou) {
         grupo.acertos += 1;
       }
     }
 
+    // Converte os acumuladores internos no formato esperado pelo dashboard.
     return Array.from(grupos.entries()).map(([nomeGrupo, grupo]) => {
       const payload = {
         respondidas: grupo.respondidas,

@@ -9,7 +9,9 @@ import {
 } from 'class-validator';
 import { trimString, trimUppercaseString } from '../../common/transformers';
 
+// Contrato completo para cadastro manual de uma pergunta.
 export class CriarPerguntaDto {
+  // Pergunta nova sempre nasce dentro de uma sala existente.
   @Type(() => Number)
   @IsInt()
   @Min(1)
@@ -73,3 +75,9 @@ export class CriarPerguntaDto {
   @IsOptional()
   tempoLimite?: number;
 }
+  // Titulo e metadado opcional de gerenciamento.
+  // Enunciado e quatro alternativas compoem o conteudo jogavel obrigatorio.
+  // Gabarito aceita somente uma das quatro letras apresentadas.
+  // Materia e dificuldade sao opcionais no fluxo manual legado.
+  // Pontuacao zero e permitida; ausencia usa o calculo padrao do servico.
+  // Tempo limite so e persistido quando for inteiro positivo.

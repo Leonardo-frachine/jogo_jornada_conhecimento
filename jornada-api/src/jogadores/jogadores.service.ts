@@ -27,6 +27,7 @@ export class JogadoresService {
 
   async criar(criarJogadorDto: CriarJogadorDto): Promise<Jogador> {
     const nome = this.formatarNome(criarJogadorDto.nome);
+    // Nomes vazios apos trim nao formam um jogador valido.
     if (!nome) {
       throw new BadRequestException('O nome do jogador e obrigatorio.');
     }
@@ -36,6 +37,7 @@ export class JogadoresService {
       criarJogadorDto.salaCodigo,
     );
 
+    // Com sala informada, o par sala + nome normalizado representa o mesmo aluno.
     if (sala) {
       const nomeNormalizado = this.normalizarNome(nome);
       const jogadorExistente = await this.buscarNaSala(
@@ -43,6 +45,7 @@ export class JogadoresService {
         nomeNormalizado,
       );
 
+      // Um aluno recorrente e reutilizado para evitar duplicacao dentro da sala.
       if (jogadorExistente) {
         return this.iniciarNovaPartida(
           jogadorExistente,
@@ -55,14 +58,17 @@ export class JogadoresService {
       try {
         return await this.salvarNovoJogador(nome, nomeNormalizado, sala);
       } catch (error) {
+        // Erros que nao sao concorrencia de cadastro mantem sua causa original.
         if (!this.ehViolacaoDeUnicidade(error)) {
           throw error;
         }
 
+        // Uma requisicao paralela pode ter criado o mesmo aluno entre busca e insert.
         const jogadorCriadoEmParalelo = await this.buscarNaSala(
           sala.id,
           nomeNormalizado,
         );
+        // Se a linha concorrente nao for localizada, nao ha recuperacao segura.
         if (!jogadorCriadoEmParalelo) {
           throw error;
         }
@@ -76,6 +82,7 @@ export class JogadoresService {
       }
     }
 
+    // O fluxo legado sem sala continua aceito, mas nao permite deduplicacao por turma.
     return this.salvarNovoJogador(nome, null, null);
   }
 
@@ -84,6 +91,7 @@ export class JogadoresService {
     nomeNormalizado: string | null,
     sala: Sala | null,
   ): Promise<Jogador> {
+    // Todo cadastro novo nasce no inicio do tabuleiro e com partida aguardando inicio.
     const jogador = this.jogadorRepository.create({
       nome,
       nomeNormalizado,
@@ -106,11 +114,12 @@ export class JogadoresService {
     const jogadorNormalizado = await this.jogadorRepository.findOne({
       where: { salaId, nomeNormalizado },
     });
+    // O indice normalizado atende rapidamente os cadastros criados no modelo atual.
     if (jogadorNormalizado) {
       return jogadorNormalizado;
     }
 
-    // Mantem compatibilidade com alunos criados antes da chave normalizada.
+    // Percorre cadastros legados porque eles podem nao possuir nomeNormalizado salvo.
     const jogadoresDaSala = await this.jogadorRepository.find({
       where: { salaId },
       order: { criadoEm: 'ASC', id: 'ASC' },
@@ -128,6 +137,8 @@ export class JogadoresService {
     nomeNormalizado: string,
     sala: Sala,
   ): Promise<Jogador> {
+    // Reaproveita a identidade do aluno e reinicia somente o estado corrente da partida.
+    // A pontuacao nao e zerada aqui no modelo atual; alterar isso exige separar tentativas.
     jogador.nome = nome;
     jogador.nomeNormalizado = nomeNormalizado;
     jogador.salaId = sala.id;
@@ -141,14 +152,17 @@ export class JogadoresService {
   }
 
   private formatarNome(nome: string): string {
+    // Remove espacos externos e reduz sequencias internas a um unico separador.
     return nome?.trim().replace(/\s+/g, ' ') ?? '';
   }
 
   private normalizarNome(nome: string): string {
+    // A normalizacao Unicode e de caixa torna a comparacao de nomes previsivel.
     return this.formatarNome(nome).normalize('NFKC').toLocaleLowerCase('pt-BR');
   }
 
   private ehViolacaoDeUnicidade(error: unknown): boolean {
+    // Somente erros do driver podem representar uma disputa de chave unica.
     if (!(error instanceof QueryFailedError)) {
       return false;
     }
@@ -157,6 +171,7 @@ export class JogadoresService {
       code?: string;
       errno?: number;
     };
+    // Reconhece os codigos equivalentes de Postgres e SQLite.
     return (
       driverError.code === '23505' ||
       driverError.code?.startsWith('SQLITE_CONSTRAINT') === true ||
@@ -165,6 +180,7 @@ export class JogadoresService {
   }
 
   async listar(): Promise<Jogador[]> {
+    // O ranking geral parte sempre da maior pontuacao persistida.
     return this.jogadorRepository.find({
       order: {
         pontuacao: 'DESC',
@@ -177,6 +193,7 @@ export class JogadoresService {
       where: { id },
     });
 
+    // Os demais metodos reutilizam esta guarda para manter o mesmo erro HTTP 404.
     if (!jogador) {
       throw new NotFoundException('Jogador nao encontrado');
     }
@@ -201,6 +218,7 @@ export class JogadoresService {
   }
 
   async atualizarFase(id: number, faseAtual: number): Promise<Jogador> {
+    // Atualiza apenas a fase solicitada; validacao de faixa pertence ao DTO.
     const jogador = await this.buscarPorId(id);
     jogador.faseAtual = faseAtual;
     return this.jogadorRepository.save(jogador);
@@ -211,6 +229,7 @@ export class JogadoresService {
     finalizarPartidaDto: FinalizarPartidaDto,
   ): Promise<Jogador> {
     const jogador = await this.buscarPorId(id);
+    // A primeira finalizacao registra o instante; repeticoes mantem a data original.
     if (
       jogador.statusPartida !== PARTIDA_STATUS.FINALIZADO ||
       !jogador.finalizadoEm
@@ -219,6 +238,7 @@ export class JogadoresService {
     }
     jogador.statusPartida = PARTIDA_STATUS.FINALIZADO;
 
+    // Nunca recua a casa ao receber uma finalizacao atrasada do cliente.
     if (finalizarPartidaDto.casaAtual !== undefined) {
       jogador.casaAtual = Math.max(
         jogador.casaAtual ?? 1,
@@ -233,11 +253,13 @@ export class JogadoresService {
     salaId?: number,
     salaCodigo?: string,
   ): Promise<Sala | null> {
+    // O ID tem precedencia quando ambos os identificadores forem enviados.
     if (salaId) {
       const sala = await this.salaRepository.findOne({
         where: { id: salaId },
       });
 
+      // Um ID desconhecido nao pode criar jogador solto silenciosamente.
       if (!sala) {
         throw new NotFoundException('Sala nao encontrada.');
       }
@@ -245,11 +267,13 @@ export class JogadoresService {
       return sala;
     }
 
+    // O codigo e a alternativa usada pelo aluno na tela de entrada da turma.
     if (salaCodigo) {
       const sala = await this.salaRepository.findOne({
         where: { codigo: salaCodigo.trim().toUpperCase() },
       });
 
+      // Codigo inexistente e erro de entrada, nao cadastro fora de sala.
       if (!sala) {
         throw new NotFoundException(
           'Sala nao encontrada para o codigo informado.',
@@ -259,6 +283,8 @@ export class JogadoresService {
       return sala;
     }
 
+    // Ausencia dos dois campos preserva compatibilidade com jogadores legados.
     return null;
   }
 }
+    // Reconstroi os totais a partir do historico, util para reparar dados derivados.

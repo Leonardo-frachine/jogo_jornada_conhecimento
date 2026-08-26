@@ -10,6 +10,7 @@ import { ProgressoModule } from './progresso/progresso.module';
 import { SalasModule } from './salas/salas.module';
 
 @Module({
+  // Inicializa o banco antes dos modulos que dependem de repositorios TypeORM.
   imports: [
     TypeOrmModule.forRoot(createDatabaseOptions()),
     JogadoresModule,
@@ -21,4 +22,5 @@ import { SalasModule } from './salas/salas.module';
   controllers: [AppController],
   providers: [AppService],
 })
+// Modulo raiz que compoe todos os dominios do backend.
 export class AppModule {}

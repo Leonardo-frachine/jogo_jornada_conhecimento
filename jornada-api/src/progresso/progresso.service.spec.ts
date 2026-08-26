@@ -11,6 +11,7 @@ import { SalasService } from '../salas/salas.service';
 import { Progresso } from './progresso.entity';
 import { ProgressoService } from './progresso.service';
 
+// Exercita as regras integradas de resposta, ranking, status e reinicio do jogador.
 describe('ProgressoService status da partida', () => {
   let moduleRef: TestingModule;
   let dataSource: DataSource;
@@ -108,6 +109,7 @@ describe('ProgressoService status da partida', () => {
       salaId: sala.id,
     });
 
+    // Cria o total de acertos necessario para estabelecer lideranca e empate no ranking.
     for (const jogador of [lider, lider, empatePrimeiro, empateDepois]) {
       await progressoService.criar({
         jogadorId: jogador.id,
@@ -117,6 +119,7 @@ describe('ProgressoService status da partida', () => {
         salaId: sala.id,
       });
     }
+    // Um jogador ainda ativo recebe mais pontos para confirmar que nao entra no ranking final.
     for (let resposta = 0; resposta < 3; resposta += 1) {
       await progressoService.criar({
         jogadorId: aindaJogando.id,

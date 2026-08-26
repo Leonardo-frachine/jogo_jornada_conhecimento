@@ -1,5 +1,6 @@
 extends Control
 
+# Tela de encerramento: resume a tentativa atual e consulta o ranking final da sala.
 const UITheme := preload("res://scripts/UITheme.gd")
 const ACCESS_SCENE_PATH := "res://scene/selecao_perfil.tscn"
 const LOADING_SCENE_PATH := "res://scene/loading_screen.tscn"
@@ -55,8 +56,10 @@ func _ready() -> void:
 	animate_logo()
 	animate_character()
 	_update_responsive_layout()
+	# Resize do viewport reorganiza cards sem recriar a tela.
 	if not get_viewport().size_changed.is_connected(_update_responsive_layout):
 		get_viewport().size_changed.connect(_update_responsive_layout)
+	# Fonte acessivel pode aumentar a altura necessaria dos cards.
 	if not SettingsManager.font_scale_changed.is_connected(_on_font_scale_changed):
 		SettingsManager.font_scale_changed.connect(_on_font_scale_changed)
 	call_deferred("_load_room_ranking")
@@ -64,8 +67,10 @@ func _ready() -> void:
 func _apply_visual_refresh() -> void:
 	UITheme.apply_font_tree(painel_central)
 	UITheme.apply_title(title_label, 42, title_label.get_theme_color("font_color"))
+	# Elementos opcionais permitem variantes da cena sem falhar a aplicacao do tema.
 	if badge_text != null:
 		UITheme.apply_subtitle(badge_text, 17, badge_text.get_theme_color("font_color"))
+	# Subtitulo opcional recebe fonte e cor herdada da propria cena.
 	if subtitle != null:
 		UITheme.apply_subtitle(subtitle, 18, subtitle.get_theme_color("font_color"))
 	UITheme.apply_font_only(result_value, 64)
@@ -81,11 +86,13 @@ func _apply_visual_refresh() -> void:
 	UITheme.apply_button(botao_jogar_novamente, UITheme.BUTTON_PRIMARY, 20)
 	UITheme.apply_button(botao_menu_principal, UITheme.BUTTON_SECONDARY, 20)
 	title_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	# So configura quebra automatica quando o label existe.
 	if subtitle != null:
 		subtitle.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	ranking_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 
 func _update_responsive_layout() -> void:
+	# Ajusta margens e altura dos cards para viewport e escala de fonte atuais.
 	var viewport_size := get_viewport_rect().size
 	var font_scale := SettingsManager.font_scale
 	var panel_width := minf(viewport_size.x - 40.0, 1180.0)
@@ -116,6 +123,7 @@ func _on_font_scale_changed(_value: float) -> void:
 	call_deferred("_update_responsive_layout")
 
 func _apply_session_data() -> void:
+	# Carrega a textura correspondente ao personagem usado nesta tentativa.
 	if character != null:
 		character.texture = load(GameState.get_selected_character_texture_path()) as Texture2D
 	_final_score = GameState.score
@@ -131,31 +139,43 @@ func _apply_session_data() -> void:
 	performance_message.add_theme_color_override("font_color", _get_performance_color(_final_accuracy))
 	performance_seal_text.text = _get_performance_seal(_final_accuracy)
 
+	# Vitoria e encerramento manual usam mensagens diferentes, mas compartilham metricas.
 	if GameState.victory:
+		# Badge opcional destaca conclusao completa da jornada.
 		if badge_text != null:
 			badge_text.text = "JORNADA CONCLUIDA"
+		# Titulo opcional recebe a mensagem de vitoria.
 		if title_label != null:
 			title_label.text = "Jornada Concluida"
+		# Subtitulo inclui o nome do aluno quando estiver presente no layout.
 		if subtitle != null:
 			subtitle.text = "%s concluiu a jornada com sucesso. Veja como foi o desempenho final." % [_get_player_display_name()]
+	# Sem vitoria, apresenta encerramento e incentiva uma nova tentativa.
 	else:
+		# Badge opcional identifica fim sem conclusao da jornada.
 		if badge_text != null:
 			badge_text.text = "FIM DA PARTIDA"
+		# Titulo opcional recebe a mensagem neutra de encerramento.
 		if title_label != null:
 			title_label.text = "Partida Encerrada"
+		# Subtitulo orienta o aluno a tentar novamente.
 		if subtitle != null:
 			subtitle.text = "%s encerrou a partida. Revise o resultado e tente novamente para evoluir." % [_get_player_display_name()]
 
 func _load_room_ranking() -> void:
+	# Limpa qualquer resultado anterior antes de iniciar nova consulta.
 	_clear_ranking()
+	# Partida sem sala resolvida nao pode consultar um ranking isolado.
 	if GameState.resolved_room_id <= 0:
 		_show_ranking_message("Ranking disponivel apenas para partidas vinculadas a uma sala.")
 		return
 
 	ranking_status.text = "Carregando alunos finalizados..."
 	var response: Dictionary = await ApiClient.fetch_room_ranking(GameState.resolved_room_id)
+	# A requisicao pode terminar depois que o usuario saiu da tela.
 	if not is_inside_tree():
 		return
+	# Falha da API vira mensagem curta dentro do card de ranking.
 	if not response.get("ok", false):
 		_show_ranking_message(response.get("error", "Nao foi possivel carregar o ranking."))
 		return
@@ -167,26 +187,33 @@ func _render_room_ranking(items: Array[Dictionary]) -> void:
 	_clear_ranking()
 	var finalizados: Array[Dictionary] = []
 	var jogadores_exibidos := {}
+	# Examina cada item recebido e monta uma lista apenas de finalizados unicos.
 	for item in items:
+		# Ranking final ignora jogadores cuja partida ainda esta em andamento.
 		if str(item.get("statusPartida", "")).to_lower() != "finalizado":
 			continue
 		var jogador_id := int(item.get("jogadorId", 0))
+		# ID invalido ou repetido nao gera uma segunda linha visual.
 		if jogador_id <= 0 or jogadores_exibidos.has(jogador_id):
 			continue
 		jogadores_exibidos[jogador_id] = true
 		finalizados.append(item)
 
+	# Sala sem finalizados exibe estado vazio em vez de tabela sem contexto.
 	if finalizados.is_empty():
 		_show_ranking_message("Nenhum aluno finalizou a jornada nesta sala ainda.")
 		return
 
 	ranking_status.text = "%d alunos com partida finalizada." % finalizados.size()
+	# Cria uma linha por posicao e separadores apenas entre linhas.
 	for index in range(finalizados.size()):
 		ranking_list.add_child(_create_ranking_row(finalizados[index]))
+		# Evita um separador sobrando depois do ultimo colocado.
 		if index < finalizados.size() - 1:
 			ranking_list.add_child(HSeparator.new())
 
 func _create_ranking_row(item: Dictionary) -> HBoxContainer:
+	# Destaca o jogador local comparando o ID persistido da sessao.
 	var row := HBoxContainer.new()
 	row.custom_minimum_size = Vector2(0, RANKING_ROW_HEIGHT)
 	row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -240,12 +267,15 @@ func _create_ranking_row(item: Dictionary) -> HBoxContainer:
 	return row
 
 func _normalize_ranking_name(value: Variant) -> String:
+	# Nome nulo vindo de dado legado recebe um rotulo seguro.
 	if value == null:
 		return "Aluno"
 	var normalized := str(value)
+	# Remove caracteres de controle que poderiam quebrar a altura da linha.
 	for separator in ["\r", "\n", "\t"]:
 		normalized = normalized.replace(separator, " ")
 	normalized = normalized.strip_edges()
+	# Reduz espacos repetidos ate restar uma separacao uniforme.
 	while normalized.contains("  "):
 		normalized = normalized.replace("  ", " ")
 	return normalized if not normalized.is_empty() else "Aluno"
@@ -260,23 +290,30 @@ func _show_ranking_message(message: String) -> void:
 	ranking_list.add_child(label)
 
 func _clear_ranking() -> void:
+	# Remove e libera todas as linhas dinamicas antes de renderizar novo resultado.
 	for child in ranking_list.get_children():
 		ranking_list.remove_child(child)
 		child.queue_free()
 
 func _extract_ranking(payload: Variant) -> Array[Dictionary]:
 	var result: Array[Dictionary] = []
+	# A API precisa devolver uma lista; outros tipos resultam em ranking vazio seguro.
 	if payload is Array:
+		# Converte somente itens de objeto, ignorando valores inesperados.
 		for item in payload:
+			# Cada linha valida e mantida como dicionario tipado.
 			if item is Dictionary:
 				result.append(item)
 	return result
 
 func _connect_buttons() -> void:
+	# Guardas evitam executar a mesma navegacao mais de uma vez por clique.
 	if not botao_jogar_novamente.pressed.is_connected(_on_play_again_pressed):
 		botao_jogar_novamente.pressed.connect(_on_play_again_pressed)
+	# Botao principal retorna ao seletor de perfil.
 	if not botao_menu_principal.pressed.is_connected(_on_main_menu_pressed):
 		botao_menu_principal.pressed.connect(_on_main_menu_pressed)
+	# Engrenagem abre o overlay global de preferencias.
 	if not botao_configuracao.pressed.is_connected(_on_settings_pressed):
 		botao_configuracao.pressed.connect(_on_settings_pressed)
 
@@ -288,6 +325,7 @@ func _prepare_intro_state() -> void:
 	metrics_row.modulate = Color(1, 1, 1, 0)
 	buttons_row.modulate = Color(1, 1, 1, 0)
 	buttons_row.scale = Vector2(0.96, 0.96)
+	# Personagem e opcional em layouts compactos.
 	if character != null:
 		character.modulate = Color(1, 1, 1, 0)
 
@@ -295,6 +333,7 @@ func _play_intro_animation() -> void:
 	var tween := create_tween()
 	tween.tween_property(painel_central, "modulate", Color.WHITE, 0.24)
 	tween.parallel().tween_property(painel_central, "scale", Vector2.ONE, 0.34).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	# Personagem participa da animacao somente quando existe na cena.
 	if character != null:
 		tween.parallel().tween_property(character, "modulate", Color.WHITE, 0.30)
 	tween.chain().tween_property(content_row, "modulate", Color.WHITE, 0.18)
@@ -320,27 +359,34 @@ func _get_player_display_name() -> String:
 	return GameState.player_name if not GameState.player_name.is_empty() else "O aluno"
 
 func _get_performance_message(accuracy: int) -> String:
+	# Aproveitamento alto recebe a mensagem de maior reconhecimento.
 	if accuracy >= HIGH_PERFORMANCE_THRESHOLD:
 		return "Excelente! Voce mandou muito bem!"
+	# Faixa intermediaria incentiva continuidade sem classificar como desempenho alto.
 	if accuracy >= MEDIUM_PERFORMANCE_THRESHOLD:
 		return "Bom trabalho! Continue praticando."
 	return "Nao desanime! Tente novamente para melhorar."
 
 func _get_performance_seal(accuracy: int) -> String:
+	# O selo A+ e reservado a partir do limite alto.
 	if accuracy >= HIGH_PERFORMANCE_THRESHOLD:
 		return "A+"
+	# O selo B representa o intervalo intermediario.
 	if accuracy >= MEDIUM_PERFORMANCE_THRESHOLD:
 		return "B"
 	return "C"
 
 func _get_performance_color(accuracy: int) -> Color:
+	# Cor dourada identifica alto desempenho.
 	if accuracy >= HIGH_PERFORMANCE_THRESHOLD:
 		return Color(1.0, 0.92549, 0.709804, 1.0)
+	# Cor azul identifica desempenho intermediario.
 	if accuracy >= MEDIUM_PERFORMANCE_THRESHOLD:
 		return Color(0.905882, 0.956863, 1.0, 1.0)
 	return Color(1.0, 0.87451, 0.756863, 1.0)
 
 func animate_logo() -> void:
+	# Variantes sem logo ignoram a animacao decorativa.
 	if logo == null:
 		return
 	var base_scale = logo.scale
@@ -350,6 +396,7 @@ func animate_logo() -> void:
 	tween.tween_property(logo, "scale", base_scale, 0.85).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 
 func animate_character() -> void:
+	# Layout compacto pode nao exibir personagem.
 	if character == null:
 		return
 	var base_y = character.position.y
@@ -359,6 +406,7 @@ func animate_character() -> void:
 	tween.tween_property(character, "position:y", base_y, 1.0).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 
 func _on_play_again_pressed() -> void:
+	# Preserva nome e sala antes de o reset da nova sessao limpar estatisticas.
 	var player_name := GameState.player_name
 	var room_code := GameState.room_code
 	SettingsManager.close_menu()
@@ -366,6 +414,7 @@ func _on_play_again_pressed() -> void:
 	get_tree().change_scene_to_file(LOADING_SCENE_PATH)
 
 func _on_main_menu_pressed() -> void:
+	# Sair para o menu encerra somente o estado local da tentativa atual.
 	SettingsManager.close_menu()
 	GameState.reset_run_stats()
 	get_tree().change_scene_to_file(ACCESS_SCENE_PATH)

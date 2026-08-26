@@ -9,6 +9,7 @@ jest.mock('@google/genai', () => ({
   })),
 }));
 
+// Garante que respostas da IA sejam validadas, balanceadas e tenham erros mapeados.
 describe('PerguntasAiService', () => {
   let service: PerguntasAiService;
   let generateContentMock: jest.Mock;

@@ -4,6 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://3ljo201dpbbx" path="res://imagens/fundo_tabuleiro/fundo_embacado.png" id="2"]
 [ext_resource type="FontFile" uid="uid://cnk767mck3js2" path="res://fonts/Fredoka-Bold.ttf" id="3_q43u4"]
 [ext_resource type="Texture2D" path="res://imagens/icons/professor_sidebar/configuracoes_ui.png" id="5"]
+[ext_resource type="Script" uid="uid://duof54ijw6wym" path="res://ui/settings/SettingsButton.gd" id="6_settings_button"]
 
 [sub_resource type="StyleBoxFlat" id="1"]
 bg_color = Color(1, 0.647059, 0, 1)
@@ -169,19 +170,18 @@ layout_mode = 2
 text = "VOLTAR"
 
 [node name="BotaoConfiguracao" type="TextureButton" parent="." unique_id=438299467]
-custom_minimum_size = Vector2(96, 96)
+custom_minimum_size = Vector2(84, 84)
 layout_mode = 1
-anchors_preset = 3
+anchors_preset = 1
 anchor_left = 1.0
-anchor_top = 1.0
 anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -168.0
-offset_top = -168.0
-offset_right = -72.0
-offset_bottom = -72.0
+offset_left = -102.0
+offset_top = 18.0
+offset_right = -18.0
+offset_bottom = 102.0
 grow_horizontal = 0
-grow_vertical = 0
+grow_vertical = 1
 texture_normal = ExtResource("5")
 ignore_texture_size = true
 stretch_mode = 0
+script = ExtResource("6_settings_button")

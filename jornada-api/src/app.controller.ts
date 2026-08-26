@@ -7,6 +7,7 @@ export class AppController {
 
   @Get()
   getHello(): string {
+    // Endpoint raiz funciona como verificacao simples de disponibilidade da API.
     return this.appService.getHello();
   }
 }

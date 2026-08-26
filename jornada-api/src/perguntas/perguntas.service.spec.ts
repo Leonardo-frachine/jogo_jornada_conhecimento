@@ -8,6 +8,7 @@ import { Professor } from '../professores/professor.entity';
 import { Progresso } from '../progresso/progresso.entity';
 import { Sala } from '../salas/sala.entity';
 
+// Valida isolamento por sala, importacao e compatibilidade com perguntas legadas.
 describe('PerguntasService', () => {
   let moduleRef: TestingModule;
   let service: PerguntasService;

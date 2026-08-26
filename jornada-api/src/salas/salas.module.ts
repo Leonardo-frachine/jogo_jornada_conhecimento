@@ -8,9 +8,11 @@ import { SalasController } from './salas.controller';
 import { SalasService } from './salas.service';
 
 @Module({
+  // Disponibiliza os repositorios necessarios para dashboard, ranking e propriedade da sala.
   imports: [TypeOrmModule.forFeature([Sala, Professor, Progresso, Jogador])],
   controllers: [SalasController],
   providers: [SalasService],
   exports: [TypeOrmModule, SalasService],
 })
+// Exporta o servico e repositorios para dominios que precisam validar uma sala.
 export class SalasModule {}

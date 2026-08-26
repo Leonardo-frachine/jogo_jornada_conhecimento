@@ -1,5 +1,6 @@
 extends Node
 
+# Estado global da tentativa do aluno e ponte entre telas, tabuleiro e backend.
 signal session_preparation_updated(message: String)
 
 const TOTAL_CASAS := 28
@@ -78,8 +79,10 @@ var fallback_question_bank: Dictionary = {
 }
 
 func start_session(name: String, code: String, character_index: int = 0) -> void:
+	# Normaliza a identidade de entrada antes de limpar qualquer tentativa anterior.
 	player_name = name.strip_edges()
 	room_code = code.strip_edges().to_upper()
+	# Indice opcional atualiza o personagem; valor desconhecido volta ao primeiro.
 	if character_index > 0:
 		selected_character_index = character_index if CHARACTER_TEXTURE_PATHS.has(character_index) else 1
 		selected_character_texture_path = str(CHARACTER_TEXTURE_PATHS[selected_character_index])
@@ -102,6 +105,7 @@ func get_selected_character_name() -> String:
 	return str(CHARACTER_NAMES.get(selected_character_index, "Cachorro"))
 
 func prepare_session() -> Dictionary:
+	# Reconstroi todo o contexto remoto na ordem sala -> jogador -> perguntas.
 	session_prepared = false
 	backend_ready = false
 	backend_error = ""
@@ -112,27 +116,32 @@ func prepare_session() -> Dictionary:
 	used_question_ids.clear()
 	current_question.clear()
 
+	# Codigo e obrigatorio para garantir isolamento do banco de perguntas.
 	if room_code.is_empty():
 		return _session_failure("Informe o codigo da sala para carregar as perguntas corretas.")
 
 	_emit_session_status("Validando sala informada...")
 	var room_response: Dictionary = await ApiClient.fetch_room_by_code(room_code)
+	# Falha ao resolver codigo impede criar jogador em turma incorreta.
 	if not room_response.get("ok", false):
 		return _session_failure("Codigo de sala invalido ou sala nao cadastrada. Confira o codigo informado e tente novamente.")
 
 	var room_data: Dictionary = room_response.get("data", {})
 	resolved_room_id = int(room_data.get("id", 0))
 	room_code = str(room_data.get("codigo", room_code)).strip_edges().to_upper()
+	# Payload sem ID nao e uma sala utilizavel, mesmo que a resposta HTTP tenha sucesso.
 	if resolved_room_id <= 0:
 		return _session_failure("A sala informada nao possui um identificador valido no servidor.")
 
 	_emit_session_status("Conectando ao backend...")
 	var player_response: Dictionary = await ApiClient.create_player(player_name, resolved_room_id, room_code)
+	# Jogador precisa existir no backend antes de qualquer progresso ser salvo.
 	if not player_response.get("ok", false):
 		return _session_failure("Nao foi possivel criar o jogador na API. %s" % player_response.get("error", ""))
 
 	var created_player: Dictionary = player_response.get("data", {})
 	player_id = int(created_player.get("id", 0))
+	# ID invalido impediria relacionar respostas posteriores.
 	if player_id <= 0:
 		return _session_failure("A API nao retornou um identificador valido para o jogador.")
 	persisted_score = int(created_player.get("pontuacao", 0))
@@ -140,10 +149,12 @@ func prepare_session() -> Dictionary:
 
 	_emit_session_status("Carregando perguntas da API...")
 	var questions_response: Dictionary = await ApiClient.fetch_questions(resolved_room_id)
+	# Perguntas da sala precisam carregar antes de abrir o tabuleiro.
 	if not questions_response.get("ok", false):
 		return _session_failure("Nao foi possivel carregar as perguntas. %s" % questions_response.get("error", ""))
 
 	var normalized_questions: Array[Dictionary] = _normalize_questions(questions_response.get("data", []))
+	# Sala sem pergunta valida nao inicia com o fallback, preservando o isolamento por turma.
 	if normalized_questions.is_empty():
 		return _session_failure("Esta sala ainda nao possui perguntas validas para iniciar a partida.")
 
@@ -159,6 +170,7 @@ func prepare_session() -> Dictionary:
 	}
 
 func reset_run_stats() -> void:
+	# Zera somente os dados da tentativa local e mantem nome, sala e personagem.
 	score = 0
 	persisted_score = 0
 	xp = 0
@@ -174,12 +186,14 @@ func reset_run_stats() -> void:
 	current_question.clear()
 
 func register_answer(correct: bool, house_index: int) -> int:
+	# Calcula feedback local imediatamente; sincronizacao remota ocorre em seguida.
 	questions_answered += 1
 	var question: Dictionary = current_question if not current_question.is_empty() else get_question_for_house(house_index)
 	var question_points: int = _get_points_for_question(question, house_index)
 	var score_delta: int = _get_score_delta(correct, question_points)
 	score += score_delta
 
+	# Acerto incrementa estatisticas, XP e pontuacao integral da pergunta.
 	if correct:
 		correct_answers += 1
 		xp += max(25, int(round(float(question_points) / 4.0)))
@@ -193,14 +207,17 @@ func register_answer(correct: bool, house_index: int) -> int:
 func submit_answer_result(correct: bool, house_index: int) -> Dictionary:
 	sync_warning = ""
 
+	# Sem sessao remota pronta nao existe jogador para receber o progresso.
 	if not backend_ready or player_id <= 0:
 		return _sync_failure("Sessao da API nao esta pronta.")
 
 	var question_id := int(current_question.get("id", 0))
+	# Perguntas fallback/invalidas sem ID nao podem ser persistidas no historico.
 	if question_id <= 0:
 		return _sync_failure("Pergunta atual sem identificador valido.")
 
 	var casa_atual := current_house
+	# Acerto confirma a casa de destino; erro permanece na casa atual/retorno do jogo.
 	if correct:
 		casa_atual = clampi(house_index, 1, TOTAL_CASAS)
 	var fase: int = get_level_for_house(casa_atual) if correct else level
@@ -214,6 +231,7 @@ func submit_answer_result(correct: bool, house_index: int) -> Dictionary:
 		casa_atual,
 		STATUS_JOGANDO
 	)
+	# Falha de sincronizacao restaura a ultima pontuacao confirmada pelo servidor.
 	if not response.get("ok", false):
 		score = persisted_score
 		return _sync_failure("Nao foi possivel registrar o progresso. %s" % response.get("error", ""))
@@ -227,6 +245,7 @@ func submit_answer_result(correct: bool, house_index: int) -> Dictionary:
 func sync_finished_session(won: bool) -> Dictionary:
 	sync_warning = ""
 
+	# Finalizacao oficial exige jogador persistido e backend disponivel.
 	if not backend_ready or player_id <= 0:
 		return _sync_failure("Sessao da API nao esta pronta.")
 
@@ -235,26 +254,32 @@ func sync_finished_session(won: bool) -> Dictionary:
 		current_house,
 		won
 	)
+	# Mantem aviso local se o servidor nao confirmar o encerramento.
 	if not response.get("ok", false):
 		return _sync_failure("Nao foi possivel registrar o encerramento da partida. %s" % response.get("error", ""))
 
 	return response
 
 func update_progress(house_index: int) -> void:
+	# Casa e fase locais acompanham cada passo efetivamente alcancado.
 	current_house = clampi(house_index, 1, TOTAL_CASAS)
 	level = get_level_for_house(current_house)
+	# A ultima casa encerra a tentativa local como vitoria.
 	if current_house >= TOTAL_CASAS:
 		finish_session(true)
 
 func finish_session(won: bool) -> void:
 	game_finished = true
 	victory = won
+	# Feedback final diferencia conclusao da jornada de encerramento sem vitoria.
 	if won:
 		last_feedback = "Jornada concluida com sucesso!"
+	# Sem vitoria usa mensagem neutra de fim.
 	else:
 		last_feedback = "Fim de partida."
 
 func get_accuracy() -> float:
+	# Sem respostas, retorna zero para evitar divisao por zero.
 	if questions_answered <= 0:
 		return 0.0
 	return float(correct_answers) / float(questions_answered)
@@ -263,10 +288,13 @@ func get_accuracy_percent() -> int:
 	return int(round(get_accuracy() * 100.0))
 
 func get_level_for_house(house_index: int) -> int:
+	# Casas 22 a 28 formam o quarto e ultimo nivel.
 	if house_index >= 22:
 		return 4
+	# Casas 15 a 21 formam o terceiro nivel.
 	if house_index >= 15:
 		return 3
+	# Casas 8 a 14 formam o segundo nivel; anteriores ficam no primeiro.
 	if house_index >= 8:
 		return 2
 	return 1
@@ -275,10 +303,12 @@ func get_difficulty_for_house(house_index: int) -> int:
 	return get_level_for_house(house_index)
 
 func get_question_for_house(house_index: int) -> Dictionary:
+	# Guarda a pergunta sorteada para validar resposta e sincronizar seu ID.
 	current_question = _select_question_for_house(house_index)
 	return current_question.duplicate(true)
 
 func get_challenge_question_for_house(house_index: int) -> Dictionary:
+	# Casa-desafio pede uma dificuldade acima, limitada ao nivel maximo.
 	var challenge_level := mini(get_level_for_house(house_index) + 1, 4)
 	current_question = _select_question_for_level(house_index, challenge_level)
 	current_question["is_challenge"] = true
@@ -288,17 +318,22 @@ func register_imported_questions(payload: Variant) -> int:
 	var normalized_questions: Array[Dictionary] = _normalize_questions(payload)
 	var imported_count := 0
 
+	# Percorre o lote normalizado para atualizar perguntas existentes ou inserir novas.
 	for question in normalized_questions:
 		var question_id := int(question.get("id", 0))
 		var replaced := false
 
+		# IDs positivos permitem localizar a mesma pergunta ja carregada.
 		if question_id > 0:
+			# Procura o ID no cache local da sala.
 			for index in range(loaded_questions.size()):
+				# Ao encontrar, substitui o conteudo e interrompe a busca.
 				if int(loaded_questions[index].get("id", 0)) == question_id:
 					loaded_questions[index] = question
 					replaced = true
 					break
 
+		# Perguntas sem correspondencia sao acrescentadas e contam como novas.
 		if not replaced:
 			loaded_questions.append(question)
 			imported_count += 1
@@ -309,6 +344,7 @@ func _select_question_for_house(house_index: int) -> Dictionary:
 	return _select_question_for_level(house_index, get_level_for_house(house_index))
 
 func _select_question_for_level(house_index: int, desired_level: int) -> Dictionary:
+	# Cache vazio usa somente o banco fallback local como ultima protecao.
 	if loaded_questions.is_empty():
 		var fallback := _build_fallback_question(house_index)
 		fallback["difficulty"] = desired_level
@@ -316,18 +352,22 @@ func _select_question_for_level(house_index: int, desired_level: int) -> Diction
 		return fallback
 
 	var candidates: Array[Dictionary] = _collect_candidates(desired_level, false)
+	# Sem pergunta exata nao usada, aceita outra dificuldade ainda nao usada.
 	if candidates.is_empty():
 		candidates = _collect_candidates(desired_level, true)
 
+	# Quando todas foram usadas, limpa o historico para iniciar um novo ciclo.
 	if candidates.is_empty():
 		used_question_ids.clear()
 		candidates = _collect_candidates(desired_level, false)
 
+	# Se nenhum item remoto for valido, retorna uma pergunta local segura.
 	if candidates.is_empty():
 		return _build_fallback_question(house_index)
 
 	var selected: Dictionary = candidates[randi_range(0, candidates.size() - 1)]
 	var selected_id := int(selected.get("id", 0))
+	# IDs validos entram na lista para evitar repeticao ate esgotar o banco.
 	if selected_id > 0 and not used_question_ids.has(selected_id):
 		used_question_ids.append(selected_id)
 
@@ -337,16 +377,21 @@ func _collect_candidates(level_value: int, include_used: bool) -> Array[Dictiona
 	var exact_matches: Array[Dictionary] = []
 	var fallback_matches: Array[Dictionary] = []
 
+	# Classifica cada pergunta como correspondencia exata ou fallback de dificuldade.
 	for question in loaded_questions:
 		var question_id := int(question.get("id", 0))
+		# No primeiro passe ignora perguntas ja apresentadas ao aluno.
 		if not include_used and question_id > 0 and used_question_ids.has(question_id):
 			continue
 
+		# Prioriza perguntas do nivel atual da casa.
 		if int(question.get("difficulty", 1)) == level_value:
 			exact_matches.append(question)
+		# Outras dificuldades ficam disponiveis somente como fallback.
 		else:
 			fallback_matches.append(question)
 
+	# Qualquer correspondencia exata vence o conjunto de fallback.
 	if not exact_matches.is_empty():
 		return exact_matches
 
@@ -354,14 +399,18 @@ func _collect_candidates(level_value: int, include_used: bool) -> Array[Dictiona
 
 func _normalize_questions(payload: Variant) -> Array[Dictionary]:
 	var normalized: Array[Dictionary] = []
+	# A API deve enviar lista; outro formato nao produz perguntas utilizaveis.
 	if payload is not Array:
 		return normalized
 
+	# Valida cada item individualmente para descartar apenas registros ruins.
 	for item in payload:
+		# Valores que nao sao objetos nao possuem campos de pergunta.
 		if item is not Dictionary:
 			continue
 
 		var normalized_question: Dictionary = _normalize_question(item)
+		# Somente perguntas com alternativas e gabarito coerentes entram no cache.
 		if not normalized_question.is_empty():
 			normalized.append(normalized_question)
 
@@ -369,13 +418,16 @@ func _normalize_questions(payload: Variant) -> Array[Dictionary]:
 
 func _normalize_question(raw_question: Dictionary) -> Dictionary:
 	var options: Array[String] = []
+	# Le as quatro alternativas na ordem fixa esperada pelo gabarito A-D.
 	for key in ["alternativaA", "alternativaB", "alternativaC", "alternativaD"]:
 		var option_text: String = str(raw_question.get(key, "")).strip_edges()
+		# Alternativa vazia nao e adicionada ao conjunto jogavel.
 		if not option_text.is_empty():
 			options.append(option_text)
 
 	var correct_letter: String = str(raw_question.get("respostaCorreta", "A")).strip_edges().to_upper()
 	var correct_index: int = ["A", "B", "C", "D"].find(correct_letter)
+	# Exige ao menos duas opcoes e uma letra correta dentro do conjunto realmente carregado.
 	if options.size() < 2 or correct_index < 0 or correct_index >= options.size():
 		return {}
 
@@ -395,6 +447,7 @@ func _normalize_question(raw_question: Dictionary) -> Dictionary:
 	}
 
 func _build_fallback_question(house_index: int) -> Dictionary:
+	# Clampa a casa e duplica dados para nao alterar o banco fallback compartilhado.
 	var fallback: Dictionary = fallback_question_bank.get(
 		clampi(house_index, 1, TOTAL_CASAS),
 		fallback_question_bank[1],
@@ -421,29 +474,37 @@ func _get_score_delta(correct: bool, question_points: int) -> int:
 
 func _parse_difficulty(value: Variant) -> int:
 	var numeric_value: int = _parse_non_negative_int(value, -1)
+	# Dificuldade numerica valida e limitada aos quatro niveis do tabuleiro.
 	if numeric_value > 0:
 		return clampi(numeric_value, 1, 4)
 
 	var text_value: String = str(value).strip_edges().to_lower()
+	# Textos facil/basico/iniciante mapeiam para o primeiro nivel.
 	if text_value.begins_with("f") or text_value.contains("basic") or text_value.contains("inic"):
 		return 1
+	# Medio/intermediario mapeiam para o segundo nivel.
 	if text_value.begins_with("m") or text_value.contains("inter"):
 		return 2
+	# Dificil/avancado mapeiam para o terceiro nivel.
 	if text_value.begins_with("d") or text_value.contains("avanc"):
 		return 3
+	# Especial/final mapeiam para o quarto nivel.
 	if text_value.begins_with("e") or text_value.contains("espec") or text_value.contains("final"):
 		return 4
 
 	return 1
 
 func _parse_non_negative_int(value: Variant, default_value: int) -> int:
+	# Inteiro pode ser usado diretamente quando nao negativo.
 	if value is int:
 		return value if value >= 0 else default_value
+	# Float e arredondado antes da mesma validacao de faixa.
 	if value is float:
 		var float_value: int = int(round(value))
 		return float_value if float_value >= 0 else default_value
 
 	var text_value: String = str(value).strip_edges()
+	# Texto vazio ou nao inteiro usa o fallback informado pelo chamador.
 	if text_value.is_empty() or not text_value.is_valid_int():
 		return default_value
 
@@ -455,6 +516,7 @@ func _emit_session_status(message: String) -> void:
 	session_preparation_updated.emit(message)
 
 func _session_failure(message: String) -> Dictionary:
+	# Falha de preparacao bloqueia entrada no tabuleiro e atualiza a tela de loading.
 	backend_error = message
 	_emit_session_status(message)
 	return {
@@ -463,8 +525,11 @@ func _session_failure(message: String) -> Dictionary:
 	}
 
 func _sync_failure(message: String) -> Dictionary:
+	# Falha posterior mantem o jogo local, mas registra aviso de sincronizacao.
 	sync_warning = message
 	return {
 		"ok": false,
 		"error": message,
 	}
+	# Uma nova preparacao perde IDs e perguntas da sessao anterior, mas preserva a escolha visual.
+	# Erro incrementa contador separado e aplica a penalidade calculada.

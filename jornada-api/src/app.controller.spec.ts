@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
+// Garante que o endpoint de saude continue acessivel apos iniciar o modulo raiz.
 describe('AppController', () => {
   let appController: AppController;
 

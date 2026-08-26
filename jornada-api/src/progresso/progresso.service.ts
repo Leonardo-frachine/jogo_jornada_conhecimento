@@ -16,6 +16,10 @@ type ProgressoComPontuacaoTotal = Progresso & {
   pontuacaoTotal: number;
 };
 
+/**
+ * Registra cada resposta como evento historico e atualiza o estado resumido do jogador.
+ * A transacao garante que resposta, posicao, status e pontuacao permaneçam coerentes.
+ */
 @Injectable()
 export class ProgressoService {
   constructor(
@@ -39,10 +43,12 @@ export class ProgressoService {
       casaAtual,
     } = criarProgressoDto;
 
+    // Rejeita eventos sem as chaves minimas para relacionar jogador, pergunta e fase.
     if (!jogadorId || !perguntaId || fase === undefined) {
       throw new BadRequestException('Dados do progresso incompletos.');
     }
 
+    // Todas as leituras e escritas abaixo usam o mesmo manager transacional.
     return this.progressoRepository.manager.transaction(async (manager) => {
       const jogadorRepository = manager.getRepository(Jogador);
       const perguntaRepository = manager.getRepository(Pergunta);
@@ -53,6 +59,7 @@ export class ProgressoService {
         where: { id: jogadorId },
       });
 
+      // Nao registra resposta para uma identidade que deixou de existir.
       if (!jogador) {
         throw new NotFoundException('Jogador não encontrado.');
       }
@@ -61,16 +68,19 @@ export class ProgressoService {
         where: { id: perguntaId, ativa: true },
       });
 
+      // Apenas perguntas existentes e ativas podem gerar pontos.
       if (!pergunta) {
         throw new NotFoundException('Pergunta não encontrada.');
       }
 
       let sala: Sala | null = null;
+      // Quando ha ID, ele e a referencia prioritaria e nao depende do codigo digitado.
       if (salaId) {
         sala =
           (await salaRepository.findOne({
             where: { id: salaId },
           })) ?? null;
+      // Sem ID, resolve o codigo publico informado pelo cliente.
       } else if (salaCodigo) {
         sala =
           (await salaRepository.findOne({
@@ -78,16 +88,19 @@ export class ProgressoService {
           })) ?? null;
       }
 
+      // Identificador fornecido mas nao resolvido representa sala invalida.
       if ((salaId || salaCodigo) && !sala) {
         throw new NotFoundException('Sala nao encontrada.');
       }
 
+      // Bloqueia o envio de resposta em nome de uma turma diferente da do aluno.
       if (jogador.salaId && sala && jogador.salaId !== sala.id) {
         throw new BadRequestException(
           'O jogador nao pertence a sala informada.',
         );
       }
 
+      // Se o cliente omitiu a sala, recupera a vinculacao persistida no jogador.
       if (jogador.salaId && !sala) {
         sala =
           (await salaRepository.findOne({
@@ -95,33 +108,39 @@ export class ProgressoService {
           })) ?? null;
       }
 
+      // Vincula cadastros legados sem sala quando a primeira resposta informa a turma.
       if (!jogador.salaId && sala) {
         jogador.salaId = sala.id;
         jogador.sala = sala;
       }
 
+      // Toda resposta nova precisa pertencer a uma turma para manter o isolamento.
       if (!sala) {
         throw new BadRequestException(
           'O progresso precisa estar vinculado a uma sala.',
         );
       }
 
+      // Evita misturar banco de perguntas de outra sala, mesmo com um ID valido.
       if (!pergunta.salaId || pergunta.salaId !== sala.id) {
         throw new BadRequestException(
           'A pergunta nao pertence a sala informada.',
         );
       }
 
+      // Acerto recebe o valor integral; erro desconta metade arredondada.
       const pontuacaoPergunta = this.calcularPontuacao(pergunta, fase);
       const pontos = acertou
         ? pontuacaoPergunta
         : -Math.round(pontuacaoPergunta / 2);
+      // Posicao nunca pode ser anterior ao inicio do tabuleiro.
       const casaAtualNormalizada = Math.max(
         1,
         Number(casaAtual ?? jogador.casaAtual ?? 1),
       );
       const statusPartidaNormalizado = this.normalizarStatusDeResposta();
 
+      // Salva primeiro o evento imutavel que servira de historico e auditoria.
       const progresso = progressoRepository.create({
         jogadorId,
         perguntaId,
@@ -138,6 +157,7 @@ export class ProgressoService {
 
       const progressoSalvo = await progressoRepository.save(progresso);
 
+      // O resumo do jogador avanca fase/casa e preserva uma partida ja finalizada.
       await jogadorRepository.update(jogador.id, {
         salaId: sala?.id ?? jogador.salaId ?? null,
         faseAtual: Math.max(jogador.faseAtual, fase),
@@ -147,6 +167,7 @@ export class ProgressoService {
             ? PARTIDA_STATUS.FINALIZADO
             : statusPartidaNormalizado,
       });
+      // Increment atomico evita perder pontos quando duas respostas chegam juntas.
       await jogadorRepository.increment(
         { id: jogador.id },
         'pontuacao',
@@ -163,6 +184,7 @@ export class ProgressoService {
   }
 
   async listar(): Promise<Progresso[]> {
+    // Lista mais recentes primeiro e inclui os dados usados pelos relatorios.
     return this.progressoRepository.find({
       relations: ['jogador', 'pergunta', 'sala'],
       order: {
@@ -177,6 +199,7 @@ export class ProgressoService {
       relations: ['jogador', 'pergunta', 'sala'],
     });
 
+    // Diferencia registro inexistente de uma resposta valida sem relacionamentos.
     if (!progresso) {
       throw new NotFoundException('Registro de progresso não encontrado.');
     }
@@ -189,6 +212,7 @@ export class ProgressoService {
       where: { id: jogadorId },
     });
 
+    // Valida a identidade antes de retornar uma lista vazia ambigua.
     if (!jogador) {
       throw new NotFoundException('Jogador não encontrado.');
     }
@@ -221,6 +245,7 @@ export class ProgressoService {
     });
     const registros = await this.progressoRepository.find();
 
+    // Para cada jogador, filtra somente suas respostas antes de calcular os totais.
     return jogadores
       .map((jogador) =>
         this.montarResumoJogador(
@@ -250,6 +275,7 @@ export class ProgressoService {
       where: { id: jogadorId },
     });
 
+    // Um relatorio individual so existe para um jogador cadastrado.
     if (!jogador) {
       throw new NotFoundException('Jogador não encontrado.');
     }
@@ -269,20 +295,24 @@ export class ProgressoService {
   }
 
   private calcularPontuacao(pergunta: Pergunta, fase: number): number {
+    // Pontuacao explicita da pergunta sempre vence as regras de fallback.
     if (Number.isInteger(pergunta.pontuacao) && pergunta.pontuacao >= 0) {
       return pergunta.pontuacao;
     }
 
     const dificuldade = Number(pergunta.dificuldade);
 
+    // Perguntas antigas sem pontuacao usam a dificuldade como multiplicador.
     if (Number.isInteger(dificuldade) && dificuldade > 0) {
       return dificuldade * 100;
     }
 
+    // Ultimo fallback usa a fase, garantindo no minimo 100 pontos-base.
     return Math.max(1, fase) * 100;
   }
 
   private normalizarStatusDeResposta(): PartidaStatus {
+    // Responder significa partida em andamento; apenas o encerramento oficial finaliza.
     return PARTIDA_STATUS.JOGANDO;
   }
 
@@ -299,6 +329,7 @@ export class ProgressoService {
     erros: number;
     aproveitamento: number;
   } {
+    // Conta somente respostas corretas; erros sao derivados do total para fechar a soma.
     const acertos = respostas.filter((resposta) => resposta.acertou).length;
     const total = respostas.length;
     return {

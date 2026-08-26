@@ -9,6 +9,7 @@
 [ext_resource type="Texture2D" path="res://imagens/personagens_animais/tartaruga.png" id="7_turtle"]
 [ext_resource type="Texture2D" path="res://imagens/personagens_animais/aguia.png" id="8_eagle"]
 [ext_resource type="Texture2D" path="res://imagens/personagens_animais/gato.png" id="9_cat"]
+[ext_resource type="Script" uid="uid://duof54ijw6wym" path="res://ui/settings/SettingsButton.gd" id="10_settings_button"]
 
 [sub_resource type="StyleBoxFlat" id="1"]
 bg_color = Color(1, 0.647059, 0, 1)
@@ -387,19 +388,18 @@ theme_override_styles/normal = SubResource("2")
 text = "JOGAR"
 
 [node name="BotaoConfiguracao" type="TextureButton" parent="." unique_id=1853276311]
-custom_minimum_size = Vector2(96, 96)
+custom_minimum_size = Vector2(84, 84)
 layout_mode = 1
-anchors_preset = 3
+anchors_preset = 1
 anchor_left = 1.0
-anchor_top = 1.0
 anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -168.0
-offset_top = -168.0
-offset_right = -72.0
-offset_bottom = -72.0
+offset_left = -102.0
+offset_top = 18.0
+offset_right = -18.0
+offset_bottom = 102.0
 grow_horizontal = 0
-grow_vertical = 0
+grow_vertical = 1
 texture_normal = ExtResource("5")
 ignore_texture_size = true
 stretch_mode = 0
+script = ExtResource("10_settings_button")

@@ -1,6 +1,7 @@
 extends RefCounted
 class_name UITheme
 
+# Biblioteca estatica do tema visual; centraliza cores, fontes e estados dos controles.
 const FONT_RESOURCE := preload("res://fonts/Fredoka-Bold.ttf")
 
 const TEXT_PRIMARY := Color(0.12, 0.16, 0.27, 1.0)
@@ -50,28 +51,35 @@ const BUTTON_TAB_ACTIVE := "tab_active"
 const BUTTON_TAB_INACTIVE := "tab_inactive"
 
 static func apply_font_only(control: Control, font_size: int = -1) -> void:
+	# Chamadores podem usar referencias opcionais sem testar null previamente.
 	if control == null:
 		return
 
 	control.add_theme_font_override("font", FONT_RESOURCE)
+	# Tamanho negativo significa aplicar apenas a familia da fonte.
 	if font_size > 0:
 		var accessibility_manager := _get_accessibility_manager()
+		# Delega escala acessivel ao autoload quando ele estiver disponivel.
 		if accessibility_manager != null and accessibility_manager.has_method("apply_font_size"):
 			accessibility_manager.call("apply_font_size", control, font_size)
 		else:
 			control.add_theme_font_size_override("font_size", font_size)
 
 static func apply_font_tree(root: Node) -> void:
+	# Encerra a recursao com seguranca para uma raiz opcional.
 	if root == null:
 		return
 
+	# Nodes visuais recebem a fonte antes de visitar seus descendentes.
 	if root is Control:
 		apply_font_only(root as Control)
 
+	# Percorre toda a subarvore para uniformizar controles aninhados.
 	for child in root.get_children():
 		apply_font_tree(child)
 
 static func apply_title(label: Label, font_size: int = 40, color: Color = TEXT_PRIMARY) -> void:
+	# Permite estilizar labels opcionais sem erro.
 	if label == null:
 		return
 
@@ -79,6 +87,7 @@ static func apply_title(label: Label, font_size: int = 40, color: Color = TEXT_P
 	label.add_theme_color_override("font_color", color)
 
 static func apply_subtitle(label: Label, font_size: int = 16, color: Color = TEXT_MUTED) -> void:
+	# Permite estilizar labels opcionais sem erro.
 	if label == null:
 		return
 
@@ -86,6 +95,7 @@ static func apply_subtitle(label: Label, font_size: int = 16, color: Color = TEX
 	label.add_theme_color_override("font_color", color)
 
 static func apply_field_label(label: Label, font_size: int = 17, color: Color = TEXT_PRIMARY) -> void:
+	# Permite estilizar labels opcionais sem erro.
 	if label == null:
 		return
 
@@ -93,6 +103,7 @@ static func apply_field_label(label: Label, font_size: int = 17, color: Color = 
 	label.add_theme_color_override("font_color", color)
 
 static func apply_surface_panel(panel: Control) -> void:
+	# Painel ausente nao exige estilo e pode ocorrer em variantes de cena.
 	if panel == null:
 		return
 
@@ -108,6 +119,7 @@ static func apply_surface_panel(panel: Control) -> void:
 	))
 
 static func apply_page_shell(panel: Control) -> void:
+	# Painel ausente nao exige estilo e pode ocorrer em variantes de cena.
 	if panel == null:
 		return
 
@@ -123,6 +135,7 @@ static func apply_page_shell(panel: Control) -> void:
 	))
 
 static func apply_overlay_panel(panel: Control) -> void:
+	# Painel ausente nao exige estilo e pode ocorrer em variantes de cena.
 	if panel == null:
 		return
 
@@ -138,6 +151,7 @@ static func apply_overlay_panel(panel: Control) -> void:
 	))
 
 static func apply_line_edit(line_edit: LineEdit, font_size: int = 18) -> void:
+	# Campos opcionais podem nao existir em todos os modos da tela.
 	if line_edit == null:
 		return
 
@@ -175,6 +189,7 @@ static func apply_line_edit(line_edit: LineEdit, font_size: int = 18) -> void:
 	line_edit.add_theme_color_override("selection_color", Color(APP_ACCENT.r, APP_ACCENT.g, APP_ACCENT.b, 0.38))
 
 static func apply_button(button: Button, variant: String = BUTTON_PRIMARY, font_size: int = 19) -> void:
+	# Evita aplicar overrides em referencias opcionais inexistentes.
 	if button == null:
 		return
 
@@ -182,6 +197,7 @@ static func apply_button(button: Button, variant: String = BUTTON_PRIMARY, font_
 	var radius := 18
 	var padding_horizontal := 20
 	var padding_vertical := 14
+	# Botoes compactos usam raio e padding menores para caber em toolbars.
 	if button.custom_minimum_size.y > 0.0 and button.custom_minimum_size.y <= 46.0:
 		radius = 16
 		padding_horizontal = 18
@@ -190,6 +206,7 @@ static func apply_button(button: Button, variant: String = BUTTON_PRIMARY, font_
 	apply_font_only(button, font_size)
 	button.clip_text = false
 	button.text_overrun_behavior = TextServer.OVERRUN_NO_TRIMMING
+	# Dentro de Container, permite quebra de linha para preservar o layout responsivo.
 	if button.get_parent() is Container:
 		button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	button.add_theme_constant_override("h_separation", 10)
@@ -250,16 +267,19 @@ static func apply_button(button: Button, variant: String = BUTTON_PRIMARY, font_
 	))
 
 static func apply_toggle_button(button: Button, enabled: bool, font_size: int = 16) -> void:
+	# Toggle opcional nao precisa de tratamento pelo chamador.
 	if button == null:
 		return
 
 	var variant := BUTTON_SECONDARY
+	# Estado ligado recebe destaque primario; desligado usa contraste secundario.
 	if enabled:
 		variant = BUTTON_PRIMARY
 
 	apply_button(button, variant, font_size)
 
 static func _button_scheme(variant: String) -> Dictionary:
+	# Cada variante retorna cores coerentes para fundo, borda e texto em todos os estados.
 	match variant:
 		BUTTON_SECONDARY:
 			return {
@@ -308,6 +328,7 @@ static func _make_surface_style(
 	shadow_color: Color = Color(0.0, 0.0, 0.0, 0.12),
 	shadow_size: int = 8
 ) -> StyleBoxFlat:
+	# Constroi um StyleBox novo para evitar compartilhar e mutar estilos entre controles.
 	var style := StyleBoxFlat.new()
 	style.bg_color = background
 	style.border_width_left = border_width
@@ -336,6 +357,7 @@ static func _shade(color_value: Color, amount: float) -> Color:
 
 static func _get_accessibility_manager() -> Node:
 	var main_loop := Engine.get_main_loop()
+	# Fora de uma SceneTree, como em alguns testes/editor, o autoload nao pode ser acessado.
 	if not main_loop is SceneTree:
 		return null
 	return (main_loop as SceneTree).root.get_node_or_null("AccessibilityManager")

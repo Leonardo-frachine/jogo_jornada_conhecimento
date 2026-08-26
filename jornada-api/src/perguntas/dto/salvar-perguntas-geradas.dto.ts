@@ -9,7 +9,9 @@ import {
 } from 'class-validator';
 import { trimString, trimUppercaseString } from '../../common/transformers';
 
+// Pergunta gerada pela IA depois de revisada e aprovada pelo professor.
 export class SalvarPerguntaGeradaDto {
+  // Titulo curto e opcional.
   @Transform(trimString)
   @IsString()
   @IsOptional()
@@ -67,3 +69,8 @@ export class SalvarPerguntaGeradaDto {
   @IsOptional()
   tempoLimite?: number;
 }
+  // Enunciado e as quatro alternativas sao obrigatorios para jogar.
+  // Gabarito e normalizado e limitado as letras existentes.
+  // Materia e dificuldade sao obrigatorias para relatorios da geracao por IA.
+  // Pontuacao aprovada deve ser inteira e positiva.
+  // Tempo e opcional, mas quando presente precisa ser positivo.

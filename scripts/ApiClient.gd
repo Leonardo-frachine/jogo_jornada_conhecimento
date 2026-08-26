@@ -1,5 +1,7 @@
 extends Node
 
+# Cliente HTTP centralizado: transforma chamadas do jogo no contrato JSON da API.
+# Nenhuma tela deve montar respostas de erro brutas por conta propria.
 const DEFAULT_BASE_URL := "https://api.nathanmariotto.com.br" # Backend local padrao
 const BASE_URL_SETTING := "application/config/api_base_url"
 const REQUEST_TIMEOUT_SECONDS := 10.0
@@ -10,6 +12,7 @@ const SERVER_UNAVAILABLE_MESSAGE := "Servidor temporariamente indisponivel. Tent
 var base_url: String = DEFAULT_BASE_URL
 
 func _ready() -> void:
+	# Permite trocar a API por configuracao de projeto sem editar cada tela.
 	base_url = _load_base_url()
 
 func set_base_url(value: String) -> void:
@@ -19,8 +22,10 @@ func create_player(name: String, sala_id: int = 0, sala_codigo: String = "") -> 
 	var payload: Dictionary = {
 		"nome": name,
 	}
+	# Envia o ID quando a sala ja foi resolvida internamente.
 	if sala_id > 0:
 		payload["salaId"] = sala_id
+	# O codigo publico e usado no fluxo de entrada digitado pelo aluno.
 	if not sala_codigo.strip_edges().is_empty():
 		payload["salaCodigo"] = sala_codigo.strip_edges().to_upper()
 	return await _request_json(HTTPClient.METHOD_POST, "/jogadores", payload)
@@ -86,6 +91,7 @@ func generate_questions_ai(sala_id: int, tema: String, materia: String, dificuld
 		"quantidade": quantidade,
 		"pontuacao": pontuacao,
 	}
+	# Tempo zero representa ausencia de limite e nao deve ser enviado como valor invalido.
 	if tempo_limite > 0:
 		payload["tempoLimite"] = tempo_limite
 
@@ -106,16 +112,19 @@ func save_generated_questions(sala_id: int, perguntas_aprovadas: Array) -> Dicti
 
 func import_questions_spreadsheet(file_path: String, sala_id: int) -> Dictionary:
 	var extension: String = file_path.get_extension().to_lower()
+	# O backend possui parser somente para CSV e XLSX.
 	if extension != "csv" and extension != "xlsx":
 		return _error_response(0, "Selecione um arquivo .csv ou .xlsx.")
 
 	var file := FileAccess.open(file_path, FileAccess.READ)
+	# Falha de permissao/caminho e devolvida antes de tentar ler o conteudo.
 	if file == null:
 		return _error_response(0, "Nao foi possivel abrir o arquivo selecionado.")
 
 	var content: PackedByteArray = file.get_buffer(file.get_length())
 	file.close()
 
+	# Upload vazio nao e uma planilha valida e economiza uma requisicao ao backend.
 	if content.is_empty():
 		return _error_response(0, "O arquivo selecionado esta vazio.")
 
@@ -126,6 +135,7 @@ func import_questions_spreadsheet(file_path: String, sala_id: int) -> Dictionary
 	}, IMPORT_REQUEST_TIMEOUT_SECONDS)
 
 func create_progress(jogador_id: int, pergunta_id: int, acertou: bool, fase: int, sala_id: int = 0, sala_codigo: String = "", casa_atual: int = 0, status_partida: String = "") -> Dictionary:
+	# Campos opcionais viram null para o backend resolver a sala pelo identificador disponivel.
 	var payload: Dictionary = {
 		"jogadorId": jogador_id,
 		"perguntaId": pergunta_id,
@@ -134,8 +144,10 @@ func create_progress(jogador_id: int, pergunta_id: int, acertou: bool, fase: int
 		"salaId": sala_id if sala_id > 0 else null,
 		"salaCodigo": sala_codigo.strip_edges().to_upper() if not sala_codigo.strip_edges().is_empty() else null,
 	}
+	# Posicao so e enviada quando o jogo ja possui uma casa valida.
 	if casa_atual > 0:
 		payload["casaAtual"] = casa_atual
+	# Status vazio deixa o servidor aplicar a regra oficial de resposta em andamento.
 	if not status_partida.strip_edges().is_empty():
 		payload["statusPartida"] = status_partida.strip_edges().to_lower()
 	return await _request_json(HTTPClient.METHOD_POST, "/progresso", payload)
@@ -152,6 +164,7 @@ func update_player_phase(jogador_id: int, fase_atual: int) -> Dictionary:
 	})
 
 func _request_json(method: HTTPClient.Method, path: String, payload: Variant = null, timeout_seconds: float = REQUEST_TIMEOUT_SECONDS) -> Dictionary:
+	# Cada chamada usa um HTTPRequest isolado e o libera assim que recebe resposta.
 	var request: HTTPRequest = HTTPRequest.new()
 	request.timeout = timeout_seconds
 	add_child(request)
@@ -161,10 +174,12 @@ func _request_json(method: HTTPClient.Method, path: String, payload: Variant = n
 		"Content-Type: application/json",
 	])
 	var body: String = ""
+	# GETs sem payload mantem corpo vazio; demais chamadas serializam JSON.
 	if payload != null:
 		body = JSON.stringify(payload)
 
 	var error: int = request.request(_build_url(path), headers, method, body)
+	# Erro ao iniciar a requisicao ocorre antes de existir um status HTTP.
 	if error != OK:
 		request.queue_free()
 		return _error_response(0, "Nao foi possivel iniciar a requisicao (%s)." % error_string(error))
@@ -178,10 +193,13 @@ func _request_json(method: HTTPClient.Method, path: String, payload: Variant = n
 	var body_text: String = raw_body.get_string_from_utf8()
 	var parsed_body: Variant = _parse_json_body(body_text)
 
+	# Falha de transporte, DNS ou timeout usa mensagem curta para nao quebrar a UI.
 	if result != HTTPRequest.RESULT_SUCCESS:
 		return _error_response(response_code, SERVER_UNAVAILABLE_MESSAGE)
 
+	# Qualquer status fora de 2xx representa falha do contrato HTTP.
 	if response_code < 200 or response_code >= 300:
+		# Erros de infraestrutura conhecidos nao exibem o corpo extenso do proxy.
 		if _is_server_unavailable_response(response_code, parsed_body):
 			return _error_response(response_code, SERVER_UNAVAILABLE_MESSAGE)
 		return _error_response(response_code, _extract_error_message(parsed_body))
@@ -203,11 +221,13 @@ func _load_base_url() -> String:
 
 func _normalize_base_url(value: String) -> String:
 	var trimmed: String = value.strip_edges()
+	# Configuracao vazia volta para o dominio oficial em vez de gerar URL relativa.
 	if trimmed.is_empty():
 		return DEFAULT_BASE_URL
 	return trimmed.trim_suffix("/")
 
 func _parse_json_body(body_text: String) -> Variant:
+	# Respostas de sucesso sem corpo sao representadas por um dicionario vazio.
 	if body_text.strip_edges().is_empty():
 		return {}
 
@@ -215,24 +235,31 @@ func _parse_json_body(body_text: String) -> Variant:
 	return parsed if parsed != null else {"raw": body_text}
 
 func _is_server_unavailable_response(response_code: int, parsed_body: Variant) -> bool:
+	# Proxies podem devolver metadados estruturados que identificam falha do tunnel.
 	if parsed_body is Dictionary:
 		var dictionary: Dictionary = parsed_body as Dictionary
+		# Marcador explicito do backend/proxy tem prioridade sobre o codigo HTTP.
 		if bool(dictionary.get("cloudflare_error", false)):
 			return true
+		# Uma mensagem de dominio deve chegar ao usuario, mesmo em status de erro.
 		if dictionary.has("message"):
 			return false
 
 	return response_code in [502, 503, 504, 520, 521, 522, 523, 524, 525, 526, 527, 530]
 
 func _extract_error_message(parsed_body: Variant) -> String:
+	# APIs NestJS normalmente retornam a mensagem em um objeto JSON.
 	if parsed_body is Dictionary:
 		var dictionary: Dictionary = parsed_body as Dictionary
 		var message: Variant = dictionary.get("message", "")
+		# Erros de validacao podem trazer varias mensagens; une todas em uma linha legivel.
 		if message is Array:
 			var parts: Array[String] = []
+			# Converte cada detalhe para texto sem assumir o tipo recebido.
 			for item in message:
 				parts.append(str(item))
 			return " | ".join(parts)
+		# Uma mensagem unica pode ser exibida diretamente.
 		if message is String and not String(message).is_empty():
 			return String(message)
 
