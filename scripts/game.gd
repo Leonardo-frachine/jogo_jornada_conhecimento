@@ -154,6 +154,7 @@ var pending_target_house: int = 1
 var pending_start_house: int = 1
 var pending_is_challenge := false
 var pending_correct_index: int = 0
+var pending_option_order: Array[int] = []
 var current_roll: int = 0
 var rng_roll = RandomNumberGenerator.new()
 var accepting_roll: bool = true
@@ -1239,6 +1240,7 @@ func _present_question(house_index: int) -> void:
 	for index in range(options.size()):
 		order.append(index)
 	order.shuffle()
+	pending_option_order = order.duplicate()
 	pending_correct_index = order.find(int(question.get("correct_index", 0)))
 
 	var question_level := int(question.get("difficulty", GameState.get_level_for_house(house_index)))
@@ -1389,9 +1391,12 @@ func _on_answer_button_pressed(answer_slot: int) -> void:
 	answering_locked = true
 	_stop_question_timer()
 	_set_question_buttons_enabled(false)
-	await _resolve_answer(answer_slot == pending_correct_index, false)
+	var original_option_index := -1
+	if answer_slot >= 0 and answer_slot < pending_option_order.size():
+		original_option_index = pending_option_order[answer_slot]
+	await _resolve_answer(answer_slot == pending_correct_index, false, original_option_index)
 
-func _resolve_answer(correct: bool, timed_out: bool) -> void:
+func _resolve_answer(correct: bool, timed_out: bool, original_option_index: int = -1) -> void:
 	# Fecha a interface antes de aplicar pontuacao, movimento e sincronizacao.
 	_hide_dialog()
 	var score_delta := GameState.register_answer(correct, pending_target_house)
@@ -1412,7 +1417,7 @@ func _resolve_answer(correct: bool, timed_out: bool) -> void:
 		if player != null:
 			await player.move_to_house(_get_challenge_return_house())
 
-		var challenge_sync: Dictionary = await GameState.submit_answer_result(false, pending_target_house)
+		var challenge_sync: Dictionary = await GameState.submit_answer_result(false, pending_target_house, original_option_index)
 		# Sucesso remoto solicita snapshot atualizado dos alunos.
 		if challenge_sync.get("ok", false):
 			call_deferred("_refresh_room_players_after_answer")
@@ -1420,7 +1425,7 @@ func _resolve_answer(correct: bool, timed_out: bool) -> void:
 		_finalize_turn()
 		return
 
-	var sync_response: Dictionary = await GameState.submit_answer_result(correct, pending_target_house)
+	var sync_response: Dictionary = await GameState.submit_answer_result(correct, pending_target_house, original_option_index)
 	# Resposta comum confirmada tambem atualiza os avatares remotos.
 	if sync_response.get("ok", false):
 		call_deferred("_refresh_room_players_after_answer")

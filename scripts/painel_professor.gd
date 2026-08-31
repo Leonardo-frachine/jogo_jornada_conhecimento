@@ -137,6 +137,7 @@ const PAGE_META := {
 @onready var botao_apagar_sala: Button = $SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/GerenciarSalaPage/GerenciarSalaGrid/PainelSalaGerenciar/SalaGerenciarMargin/SalaGerenciarVBox/AcoesSalaGerenciar/BotaoApagarSalaGerenciar
 
 @onready var resumo_acompanhamento: Label = $SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/AcompanhamentoPage/AcompanhamentoHero/AcompanhamentoHeroMargin/AcompanhamentoHeroVBox/ResumoAcompanhamento
+@onready var botao_exportar_csv: Button = $SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/AcompanhamentoPage/AcompanhamentoHero/AcompanhamentoHeroMargin/AcompanhamentoHeroVBox/AcompanhamentoActions/BotaoExportarCsv
 @onready var acompanhamento_grid: GridContainer = $SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/AcompanhamentoPage/AcompanhamentoGrid
 
 @onready var resumo_banco_perguntas: Label = $SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/BancoPerguntasPage/PerguntasHeaderCard/PerguntasHeaderMargin/PerguntasHeaderVBox/PerguntasHeaderTop/PerguntasTituloBox/ResumoBancoPerguntas
@@ -186,6 +187,10 @@ var ia_salvando := false
 var sidebar_expanded := true
 var import_dialog: FileDialog
 var template_download_dialog: FileDialog
+var report_download_dialog: FileDialog
+var relatorio_exportando := false
+var pending_report_data := PackedByteArray()
+var pending_report_extension := ""
 
 var current_view := VIEW_DASHBOARD
 var dashboard_payload: Dictionary = {}
@@ -293,6 +298,7 @@ func _connect_signals() -> void:
 	botao_criar_sala.pressed.connect(_on_botao_criar_sala_pressed)
 	botao_atualizar_salas.pressed.connect(_on_botao_atualizar_salas_pressed)
 	botao_apagar_sala.pressed.connect(_on_botao_apagar_sala_pressed)
+	botao_exportar_csv.pressed.connect(_on_exportar_csv_pressed)
 	confirmacao_apagar_sala.confirmed.connect(_on_confirmacao_apagar_sala_confirmed)
 	confirmacao_apagar_perguntas.confirmed.connect(_on_confirmacao_apagar_perguntas_confirmed)
 
@@ -387,6 +393,7 @@ func _apply_theme() -> void:
 	UITheme.apply_title(get_node("SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/DashboardPage/DashboardSecondaryGrid/PainelAtividades/AtividadesMargin/AtividadesVBox/TituloAtividades"), 20, COLOR_TEXT)
 	UITheme.apply_title(get_node("SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/DashboardPage/RankingFinalPanel/RankingFinalMargin/RankingFinalVBox/RankingFinalTitle"), 20, COLOR_TEXT)
 	UITheme.apply_title(get_node("SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/AcompanhamentoPage/AcompanhamentoHero/AcompanhamentoHeroMargin/AcompanhamentoHeroVBox/TituloAcompanhamento"), 22, COLOR_TEXT)
+	UITheme.apply_button(botao_exportar_csv, UITheme.BUTTON_PRIMARY, 15)
 	UITheme.apply_title(get_node("SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/BancoPerguntasPage/PerguntasHeaderCard/PerguntasHeaderMargin/PerguntasHeaderVBox/PerguntasHeaderTop/PerguntasTituloBox/TituloBancoPerguntas"), 22, COLOR_TEXT)
 	UITheme.apply_title(get_node("SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/ImportarPerguntasPage/ImportarIntroCard/ImportarIntroMargin/ImportarIntroVBox/TituloImportar"), 22, COLOR_TEXT)
 	UITheme.apply_title(get_node("SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/GerarIAPage/IaIntroCard/IaIntroMargin/IaIntroVBox/TituloIa"), 22, COLOR_TEXT)
@@ -685,6 +692,7 @@ func _set_loading_state(enabled: bool) -> void:
 	botao_atualizar_salas.disabled = enabled
 	botao_apagar_sala.disabled = enabled or salas.is_empty() or not ProfessorSession.has_current_room()
 	botao_atualizar_salas_header.disabled = enabled
+	botao_exportar_csv.disabled = enabled or relatorio_exportando or not ProfessorSession.has_current_room()
 	seletor_salas.disabled = enabled or salas.is_empty()
 	_update_question_bank_controls_state()
 	_update_ia_controls_state()
@@ -724,6 +732,20 @@ func _ensure_import_dialog() -> void:
 	# Caminho escolhido e processado uma unica vez por confirmacao.
 	if not template_download_dialog.file_selected.is_connected(_on_template_download_file_selected):
 		template_download_dialog.file_selected.connect(_on_template_download_file_selected)
+
+	report_download_dialog = get_node_or_null("ReportDownloadDialog")
+	if report_download_dialog == null:
+		report_download_dialog = FileDialog.new()
+		report_download_dialog.name = "ReportDownloadDialog"
+		report_download_dialog.access = FileDialog.ACCESS_FILESYSTEM
+		report_download_dialog.file_mode = FileDialog.FILE_MODE_SAVE_FILE
+		report_download_dialog.use_native_dialog = true
+		report_download_dialog.title = "Salvar relatorio"
+		add_child(report_download_dialog)
+	if not report_download_dialog.file_selected.is_connected(_on_report_download_file_selected):
+		report_download_dialog.file_selected.connect(_on_report_download_file_selected)
+	if not report_download_dialog.canceled.is_connected(_clear_pending_report):
+		report_download_dialog.canceled.connect(_clear_pending_report)
 
 func _fetch_rooms(refresh_dashboard_after_load: bool) -> void:
 	# Impede consultas concorrentes acionadas por botoes ou inicializacao.
@@ -1312,7 +1334,103 @@ func _create_student_card(item: Dictionary) -> PanelContainer:
 	UITheme.apply_font_only(bottom, 14)
 	bottom.add_theme_color_override("font_color", COLOR_MUTED)
 	box.add_child(bottom)
+
+	var export_button := Button.new()
+	export_button.text = "Exportar relatorio em PDF"
+	export_button.custom_minimum_size.y = 42
+	export_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	export_button.disabled = relatorio_exportando
+	UITheme.apply_button(export_button, UITheme.BUTTON_SECONDARY, 14)
+	export_button.pressed.connect(_on_exportar_pdf_aluno_pressed.bind(item, export_button))
+	box.add_child(export_button)
 	return panel
+
+func _on_exportar_csv_pressed() -> void:
+	if relatorio_exportando or not ProfessorSession.has_current_room():
+		return
+	relatorio_exportando = true
+	botao_exportar_csv.disabled = true
+	_show_status("Preparando a base CSV da sala...", STATUS_INFO)
+	var response: Dictionary = await ApiClient.download_room_report_csv(
+		ProfessorSession.current_room_id,
+		ProfessorSession.professor_id
+	)
+	relatorio_exportando = false
+	botao_exportar_csv.disabled = not ProfessorSession.has_current_room()
+	if not response.get("ok", false):
+		_show_status(response.get("error", "Nao foi possivel exportar o CSV."), STATUS_ERROR)
+		return
+	_open_report_save_dialog(
+		response.get("data", PackedByteArray()),
+		str(response.get("file_name", "desempenho_sala.csv")),
+		"csv"
+	)
+
+func _on_exportar_pdf_aluno_pressed(item: Dictionary, button: Button) -> void:
+	if relatorio_exportando or not ProfessorSession.has_current_room():
+		return
+	var jogador_id := int(item.get("jogadorId", 0))
+	if jogador_id <= 0:
+		_show_status("O aluno selecionado nao possui um identificador valido.", STATUS_ERROR)
+		return
+	relatorio_exportando = true
+	button.disabled = true
+	botao_exportar_csv.disabled = true
+	_show_status("Gerando o relatorio profissional de %s..." % str(item.get("nome", "aluno")), STATUS_INFO)
+	var response: Dictionary = await ApiClient.download_student_report_pdf(
+		ProfessorSession.current_room_id,
+		jogador_id,
+		ProfessorSession.professor_id
+	)
+	relatorio_exportando = false
+	if is_instance_valid(button):
+		button.disabled = false
+	botao_exportar_csv.disabled = not ProfessorSession.has_current_room()
+	if not response.get("ok", false):
+		_show_status(response.get("error", "Nao foi possivel exportar o PDF."), STATUS_ERROR)
+		return
+	_open_report_save_dialog(
+		response.get("data", PackedByteArray()),
+		str(response.get("file_name", "relatorio_aluno.pdf")),
+		"pdf"
+	)
+
+func _open_report_save_dialog(data: PackedByteArray, suggested_name: String, extension: String) -> void:
+	if report_download_dialog == null or data.is_empty():
+		_show_status("O arquivo de relatorio recebido esta vazio.", STATUS_ERROR)
+		return
+	pending_report_data = data
+	pending_report_extension = extension.to_lower()
+	report_download_dialog.clear_filters()
+	report_download_dialog.add_filter("*.%s" % pending_report_extension, "Arquivo %s" % pending_report_extension.to_upper())
+	report_download_dialog.current_file = suggested_name if not suggested_name.is_empty() else "relatorio.%s" % pending_report_extension
+	report_download_dialog.title = "Salvar relatorio %s" % pending_report_extension.to_upper()
+	report_download_dialog.popup_centered_ratio(0.72)
+	_show_status("Relatorio pronto. Escolha onde salvar o arquivo.", STATUS_OK)
+
+func _on_report_download_file_selected(path: String) -> void:
+	if pending_report_data.is_empty() or pending_report_extension.is_empty():
+		_show_status("Nao ha um relatorio pronto para salvar.", STATUS_ERROR)
+		return
+	var target_path := path
+	if target_path.get_extension().to_lower() != pending_report_extension:
+		target_path = "%s.%s" % [target_path, pending_report_extension]
+	var target_file := FileAccess.open(target_path, FileAccess.WRITE)
+	if target_file == null:
+		_show_status("Nao foi possivel salvar o relatorio no local escolhido.", STATUS_ERROR)
+		return
+	target_file.store_buffer(pending_report_data)
+	var write_error := target_file.get_error()
+	target_file.close()
+	if write_error != OK:
+		_show_status("Falha ao concluir a gravacao do relatorio.", STATUS_ERROR)
+		return
+	_clear_pending_report()
+	_show_status("Relatorio salvo com sucesso em %s." % target_path.get_file(), STATUS_OK)
+
+func _clear_pending_report() -> void:
+	pending_report_data = PackedByteArray()
+	pending_report_extension = ""
 
 func _build_student_models(respostas: Array[Dictionary], alunos: Array[Dictionary] = []) -> Array[Dictionary]:
 	# Une estado corrente do jogador com seu historico de respostas.

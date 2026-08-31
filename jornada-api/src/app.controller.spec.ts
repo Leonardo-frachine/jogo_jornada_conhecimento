@@ -16,8 +16,10 @@ describe('AppController', () => {
   });
 
   describe('root', () => {
-    it('should return "Hello World!"', () => {
-      expect(appController.getHello()).toBe('Hello World!');
+    it('retorna a descricao publica da API', () => {
+      expect(appController.getHello()).toContain(
+        'API do Jornada do Conhecimento esta rodando.',
+      );
     });
   });
 });

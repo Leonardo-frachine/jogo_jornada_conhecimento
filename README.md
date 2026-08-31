@@ -28,7 +28,7 @@ Inspirado na **Jornada do Herói**, o jogo acompanha o aluno em uma aventura pel
 - **Plataforma**: Desenvolvido com Godot  
 - **Objetivo**: Chegar ao final do tabuleiro acumulando conhecimento (XP)
 
-O jogador progride conforme responde corretamente às perguntas, enquanto o professor pode gerenciar conteúdos e acompanhar o progresso dos alunos.
+O jogador progride conforme responde corretamente às perguntas, enquanto o professor pode gerenciar conteúdos, acompanhar o progresso dos alunos e exportar um relatório individual em PDF ou a base detalhada da sala em CSV.
 
 ---
 

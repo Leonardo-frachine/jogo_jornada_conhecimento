@@ -436,6 +436,15 @@ layout_mode = 2
 autowrap_mode = 3
 text = "O progresso dos alunos sera exibido aqui."
 
+[node name="AcompanhamentoActions" type="HBoxContainer" parent="SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/AcompanhamentoPage/AcompanhamentoHero/AcompanhamentoHeroMargin/AcompanhamentoHeroVBox"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="BotaoExportarCsv" type="Button" parent="SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/AcompanhamentoPage/AcompanhamentoHero/AcompanhamentoHeroMargin/AcompanhamentoHeroVBox/AcompanhamentoActions"]
+custom_minimum_size = Vector2(210, 46)
+layout_mode = 2
+text = "Exportar CSV da sala"
+
 [node name="AcompanhamentoGrid" type="GridContainer" parent="SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/AcompanhamentoPage"]
 layout_mode = 2
 size_flags_horizontal = 3

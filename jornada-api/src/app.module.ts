@@ -8,6 +8,7 @@ import { PerguntasModule } from './perguntas/perguntas.module';
 import { ProfessoresModule } from './professores/professores.module';
 import { ProgressoModule } from './progresso/progresso.module';
 import { SalasModule } from './salas/salas.module';
+import { RelatoriosModule } from './relatorios/relatorios.module';
 
 @Module({
   // Inicializa o banco antes dos modulos que dependem de repositorios TypeORM.
@@ -18,6 +19,7 @@ import { SalasModule } from './salas/salas.module';
     ProgressoModule,
     ProfessoresModule,
     SalasModule,
+    RelatoriosModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -8,6 +8,8 @@ import { AppModule } from '../src/app.module';
 
 describe('AppController (e2e)', () => {
   let app: INestApplication<App>;
+  let professorId: number;
+  let salaId: number;
   const originalIaEnabled = process.env.IA_ENABLED;
   const originalGeminiApiKey = process.env.GEMINI_API_KEY;
 
@@ -19,6 +21,25 @@ describe('AppController (e2e)', () => {
     app = moduleFixture.createNestApplication();
     configureApp(app);
     await app.init();
+
+    const professorResponse = await request(app.getHttpServer())
+      .post('/professores/cadastro')
+      .send({
+        nome: 'Professora E2E',
+        email: 'professora-e2e@example.com',
+        senha: 'senha-segura',
+      })
+      .expect(201);
+    const professorBody = professorResponse.body as {
+      professor: { id: number };
+    };
+    professorId = professorBody.professor.id;
+    const salaResponse = await request(app.getHttpServer())
+      .post('/salas')
+      .send({ professorId, nome: 'Sala E2E' })
+      .expect(201);
+    const salaBody = salaResponse.body as { sala: { id: number } };
+    salaId = salaBody.sala.id;
   });
 
   afterEach(() => {
@@ -30,7 +51,7 @@ describe('AppController (e2e)', () => {
     return request(app.getHttpServer())
       .get('/')
       .expect(200)
-      .expect('Hello World!');
+      .expect(/API do Jornada do Conhecimento esta rodando/);
   });
 
   it('valida parametros numericos antes de consultar o banco', () => {
@@ -40,7 +61,7 @@ describe('AppController (e2e)', () => {
   it('registra jogador, pergunta, progresso e relatorio sem inconsistir pontuacao', async () => {
     const jogadorResponse = await request(app.getHttpServer())
       .post('/jogadores')
-      .send({ nome: '  Ana Teste  ' })
+      .send({ nome: '  Ana Teste  ', salaId })
       .expect(201);
 
     const jogador = jogadorResponse.body as { id: number; nome: string };
@@ -49,6 +70,7 @@ describe('AppController (e2e)', () => {
     const perguntaResponse = await request(app.getHttpServer())
       .post('/perguntas')
       .send({
+        salaId,
         titulo: 'Godot',
         enunciado: 'Qual linguagem e usada na Godot?',
         alternativaA: 'Python',
@@ -76,8 +98,10 @@ describe('AppController (e2e)', () => {
         jogadorId: jogador.id,
         perguntaId: pergunta.id,
         acertou: true,
+        respostaEscolhida: 'B',
         fase: 2,
         pontuacaoGanha: 9999,
+        salaId,
       })
       .expect(201);
 
@@ -131,6 +155,28 @@ describe('AppController (e2e)', () => {
       erros: 0,
       aproveitamento: 100,
     });
+
+    const pdfResponse = await request(app.getHttpServer())
+      .get(
+        `/salas/${salaId}/relatorios/alunos/${jogador.id}/pdf?professorId=${professorId}`,
+      )
+      .expect(200)
+      .expect('Content-Type', /application\/pdf/);
+    expect(Buffer.from(pdfResponse.body).subarray(0, 5).toString('ascii')).toBe(
+      '%PDF-',
+    );
+    expect(pdfResponse.headers['content-disposition']).toContain(
+      'relatorio_ana_teste',
+    );
+
+    const csvResponse = await request(app.getHttpServer())
+      .get(
+        `/salas/${salaId}/relatorios/respostas.csv?professorId=${professorId}`,
+      )
+      .expect(200)
+      .expect('Content-Type', /text\/csv/);
+    expect(csvResponse.text).toContain('resposta_escolhida_letra');
+    expect(csvResponse.text).toContain(',B,GDScript,B,GDScript,true,');
   });
 
   it('importa e exporta perguntas em CSV', async () => {
@@ -141,7 +187,7 @@ describe('AppController (e2e)', () => {
 
     const importacaoResponse = await request(app.getHttpServer())
       .post('/perguntas/importar-csv')
-      .send({ csv })
+      .send({ csv, salaId })
       .expect(201);
 
     const importacao = importacaoResponse.body as { total: number };
@@ -149,6 +195,7 @@ describe('AppController (e2e)', () => {
 
     const exportacaoResponse = await request(app.getHttpServer())
       .get('/perguntas/exportar-csv')
+      .query({ salaId })
       .expect(200);
 
     expect(exportacaoResponse.text).toContain('Correta (A-D)');
@@ -164,21 +211,33 @@ describe('AppController (e2e)', () => {
     const importacaoCsvResponse = await request(app.getHttpServer())
       .post('/perguntas/importar-planilha')
       .send({
+        salaId,
         fileName: 'perguntas-importacao.csv',
         contentBase64: Buffer.from(csv, 'utf-8').toString('base64'),
       })
       .expect(201);
 
-    expect(importacaoCsvResponse.body).toMatchObject({
+    const importacaoCsvBody = importacaoCsvResponse.body as {
+      total: number;
+      formato: string;
+      perguntas: Array<{
+        id: number;
+        respostaCorreta: string;
+        materia: string;
+        pontuacao: number;
+      }>;
+    };
+
+    expect(importacaoCsvBody).toMatchObject({
       total: 1,
       formato: 'csv',
     });
-    expect(importacaoCsvResponse.body.perguntas[0]).toMatchObject({
+    expect(importacaoCsvBody.perguntas[0]).toMatchObject({
       respostaCorreta: 'A',
       materia: 'Matematica',
       pontuacao: 120,
     });
-    expect(importacaoCsvResponse.body.perguntas[0].id).not.toBe(999);
+    expect(importacaoCsvBody.perguntas[0].id).not.toBe(999);
 
     const workbook = XLSX.utils.book_new();
     const worksheet = XLSX.utils.aoa_to_sheet([
@@ -212,29 +271,45 @@ describe('AppController (e2e)', () => {
       ],
     ]);
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Perguntas');
-    const xlsxBase64 = XLSX.write(workbook, {
+    const xlsxResult: unknown = XLSX.write(workbook, {
       type: 'base64',
       bookType: 'xlsx',
     });
+    if (typeof xlsxResult !== 'string') {
+      throw new TypeError('A planilha XLSX de teste nao foi serializada.');
+    }
+    const xlsxBase64 = xlsxResult;
 
     const importacaoXlsxResponse = await request(app.getHttpServer())
       .post('/perguntas/importar-planilha')
       .send({
+        salaId,
         fileName: 'perguntas-importacao.xlsx',
         contentBase64: xlsxBase64,
       })
       .expect(201);
 
-    expect(importacaoXlsxResponse.body).toMatchObject({
+    const importacaoXlsxBody = importacaoXlsxResponse.body as {
+      total: number;
+      formato: string;
+      perguntas: Array<{
+        id: number;
+        respostaCorreta: string;
+        materia: string;
+        pontuacao: number;
+      }>;
+    };
+
+    expect(importacaoXlsxBody).toMatchObject({
       total: 1,
       formato: 'xlsx',
     });
-    expect(importacaoXlsxResponse.body.perguntas[0]).toMatchObject({
+    expect(importacaoXlsxBody.perguntas[0]).toMatchObject({
       respostaCorreta: 'A',
       materia: 'Ciencias',
       pontuacao: 220,
     });
-    expect(importacaoXlsxResponse.body.perguntas[0].id).not.toBe(500);
+    expect(importacaoXlsxBody.perguntas[0].id).not.toBe(500);
   });
 
   it('retorna erro amigavel quando a geracao por IA esta desativada', async () => {
@@ -244,6 +319,7 @@ describe('AppController (e2e)', () => {
     const response = await request(app.getHttpServer())
       .post('/perguntas/gerar-ia')
       .send({
+        salaId,
         tema: 'Sistema Solar',
         materia: 'Ciencias',
         dificuldade: 'Medio',
@@ -253,7 +329,8 @@ describe('AppController (e2e)', () => {
       })
       .expect(503);
 
-    expect(response.body.message).toBe(
+    const responseBody = response.body as { message: string };
+    expect(responseBody.message).toBe(
       'A geracao por IA esta desativada no servidor.',
     );
   });
@@ -265,6 +342,7 @@ describe('AppController (e2e)', () => {
     const response = await request(app.getHttpServer())
       .post('/perguntas/gerar-ia')
       .send({
+        salaId,
         tema: 'Sistema Solar',
         materia: 'Ciencias',
         dificuldade: 'Medio',
@@ -274,7 +352,8 @@ describe('AppController (e2e)', () => {
       })
       .expect(503);
 
-    expect(response.body.message).toBe(
+    const responseBody = response.body as { message: string };
+    expect(responseBody.message).toBe(
       'Chave da API Gemini nao configurada no servidor.',
     );
   });
@@ -282,6 +361,7 @@ describe('AppController (e2e)', () => {
   it('salva apenas as perguntas aprovadas enviadas pelo professor', async () => {
     const response = await request(app.getHttpServer())
       .post('/perguntas/salvar-geradas')
+      .query({ salaId })
       .send([
         {
           titulo: 'Sistema Solar',
@@ -311,14 +391,19 @@ describe('AppController (e2e)', () => {
       ])
       .expect(201);
 
-    expect(response.body).toMatchObject({
+    const responseBody = response.body as {
+      total: number;
+      perguntas: Array<{ id: number }>;
+    };
+    expect(responseBody).toMatchObject({
       total: 2,
     });
-    expect(response.body.perguntas[0].id).toBeGreaterThan(0);
-    expect(response.body.perguntas[1].id).toBeGreaterThan(0);
+    expect(responseBody.perguntas[0].id).toBeGreaterThan(0);
+    expect(responseBody.perguntas[1].id).toBeGreaterThan(0);
 
     const perguntasResponse = await request(app.getHttpServer())
       .get('/perguntas')
+      .query({ salaId })
       .expect(200);
 
     const perguntas = perguntasResponse.body as Array<{
@@ -339,8 +424,7 @@ describe('AppController (e2e)', () => {
     expect(
       perguntas.some(
         (pergunta) =>
-          pergunta.enunciado ===
-            'Qual oceano banha a costa leste do Brasil?' &&
+          pergunta.enunciado === 'Qual oceano banha a costa leste do Brasil?' &&
           pergunta.respostaCorreta === 'B' &&
           pergunta.materia === 'Geografia',
       ),

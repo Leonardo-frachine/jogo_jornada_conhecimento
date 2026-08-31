@@ -7,6 +7,7 @@ const BASE_URL_SETTING := "application/config/api_base_url"
 const REQUEST_TIMEOUT_SECONDS := 10.0
 const IMPORT_REQUEST_TIMEOUT_SECONDS := 30.0
 const AI_REQUEST_TIMEOUT_SECONDS := 45.0
+const REPORT_REQUEST_TIMEOUT_SECONDS := 30.0
 const SERVER_UNAVAILABLE_MESSAGE := "Servidor temporariamente indisponivel. Tente novamente em alguns minutos."
 
 var base_url: String = DEFAULT_BASE_URL
@@ -66,6 +67,18 @@ func fetch_room_players(room_id: int) -> Dictionary:
 
 func fetch_room_ranking(room_id: int) -> Dictionary:
 	return await _request_json(HTTPClient.METHOD_GET, "/salas/%d/ranking" % room_id)
+
+func download_student_report_pdf(room_id: int, player_id: int, professor_id: int) -> Dictionary:
+	return await _request_binary(
+		"/salas/%d/relatorios/alunos/%d/pdf?professorId=%d" % [room_id, player_id, professor_id],
+		"application/pdf"
+	)
+
+func download_room_report_csv(room_id: int, professor_id: int) -> Dictionary:
+	return await _request_binary(
+		"/salas/%d/relatorios/respostas.csv?professorId=%d" % [room_id, professor_id],
+		"text/csv"
+	)
 
 func delete_room(room_id: int) -> Dictionary:
 	return await _request_json(HTTPClient.METHOD_DELETE, "/salas/%d" % room_id)
@@ -134,7 +147,7 @@ func import_questions_spreadsheet(file_path: String, sala_id: int) -> Dictionary
 		"contentBase64": Marshalls.raw_to_base64(content),
 	}, IMPORT_REQUEST_TIMEOUT_SECONDS)
 
-func create_progress(jogador_id: int, pergunta_id: int, acertou: bool, fase: int, sala_id: int = 0, sala_codigo: String = "", casa_atual: int = 0, status_partida: String = "") -> Dictionary:
+func create_progress(jogador_id: int, pergunta_id: int, acertou: bool, fase: int, sala_id: int = 0, sala_codigo: String = "", casa_atual: int = 0, status_partida: String = "", resposta_escolhida: String = "") -> Dictionary:
 	# Campos opcionais viram null para o backend resolver a sala pelo identificador disponivel.
 	var payload: Dictionary = {
 		"jogadorId": jogador_id,
@@ -150,6 +163,9 @@ func create_progress(jogador_id: int, pergunta_id: int, acertou: bool, fase: int
 	# Status vazio deixa o servidor aplicar a regra oficial de resposta em andamento.
 	if not status_partida.strip_edges().is_empty():
 		payload["statusPartida"] = status_partida.strip_edges().to_lower()
+	# A letra original permite ao backend validar o acerto e compor relatorios auditaveis.
+	if resposta_escolhida.strip_edges().to_upper() in ["A", "B", "C", "D"]:
+		payload["respostaEscolhida"] = resposta_escolhida.strip_edges().to_upper()
 	return await _request_json(HTTPClient.METHOD_POST, "/progresso", payload)
 
 func finish_player_session(jogador_id: int, casa_atual: int, won: bool) -> Dictionary:
@@ -210,6 +226,51 @@ func _request_json(method: HTTPClient.Method, path: String, payload: Variant = n
 		"data": parsed_body,
 		"error": "",
 	}
+
+func _request_binary(path: String, accept_type: String) -> Dictionary:
+	var request := HTTPRequest.new()
+	request.timeout = REPORT_REQUEST_TIMEOUT_SECONDS
+	add_child(request)
+	var headers := PackedStringArray(["Accept: %s" % accept_type])
+	var error := request.request(_build_url(path), headers, HTTPClient.METHOD_GET)
+	if error != OK:
+		request.queue_free()
+		return _error_response(0, "Nao foi possivel iniciar a exportacao (%s)." % error_string(error))
+
+	var result_data: Array = await request.request_completed
+	request.queue_free()
+	var result := int(result_data[0])
+	var response_code := int(result_data[1])
+	var response_headers: PackedStringArray = result_data[2]
+	var raw_body: PackedByteArray = result_data[3]
+
+	if result != HTTPRequest.RESULT_SUCCESS:
+		return _error_response(response_code, SERVER_UNAVAILABLE_MESSAGE)
+	if response_code < 200 or response_code >= 300:
+		var parsed_body: Variant = _parse_json_body(raw_body.get_string_from_utf8())
+		return _error_response(response_code, _extract_error_message(parsed_body))
+	if raw_body.is_empty():
+		return _error_response(response_code, "O servidor retornou um arquivo vazio.")
+
+	return {
+		"ok": true,
+		"status_code": response_code,
+		"data": raw_body,
+		"file_name": _extract_download_filename(response_headers),
+		"error": "",
+	}
+
+func _extract_download_filename(headers: PackedStringArray) -> String:
+	for header in headers:
+		var lower_header := header.to_lower()
+		if not lower_header.begins_with("content-disposition:"):
+			continue
+		var marker_index := lower_header.find("filename=")
+		if marker_index < 0:
+			continue
+		var value := header.substr(marker_index + "filename=".length()).strip_edges()
+		return value.trim_prefix("\"").trim_suffix("\"")
+	return ""
 
 func _build_url(path: String) -> String:
 	var normalized_path: String = path if path.begins_with("/") else "/%s" % path

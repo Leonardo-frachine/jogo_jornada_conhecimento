@@ -204,7 +204,7 @@ func register_answer(correct: bool, house_index: int) -> int:
 	last_feedback = "Resposta incorreta! %d pontos." % score_delta
 	return score_delta
 
-func submit_answer_result(correct: bool, house_index: int) -> Dictionary:
+func submit_answer_result(correct: bool, house_index: int, selected_option_index: int = -1) -> Dictionary:
 	sync_warning = ""
 
 	# Sem sessao remota pronta nao existe jogador para receber o progresso.
@@ -221,6 +221,9 @@ func submit_answer_result(correct: bool, house_index: int) -> Dictionary:
 	if correct:
 		casa_atual = clampi(house_index, 1, TOTAL_CASAS)
 	var fase: int = get_level_for_house(casa_atual) if correct else level
+	var resposta_escolhida := ""
+	if selected_option_index >= 0 and selected_option_index < 4:
+		resposta_escolhida = ["A", "B", "C", "D"][selected_option_index]
 	var response: Dictionary = await ApiClient.create_progress(
 		player_id,
 		question_id,
@@ -229,7 +232,8 @@ func submit_answer_result(correct: bool, house_index: int) -> Dictionary:
 		resolved_room_id,
 		room_code,
 		casa_atual,
-		STATUS_JOGANDO
+		STATUS_JOGANDO,
+		resposta_escolhida
 	)
 	# Falha de sincronizacao restaura a ultima pontuacao confirmada pelo servidor.
 	if not response.get("ok", false):

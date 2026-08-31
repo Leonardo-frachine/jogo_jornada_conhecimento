@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { Jogador } from '../jogadores/jogador.entity';
 import { PARTIDA_STATUS } from '../jogadores/partida-status';
 import type { PartidaStatus } from '../jogadores/partida-status';
+import { Pergunta } from '../perguntas/pergunta.entity';
 import { Professor } from '../professores/professor.entity';
 import { Progresso } from '../progresso/progresso.entity';
 import { CriarSalaDto } from './dto/criar-sala.dto';
@@ -273,6 +274,10 @@ export class SalasService {
       materia: string;
       dificuldade: string;
       acertou: boolean;
+      respostaEscolhida: string | null;
+      respostaEscolhidaTexto: string | null;
+      respostaCorreta: string;
+      respostaCorretaTexto: string;
       fase: number;
       casaAtual: number;
       statusPartida: PartidaStatus;
@@ -312,6 +317,19 @@ export class SalasService {
         materia: resposta.pergunta?.materia ?? 'Nao informada',
         dificuldade: resposta.pergunta?.dificuldade ?? `Nivel ${resposta.fase}`,
         acertou: resposta.acertou,
+        respostaEscolhida: resposta.respostaEscolhida ?? null,
+        respostaEscolhidaTexto: resposta.respostaEscolhidaTexto ?? null,
+        respostaCorreta:
+          resposta.respostaCorretaSnapshot ??
+          resposta.pergunta?.respostaCorreta ??
+          '',
+        respostaCorretaTexto:
+          resposta.respostaCorretaTextoSnapshot ??
+          this.obterTextoAlternativa(
+            resposta.pergunta,
+            resposta.respostaCorretaSnapshot ??
+              resposta.pergunta?.respostaCorreta,
+          ),
         fase: resposta.fase,
         casaAtual: resposta.casaAtual ?? resposta.jogador?.casaAtual ?? 1,
         statusPartida:
@@ -576,5 +594,23 @@ export class SalasService {
         ? { materia: nomeGrupo, ...payload }
         : { dificuldade: nomeGrupo, ...payload };
     });
+  }
+
+  private obterTextoAlternativa(
+    pergunta: Pergunta | undefined,
+    letra: string | null | undefined,
+  ): string {
+    if (!pergunta || !letra) {
+      return '';
+    }
+
+    const alternativas: Record<string, string> = {
+      A: pergunta.alternativaA,
+      B: pergunta.alternativaB,
+      C: pergunta.alternativaC,
+      D: pergunta.alternativaD,
+    };
+
+    return alternativas[letra.toUpperCase()] ?? '';
   }
 }

@@ -36,11 +36,11 @@ export class ProgressoService {
     const {
       jogadorId,
       perguntaId,
-      acertou,
       fase,
       salaId,
       salaCodigo,
       casaAtual,
+      respostaEscolhida,
     } = criarProgressoDto;
 
     // Rejeita eventos sem as chaves minimas para relacionar jogador, pergunta e fase.
@@ -80,7 +80,7 @@ export class ProgressoService {
           (await salaRepository.findOne({
             where: { id: salaId },
           })) ?? null;
-      // Sem ID, resolve o codigo publico informado pelo cliente.
+        // Sem ID, resolve o codigo publico informado pelo cliente.
       } else if (salaCodigo) {
         sala =
           (await salaRepository.findOne({
@@ -130,9 +130,17 @@ export class ProgressoService {
 
       // Acerto recebe o valor integral; erro desconta metade arredondada.
       const pontuacaoPergunta = this.calcularPontuacao(pergunta, fase);
+      const respostaEscolhidaNormalizada =
+        respostaEscolhida?.toUpperCase() ?? null;
+      // Clientes novos nao conseguem forjar o resultado: o servidor compara a escolha com o gabarito.
+      const acertou = respostaEscolhidaNormalizada
+        ? respostaEscolhidaNormalizada ===
+          pergunta.respostaCorreta.toUpperCase()
+        : criarProgressoDto.acertou;
       const pontos = acertou
         ? pontuacaoPergunta
         : -Math.round(pontuacaoPergunta / 2);
+      const respostaCorretaNormalizada = pergunta.respostaCorreta.toUpperCase();
       // Posicao nunca pode ser anterior ao inicio do tabuleiro.
       const casaAtualNormalizada = Math.max(
         1,
@@ -146,6 +154,21 @@ export class ProgressoService {
         perguntaId,
         salaId: sala?.id ?? null,
         acertou,
+        respostaEscolhida: respostaEscolhidaNormalizada,
+        respostaEscolhidaTexto: this.obterTextoAlternativa(
+          pergunta,
+          respostaEscolhidaNormalizada,
+        ),
+        respostaCorretaSnapshot: respostaCorretaNormalizada,
+        respostaCorretaTextoSnapshot: this.obterTextoAlternativa(
+          pergunta,
+          respostaCorretaNormalizada,
+        ),
+        perguntaTituloSnapshot: pergunta.titulo?.trim() || null,
+        perguntaEnunciadoSnapshot: pergunta.enunciado,
+        materiaSnapshot: pergunta.materia?.trim() || null,
+        dificuldadeSnapshot: pergunta.dificuldade?.trim() || null,
+        pontuacaoBaseSnapshot: pontuacaoPergunta,
         fase,
         casaAtual: casaAtualNormalizada,
         statusPartida: statusPartidaNormalizado,
@@ -309,6 +332,24 @@ export class ProgressoService {
 
     // Ultimo fallback usa a fase, garantindo no minimo 100 pontos-base.
     return Math.max(1, fase) * 100;
+  }
+
+  private obterTextoAlternativa(
+    pergunta: Pergunta,
+    letra?: string | null,
+  ): string | null {
+    if (!letra) {
+      return null;
+    }
+
+    const alternativas: Record<string, string> = {
+      A: pergunta.alternativaA,
+      B: pergunta.alternativaB,
+      C: pergunta.alternativaC,
+      D: pergunta.alternativaD,
+    };
+
+    return alternativas[letra.toUpperCase()]?.trim() || null;
   }
 
   private normalizarStatusDeResposta(): PartidaStatus {
