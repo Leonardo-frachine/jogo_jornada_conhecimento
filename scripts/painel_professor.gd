@@ -137,6 +137,7 @@ const PAGE_META := {
 @onready var botao_apagar_sala: Button = $SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/GerenciarSalaPage/GerenciarSalaGrid/PainelSalaGerenciar/SalaGerenciarMargin/SalaGerenciarVBox/AcoesSalaGerenciar/BotaoApagarSalaGerenciar
 
 @onready var resumo_acompanhamento: Label = $SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/AcompanhamentoPage/AcompanhamentoHero/AcompanhamentoHeroMargin/AcompanhamentoHeroVBox/ResumoAcompanhamento
+@onready var botao_exportar_pdf_turma: Button = $SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/AcompanhamentoPage/AcompanhamentoHero/AcompanhamentoHeroMargin/AcompanhamentoHeroVBox/AcompanhamentoActions/BotaoExportarPdfTurma
 @onready var botao_exportar_csv: Button = $SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/AcompanhamentoPage/AcompanhamentoHero/AcompanhamentoHeroMargin/AcompanhamentoHeroVBox/AcompanhamentoActions/BotaoExportarCsv
 @onready var acompanhamento_grid: GridContainer = $SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/AcompanhamentoPage/AcompanhamentoGrid
 
@@ -298,6 +299,7 @@ func _connect_signals() -> void:
 	botao_criar_sala.pressed.connect(_on_botao_criar_sala_pressed)
 	botao_atualizar_salas.pressed.connect(_on_botao_atualizar_salas_pressed)
 	botao_apagar_sala.pressed.connect(_on_botao_apagar_sala_pressed)
+	botao_exportar_pdf_turma.pressed.connect(_on_exportar_pdf_turma_pressed)
 	botao_exportar_csv.pressed.connect(_on_exportar_csv_pressed)
 	confirmacao_apagar_sala.confirmed.connect(_on_confirmacao_apagar_sala_confirmed)
 	confirmacao_apagar_perguntas.confirmed.connect(_on_confirmacao_apagar_perguntas_confirmed)
@@ -393,6 +395,7 @@ func _apply_theme() -> void:
 	UITheme.apply_title(get_node("SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/DashboardPage/DashboardSecondaryGrid/PainelAtividades/AtividadesMargin/AtividadesVBox/TituloAtividades"), 20, COLOR_TEXT)
 	UITheme.apply_title(get_node("SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/DashboardPage/RankingFinalPanel/RankingFinalMargin/RankingFinalVBox/RankingFinalTitle"), 20, COLOR_TEXT)
 	UITheme.apply_title(get_node("SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/AcompanhamentoPage/AcompanhamentoHero/AcompanhamentoHeroMargin/AcompanhamentoHeroVBox/TituloAcompanhamento"), 22, COLOR_TEXT)
+	UITheme.apply_button(botao_exportar_pdf_turma, UITheme.BUTTON_SECONDARY, 15)
 	UITheme.apply_button(botao_exportar_csv, UITheme.BUTTON_PRIMARY, 15)
 	UITheme.apply_title(get_node("SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/BancoPerguntasPage/PerguntasHeaderCard/PerguntasHeaderMargin/PerguntasHeaderVBox/PerguntasHeaderTop/PerguntasTituloBox/TituloBancoPerguntas"), 22, COLOR_TEXT)
 	UITheme.apply_title(get_node("SafeArea/Shell/MainColumn/ContentShell/ContentScroll/PageStack/ImportarPerguntasPage/ImportarIntroCard/ImportarIntroMargin/ImportarIntroVBox/TituloImportar"), 22, COLOR_TEXT)
@@ -692,6 +695,7 @@ func _set_loading_state(enabled: bool) -> void:
 	botao_atualizar_salas.disabled = enabled
 	botao_apagar_sala.disabled = enabled or salas.is_empty() or not ProfessorSession.has_current_room()
 	botao_atualizar_salas_header.disabled = enabled
+	botao_exportar_pdf_turma.disabled = enabled or relatorio_exportando or not ProfessorSession.has_current_room()
 	botao_exportar_csv.disabled = enabled or relatorio_exportando or not ProfessorSession.has_current_room()
 	seletor_salas.disabled = enabled or salas.is_empty()
 	_update_question_bank_controls_state()
@@ -1349,6 +1353,7 @@ func _on_exportar_csv_pressed() -> void:
 	if relatorio_exportando or not ProfessorSession.has_current_room():
 		return
 	relatorio_exportando = true
+	botao_exportar_pdf_turma.disabled = true
 	botao_exportar_csv.disabled = true
 	_show_status("Preparando a base CSV da sala...", STATUS_INFO)
 	var response: Dictionary = await ApiClient.download_room_report_csv(
@@ -1356,6 +1361,7 @@ func _on_exportar_csv_pressed() -> void:
 		ProfessorSession.professor_id
 	)
 	relatorio_exportando = false
+	botao_exportar_pdf_turma.disabled = not ProfessorSession.has_current_room()
 	botao_exportar_csv.disabled = not ProfessorSession.has_current_room()
 	if not response.get("ok", false):
 		_show_status(response.get("error", "Nao foi possivel exportar o CSV."), STATUS_ERROR)
@@ -1364,6 +1370,29 @@ func _on_exportar_csv_pressed() -> void:
 		response.get("data", PackedByteArray()),
 		str(response.get("file_name", "desempenho_sala.csv")),
 		"csv"
+	)
+
+func _on_exportar_pdf_turma_pressed() -> void:
+	if relatorio_exportando or not ProfessorSession.has_current_room():
+		return
+	relatorio_exportando = true
+	botao_exportar_pdf_turma.disabled = true
+	botao_exportar_csv.disabled = true
+	_show_status("Gerando o relatorio consolidado da turma...", STATUS_INFO)
+	var response: Dictionary = await ApiClient.download_class_report_pdf(
+		ProfessorSession.current_room_id,
+		ProfessorSession.professor_id
+	)
+	relatorio_exportando = false
+	botao_exportar_pdf_turma.disabled = not ProfessorSession.has_current_room()
+	botao_exportar_csv.disabled = not ProfessorSession.has_current_room()
+	if not response.get("ok", false):
+		_show_status(response.get("error", "Nao foi possivel exportar o PDF da turma."), STATUS_ERROR)
+		return
+	_open_report_save_dialog(
+		response.get("data", PackedByteArray()),
+		str(response.get("file_name", "relatorio_turma.pdf")),
+		"pdf"
 	)
 
 func _on_exportar_pdf_aluno_pressed(item: Dictionary, button: Button) -> void:
@@ -1375,6 +1404,7 @@ func _on_exportar_pdf_aluno_pressed(item: Dictionary, button: Button) -> void:
 		return
 	relatorio_exportando = true
 	button.disabled = true
+	botao_exportar_pdf_turma.disabled = true
 	botao_exportar_csv.disabled = true
 	_show_status("Gerando o relatorio profissional de %s..." % str(item.get("nome", "aluno")), STATUS_INFO)
 	var response: Dictionary = await ApiClient.download_student_report_pdf(
@@ -1385,6 +1415,7 @@ func _on_exportar_pdf_aluno_pressed(item: Dictionary, button: Button) -> void:
 	relatorio_exportando = false
 	if is_instance_valid(button):
 		button.disabled = false
+	botao_exportar_pdf_turma.disabled = not ProfessorSession.has_current_room()
 	botao_exportar_csv.disabled = not ProfessorSession.has_current_room()
 	if not response.get("ok", false):
 		_show_status(response.get("error", "Nao foi possivel exportar o PDF."), STATUS_ERROR)

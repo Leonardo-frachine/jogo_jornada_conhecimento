@@ -169,6 +169,19 @@ describe('AppController (e2e)', () => {
       'relatorio_ana_teste',
     );
 
+    const pdfTurmaResponse = await request(app.getHttpServer())
+      .get(
+        `/salas/${salaId}/relatorios/turma.pdf?professorId=${professorId}`,
+      )
+      .expect(200)
+      .expect('Content-Type', /application\/pdf/);
+    expect(
+      Buffer.from(pdfTurmaResponse.body).subarray(0, 5).toString('ascii'),
+    ).toBe('%PDF-');
+    expect(pdfTurmaResponse.headers['content-disposition']).toContain(
+      'relatorio_turma_sala_e2e',
+    );
+
     const csvResponse = await request(app.getHttpServer())
       .get(
         `/salas/${salaId}/relatorios/respostas.csv?professorId=${professorId}`,

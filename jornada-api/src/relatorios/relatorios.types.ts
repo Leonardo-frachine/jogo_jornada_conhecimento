@@ -87,3 +87,54 @@ export type RelatorioSala = {
   professor: RelatorioAluno['professor'];
   respostas: RespostaRelatorio[];
 };
+
+export type AlunoRelatorioTurma = {
+  id: number;
+  nome: string;
+  statusPartida: PartidaStatus;
+  faseAtual: number;
+  casaAtual: number;
+  pontuacao: number;
+  respondidas: number;
+  acertos: number;
+  erros: number;
+  aproveitamento: number;
+  ultimaAtividade: Date | null;
+  classificacao: ClassificacaoDesempenho;
+};
+
+export type QuestaoParaRevisarTurma = {
+  perguntaId: number;
+  titulo: string;
+  enunciado: string;
+  materia: string;
+  dificuldade: string;
+  respondidas: number;
+  erros: number;
+  percentualErro: number;
+};
+
+export type RelatorioTurma = {
+  geradoEm: Date;
+  sala: RelatorioAluno['sala'];
+  professor: RelatorioAluno['professor'];
+  periodo: RelatorioAluno['periodo'];
+  resumo: {
+    totalAlunos: number;
+    alunosComRespostas: number;
+    alunosSemRespostas: number;
+    participacao: number;
+    finalizados: number;
+    emAndamento: number;
+    respondidas: number;
+    acertos: number;
+    erros: number;
+    aproveitamento: number;
+    pontuacaoTotal: number;
+    pontuacaoMedia: number;
+  };
+  desempenhoPorMateria: DesempenhoGrupo[];
+  desempenhoPorDificuldade: DesempenhoGrupo[];
+  alunos: AlunoRelatorioTurma[];
+  questoesParaRevisar: QuestaoParaRevisarTurma[];
+};

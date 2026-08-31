@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import type { Response } from 'express';
 import { RelatorioPdfService } from './relatorio-pdf.service';
+import { RelatorioTurmaPdfService } from './relatorio-turma-pdf.service';
 import { RelatoriosService } from './relatorios.service';
 
 @Controller('salas/:salaId/relatorios')
@@ -15,6 +16,7 @@ export class RelatoriosController {
   constructor(
     private readonly relatoriosService: RelatoriosService,
     private readonly relatorioPdfService: RelatorioPdfService,
+    private readonly relatorioTurmaPdfService: RelatorioTurmaPdfService,
   ) {}
 
   @Get('alunos/:jogadorId/pdf')
@@ -31,6 +33,28 @@ export class RelatoriosController {
     );
     const arquivo = await this.relatorioPdfService.gerar(relatorio);
     const nomeArquivo = this.relatoriosService.nomeArquivoPdf(relatorio);
+
+    response.setHeader('Content-Type', 'application/pdf');
+    response.setHeader('Content-Length', String(arquivo.length));
+    response.setHeader(
+      'Content-Disposition',
+      `attachment; filename="${nomeArquivo}"`,
+    );
+    response.send(arquivo);
+  }
+
+  @Get('turma.pdf')
+  async exportarPdfTurma(
+    @Param('salaId', ParseIntPipe) salaId: number,
+    @Query('professorId', ParseIntPipe) professorId: number,
+    @Res() response: Response,
+  ): Promise<void> {
+    const relatorio = await this.relatoriosService.obterRelatorioTurma(
+      salaId,
+      professorId,
+    );
+    const arquivo = await this.relatorioTurmaPdfService.gerar(relatorio);
+    const nomeArquivo = this.relatoriosService.nomeArquivoPdfTurma(relatorio);
 
     response.setHeader('Content-Type', 'application/pdf');
     response.setHeader('Content-Length', String(arquivo.length));

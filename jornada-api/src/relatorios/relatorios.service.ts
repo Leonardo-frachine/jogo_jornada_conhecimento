@@ -6,14 +6,17 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Jogador } from '../jogadores/jogador.entity';
+import { PARTIDA_STATUS } from '../jogadores/partida-status';
 import { Pergunta } from '../perguntas/pergunta.entity';
 import { Progresso } from '../progresso/progresso.entity';
 import { Sala } from '../salas/sala.entity';
 import {
   ClassificacaoDesempenho,
   DesempenhoGrupo,
+  QuestaoParaRevisarTurma,
   RelatorioAluno,
   RelatorioSala,
+  RelatorioTurma,
   RespostaRelatorio,
 } from './relatorios.types';
 
@@ -175,6 +178,121 @@ export class RelatoriosService {
     };
   }
 
+  async obterRelatorioTurma(
+    salaId: number,
+    professorId: number,
+  ): Promise<RelatorioTurma> {
+    const sala = await this.validarSalaDoProfessor(salaId, professorId);
+    const [jogadores, progressos] = await Promise.all([
+      this.jogadorRepository.find({
+        where: { salaId },
+        order: { nome: 'ASC', id: 'ASC' },
+      }),
+      this.progressoRepository.find({
+        where: { salaId },
+        relations: ['jogador', 'pergunta'],
+        order: { criadoEm: 'ASC', id: 'ASC' },
+      }),
+    ]);
+    const respostas = progressos.map((progresso) =>
+      this.normalizarResposta(progresso, sala),
+    );
+    const respostasPorAluno = new Map<number, RespostaRelatorio[]>();
+    for (const resposta of respostas) {
+      const historico = respostasPorAluno.get(resposta.alunoId) ?? [];
+      historico.push(resposta);
+      respostasPorAluno.set(resposta.alunoId, historico);
+    }
+
+    const alunos = jogadores
+      .map((jogador) => {
+        const historico = respostasPorAluno.get(jogador.id) ?? [];
+        const acertos = historico.filter((resposta) => resposta.acertou).length;
+        const respondidas = historico.length;
+        return {
+          id: jogador.id,
+          nome: jogador.nome,
+          statusPartida: jogador.statusPartida,
+          faseAtual: jogador.faseAtual,
+          casaAtual: jogador.casaAtual,
+          pontuacao: historico.reduce(
+            (total, resposta) => total + resposta.pontuacaoGanha,
+            0,
+          ),
+          respondidas,
+          acertos,
+          erros: respondidas - acertos,
+          aproveitamento:
+            respondidas === 0 ? 0 : Math.round((acertos / respondidas) * 100),
+          ultimaAtividade: historico.at(-1)?.respondidoEm ?? null,
+          classificacao: this.classificarDesempenho(
+            respondidas,
+            respondidas === 0 ? 0 : Math.round((acertos / respondidas) * 100),
+          ),
+        };
+      })
+      .sort(
+        (a, b) =>
+          Number(a.respondidas === 0) - Number(b.respondidas === 0) ||
+          a.aproveitamento - b.aproveitamento ||
+          b.respondidas - a.respondidas ||
+          a.nome.localeCompare(b.nome, 'pt-BR'),
+      );
+    const totalAlunos = alunos.length;
+    const alunosComRespostas = alunos.filter(
+      (aluno) => aluno.respondidas > 0,
+    ).length;
+    const finalizados = alunos.filter(
+      (aluno) => aluno.statusPartida === PARTIDA_STATUS.FINALIZADO,
+    ).length;
+    const acertos = respostas.filter((resposta) => resposta.acertou).length;
+    const pontuacaoTotal = alunos.reduce(
+      (total, aluno) => total + aluno.pontuacao,
+      0,
+    );
+
+    return {
+      geradoEm: new Date(),
+      sala: { id: sala.id, nome: sala.nome, codigo: sala.codigo },
+      professor: { id: sala.professor.id, nome: sala.professor.nome },
+      periodo: {
+        inicio: respostas[0]?.respondidoEm ?? null,
+        fim: respostas.at(-1)?.respondidoEm ?? null,
+      },
+      resumo: {
+        totalAlunos,
+        alunosComRespostas,
+        alunosSemRespostas: totalAlunos - alunosComRespostas,
+        participacao:
+          totalAlunos === 0
+            ? 0
+            : Math.round((alunosComRespostas / totalAlunos) * 100),
+        finalizados,
+        emAndamento: totalAlunos - finalizados,
+        respondidas: respostas.length,
+        acertos,
+        erros: respostas.length - acertos,
+        aproveitamento:
+          respostas.length === 0
+            ? 0
+            : Math.round((acertos / respostas.length) * 100),
+        pontuacaoTotal,
+        pontuacaoMedia:
+          totalAlunos === 0 ? 0 : Math.round(pontuacaoTotal / totalAlunos),
+      },
+      desempenhoPorMateria: this.agruparDesempenho(
+        respostas,
+        (resposta) => resposta.materia,
+      ),
+      desempenhoPorDificuldade: this.agruparDesempenho(
+        respostas,
+        (resposta) => resposta.dificuldade,
+      ),
+      alunos,
+      questoesParaRevisar: this.agruparQuestoesParaRevisar(respostas),
+    };
+  }
+
   gerarCsv(relatorio: RelatorioSala): Buffer {
     const linhas = [
       CSV_COLUMNS.map((coluna) => coluna.header).join(','),
@@ -194,6 +312,10 @@ export class RelatoriosService {
 
   nomeArquivoCsv(relatorio: RelatorioSala): string {
     return `desempenho_${this.sanitizarNomeArquivo(relatorio.sala.nome)}_${this.dataArquivo(relatorio.geradoEm)}.csv`;
+  }
+
+  nomeArquivoPdfTurma(relatorio: RelatorioTurma): string {
+    return `relatorio_turma_${this.sanitizarNomeArquivo(relatorio.sala.nome)}_${this.dataArquivo(relatorio.geradoEm)}.pdf`;
   }
 
   private async validarSalaDoProfessor(
@@ -332,6 +454,50 @@ export class RelatoriosService {
           b.percentualAcerto - a.percentualAcerto ||
           a.nome.localeCompare(b.nome, 'pt-BR'),
       );
+  }
+
+  private agruparQuestoesParaRevisar(
+    respostas: RespostaRelatorio[],
+  ): QuestaoParaRevisarTurma[] {
+    const grupos = new Map<
+      number,
+      {
+        referencia: RespostaRelatorio;
+        respondidas: number;
+        erros: number;
+      }
+    >();
+
+    for (const resposta of respostas) {
+      const grupo = grupos.get(resposta.perguntaId) ?? {
+        referencia: resposta,
+        respondidas: 0,
+        erros: 0,
+      };
+      grupo.respondidas += 1;
+      grupo.erros += resposta.acertou ? 0 : 1;
+      grupos.set(resposta.perguntaId, grupo);
+    }
+
+    return Array.from(grupos.values())
+      .filter((grupo) => grupo.erros > 0)
+      .map((grupo) => ({
+        perguntaId: grupo.referencia.perguntaId,
+        titulo: grupo.referencia.perguntaTitulo,
+        enunciado: grupo.referencia.perguntaEnunciado,
+        materia: grupo.referencia.materia,
+        dificuldade: grupo.referencia.dificuldade,
+        respondidas: grupo.respondidas,
+        erros: grupo.erros,
+        percentualErro: Math.round((grupo.erros / grupo.respondidas) * 100),
+      }))
+      .sort(
+        (a, b) =>
+          b.erros - a.erros ||
+          b.percentualErro - a.percentualErro ||
+          a.titulo.localeCompare(b.titulo, 'pt-BR'),
+      )
+      .slice(0, 8);
   }
 
   private classificarDesempenho(

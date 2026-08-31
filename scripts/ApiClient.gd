@@ -74,6 +74,12 @@ func download_student_report_pdf(room_id: int, player_id: int, professor_id: int
 		"application/pdf"
 	)
 
+func download_class_report_pdf(room_id: int, professor_id: int) -> Dictionary:
+	return await _request_binary(
+		"/salas/%d/relatorios/turma.pdf?professorId=%d" % [room_id, professor_id],
+		"application/pdf"
+	)
+
 func download_room_report_csv(room_id: int, professor_id: int) -> Dictionary:
 	return await _request_binary(
 		"/salas/%d/relatorios/respostas.csv?professorId=%d" % [room_id, professor_id],

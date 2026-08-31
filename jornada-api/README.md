@@ -38,6 +38,7 @@ npm run start:prod
 npm run test
 npm run test:e2e
 npm run report:sample
+npm run report:class-sample
 ```
 
 ## Relatorios de desempenho
@@ -45,12 +46,14 @@ npm run report:sample
 O painel do professor permite exportar dois formatos complementares dentro da sala selecionada:
 
 - PDF individual, visual e paginado, com resumo, acertos, erros, desempenho por materia e dificuldade, pontos fortes, pontos a desenvolver e recomendacoes;
+- PDF consolidado da turma, com indicadores gerais, desempenho pedagogico, detalhamento de todos os alunos e questoes prioritarias para revisao;
 - CSV da sala, com uma linha por resposta e colunas estaveis para conferencia, Excel, Google Sheets ou Power BI.
 
 Endpoints:
 
 ```text
 GET /salas/:salaId/relatorios/alunos/:jogadorId/pdf?professorId=:professorId
+GET /salas/:salaId/relatorios/turma.pdf?professorId=:professorId
 GET /salas/:salaId/relatorios/respostas.csv?professorId=:professorId
 ```
 
@@ -59,6 +62,8 @@ O backend confirma que a sala pertence ao professor informado e que o aluno pert
 Novas respostas guardam um snapshot da pergunta, da alternativa escolhida e da resposta correta. Registros antigos continuam exportaveis: os dados atuais da pergunta sao usados como fallback e uma escolha historica desconhecida permanece vazia no CSV e aparece como nao registrada no PDF.
 
 O script `npm run report:sample` gera uma amostra longa em `../output/pdf/relatorio_modelo_ana_clara.pdf`, util para revisar o layout sem depender de dados locais.
+
+O script `npm run report:class-sample` gera uma amostra consolidada em `../output/pdf/relatorio_modelo_turma_7_ano_a.pdf`, incluindo alunos ativos, alunos sem respostas e questoes com diferentes taxas de erro.
 
 Quando `DB_SYNCHRONIZE` estiver habilitado, o TypeORM cria as novas colunas de snapshot automaticamente. Ambientes que desabilitam a sincronizacao devem aplicar uma migracao equivalente antes do deploy.
 

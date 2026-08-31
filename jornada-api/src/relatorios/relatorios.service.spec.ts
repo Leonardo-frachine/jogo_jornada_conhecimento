@@ -9,6 +9,7 @@ import { Progresso } from '../progresso/progresso.entity';
 import { ProgressoService } from '../progresso/progresso.service';
 import { Sala } from '../salas/sala.entity';
 import { RelatorioPdfService } from './relatorio-pdf.service';
+import { RelatorioTurmaPdfService } from './relatorio-turma-pdf.service';
 import { RelatoriosService } from './relatorios.service';
 
 describe('RelatoriosService', () => {
@@ -17,6 +18,7 @@ describe('RelatoriosService', () => {
   let progressoService: ProgressoService;
   let relatoriosService: RelatoriosService;
   let pdfService: RelatorioPdfService;
+  let turmaPdfService: RelatorioTurmaPdfService;
 
   beforeEach(async () => {
     moduleRef = await Test.createTestingModule({
@@ -36,13 +38,19 @@ describe('RelatoriosService', () => {
           Professor,
         ]),
       ],
-      providers: [ProgressoService, RelatoriosService, RelatorioPdfService],
+      providers: [
+        ProgressoService,
+        RelatoriosService,
+        RelatorioPdfService,
+        RelatorioTurmaPdfService,
+      ],
     }).compile();
 
     dataSource = moduleRef.get(DataSource);
     progressoService = moduleRef.get(ProgressoService);
     relatoriosService = moduleRef.get(RelatoriosService);
     pdfService = moduleRef.get(RelatorioPdfService);
+    turmaPdfService = moduleRef.get(RelatorioTurmaPdfService);
   });
 
   afterEach(async () => {
@@ -208,6 +216,101 @@ describe('RelatoriosService', () => {
     });
     expect(relatorioAluno.periodo).toEqual({ inicio: null, fim: null });
     expect(csv.trim().split('\r\n')).toHaveLength(1);
+    expect(pdf.subarray(0, 5).toString('ascii')).toBe('%PDF-');
+  });
+
+  it('consolida indicadores, todos os alunos e questoes prioritarias da turma', async () => {
+    const { sala, professor, jogador } = await criarContexto();
+    const outroAluno = await dataSource.getRepository(Jogador).save({
+      nome: 'Bruno Lima',
+      pontuacao: 0,
+      faseAtual: 3,
+      salaId: sala.id,
+      sala,
+      casaAtual: 18,
+      statusPartida: 'finalizado',
+    });
+    await dataSource.getRepository(Jogador).save({
+      nome: 'Carla sem respostas',
+      pontuacao: 0,
+      faseAtual: 1,
+      salaId: sala.id,
+      sala,
+      casaAtual: 1,
+    });
+    const matematica = await criarPergunta(sala, {
+      titulo: 'Operacoes fundamentais',
+      materia: 'Matematica',
+      respostaCorreta: 'A',
+    });
+    const historia = await criarPergunta(sala, {
+      titulo: 'Brasil Colonia',
+      materia: 'Historia',
+      respostaCorreta: 'D',
+    });
+
+    for (let indice = 0; indice < 3; indice += 1) {
+      await responder(jogador, sala, matematica, 'A');
+      await responder(jogador, sala, historia, 'A');
+    }
+    await responder(outroAluno, sala, matematica, 'A');
+    await responder(outroAluno, sala, matematica, 'A');
+
+    const relatorio = await relatoriosService.obterRelatorioTurma(
+      sala.id,
+      professor.id,
+    );
+    const pdf = await turmaPdfService.gerar(relatorio);
+
+    expect(relatorio.resumo).toMatchObject({
+      totalAlunos: 3,
+      alunosComRespostas: 2,
+      alunosSemRespostas: 1,
+      participacao: 67,
+      finalizados: 1,
+      respondidas: 8,
+      acertos: 5,
+      erros: 3,
+      aproveitamento: 63,
+      pontuacaoTotal: 350,
+      pontuacaoMedia: 117,
+    });
+    expect(relatorio.alunos).toHaveLength(3);
+    expect(relatorio.alunos.at(-1)?.nome).toBe('Carla sem respostas');
+    expect(
+      relatorio.desempenhoPorMateria.find(
+        (grupo) => grupo.nome === 'Matematica',
+      ),
+    ).toMatchObject({ acertos: 5, erros: 0, percentualAcerto: 100 });
+    expect(relatorio.questoesParaRevisar[0]).toMatchObject({
+      titulo: 'Brasil Colonia',
+      erros: 3,
+      percentualErro: 100,
+    });
+    expect(relatoriosService.nomeArquivoPdfTurma(relatorio)).toMatch(
+      /^relatorio_turma_7_ano_a_\d{4}-\d{2}-\d{2}\.pdf$/,
+    );
+    expect(pdf.subarray(0, 5).toString('ascii')).toBe('%PDF-');
+    expect(pdf.length).toBeGreaterThan(20_000);
+  });
+
+  it('gera relatorio consolidado valido para turma sem respostas', async () => {
+    const { sala, professor } = await criarContexto();
+    const relatorio = await relatoriosService.obterRelatorioTurma(
+      sala.id,
+      professor.id,
+    );
+    const pdf = await turmaPdfService.gerar(relatorio);
+
+    expect(relatorio.resumo).toMatchObject({
+      totalAlunos: 1,
+      alunosComRespostas: 0,
+      alunosSemRespostas: 1,
+      participacao: 0,
+      respondidas: 0,
+      aproveitamento: 0,
+    });
+    expect(relatorio.questoesParaRevisar).toEqual([]);
     expect(pdf.subarray(0, 5).toString('ascii')).toBe('%PDF-');
   });
 
