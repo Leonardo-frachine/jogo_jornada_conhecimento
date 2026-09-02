@@ -9,7 +9,6 @@ const UITheme := preload("res://scripts/UITheme.gd")
 @onready var subtitulo: Label = $PainelCentral/MarginContainer/VBoxContainer/Subtitulo
 @onready var botao_aluno: Button = $PainelCentral/MarginContainer/VBoxContainer/BotaoAluno
 @onready var botao_professor: Button = $PainelCentral/MarginContainer/VBoxContainer/BotaoProfessor
-@onready var botao_configuracao: TextureButton = $BotaoConfiguracao
 
 func _ready() -> void:
 	# Menu principal nao pausa arvore e inicia a trilha sonora de navegacao.
@@ -21,7 +20,6 @@ func _ready() -> void:
 
 	botao_aluno.pressed.connect(_on_botao_aluno_pressed)
 	botao_professor.pressed.connect(_on_botao_professor_pressed)
-	botao_configuracao.pressed.connect(_on_botao_configuracao_pressed)
 	botao_aluno.grab_focus()
 	# Evita duplicar o listener do autoload ao reconstruir a cena.
 	if not SettingsManager.font_scale_changed.is_connected(_on_font_scale_changed):
@@ -64,6 +62,3 @@ func _on_botao_aluno_pressed() -> void:
 
 func _on_botao_professor_pressed() -> void:
 	get_tree().change_scene_to_file("res://scene/acesso_professor.tscn")
-
-func _on_botao_configuracao_pressed() -> void:
-	SettingsManager.open_menu()

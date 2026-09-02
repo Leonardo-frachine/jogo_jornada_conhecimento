@@ -312,12 +312,6 @@ func _bind_scene_ui() -> void:
 		if not roll_button.pressed.is_connected(Callable(self, "roll_dice")):
 			roll_button.pressed.connect(Callable(self, "roll_dice"))
 
-	# Engrenagem opcional abre o overlay global.
-	if settings_button != null:
-		# Conecta somente uma vez apesar de reconfiguracoes visuais.
-		if not settings_button.pressed.is_connected(Callable(self, "_on_settings_pressed")):
-			settings_button.pressed.connect(Callable(self, "_on_settings_pressed"))
-
 	# Dialogo de pergunta bloqueia cliques no tabuleiro enquanto estiver visivel.
 	if dialog_panel != null:
 		dialog_panel.mouse_filter = Control.MOUSE_FILTER_STOP
@@ -662,9 +656,6 @@ func _apply_house_visual_size(casa: Node2D) -> void:
 		# Casas comuns mantem a escala padrao do caminho.
 		else:
 			sprite.scale = BOARD_HOUSE_SPRITE_SCALE
-
-func _on_settings_pressed() -> void:
-	SettingsManager.open_menu()
 
 func _configure_camera() -> void:
 	# Variantes sem camera deixam o viewport na transformacao padrao.

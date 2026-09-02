@@ -24,7 +24,6 @@ const STATUS_ERROR := UITheme.STATUS_ERROR
 @onready var botao_alternar: Button = $PainelCentral/MarginContainer/VBoxContainer/BotaoAlternar
 @onready var botao_voltar: Button = $PainelCentral/MarginContainer/VBoxContainer/BotaoVoltar
 @onready var personagem: TextureRect = get_node_or_null("Personagem") as TextureRect
-@onready var botao_configuracao: TextureButton = $BotaoConfiguracao
 
 var modo_cadastro := false
 var requisicao_em_andamento := false
@@ -45,7 +44,6 @@ func _ready() -> void:
 	botao_acao.pressed.connect(_on_botao_acao_pressed)
 	botao_alternar.pressed.connect(_on_botao_alternar_pressed)
 	botao_voltar.pressed.connect(_on_botao_voltar_pressed)
-	botao_configuracao.pressed.connect(_on_botao_configuracao_pressed)
 	input_email.text_submitted.connect(_on_input_email_submitted)
 	input_senha.text_submitted.connect(_on_input_senha_submitted)
 	input_nome.text_submitted.connect(_on_input_nome_submitted)
@@ -156,9 +154,6 @@ func _on_botao_alternar_pressed() -> void:
 
 func _on_botao_voltar_pressed() -> void:
 	get_tree().change_scene_to_file("res://scene/selecao_perfil.tscn")
-
-func _on_botao_configuracao_pressed() -> void:
-	SettingsManager.open_menu()
 
 func _on_botao_acao_pressed() -> void:
 	# Bloqueia cliques repetidos enquanto a API ainda processa a solicitacao.

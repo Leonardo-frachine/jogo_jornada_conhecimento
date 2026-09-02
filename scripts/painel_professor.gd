@@ -2,6 +2,7 @@ extends Control
 
 # Painel administrativo: gerencia salas, alunos, perguntas, importacao, IA e indicadores.
 const UITheme := preload("res://scripts/UITheme.gd")
+const SettingsButtonLayout := preload("res://ui/settings/SettingsButtonLayout.gd")
 const MetricCardScene := preload("res://scene/professor/components/MetricCard.tscn")
 const QuestionCardScene := preload("res://scene/professor/components/QuestionCard.tscn")
 
@@ -92,7 +93,6 @@ const PAGE_META := {
 @onready var botao_banco_perguntas: Button = $SafeArea/Shell/Sidebar/Margin/VBox/NavList/BotaoBancoPerguntas
 @onready var botao_importar_pagina: Button = $SafeArea/Shell/Sidebar/Margin/VBox/NavList/BotaoImportarPerguntas
 @onready var botao_gerar_ia_pagina: Button = $SafeArea/Shell/Sidebar/Margin/VBox/NavList/BotaoGerarIa
-@onready var botao_configuracoes_menu: Button = $SafeArea/Shell/Sidebar/Margin/VBox/NavList/BotaoConfiguracoes
 
 @onready var header: PanelContainer = $SafeArea/Shell/MainColumn/Header
 @onready var page_title: Label = $SafeArea/Shell/MainColumn/Header/Margin/HeaderLayout/TitleColumn/PageTitle
@@ -203,7 +203,6 @@ var perguntas_geradas_sala_id := 0
 var importacao_sala_id := 0
 var expanded_bank_question_ids := {}
 var expanded_generated_question_ids := {}
-var settings_overlay_bound := false
 var dashboard_refresh_timer: Timer
 var dashboard_refresh_in_progress := false
 var panel_exiting := false
@@ -223,7 +222,6 @@ func _ready() -> void:
 
 	_ensure_import_dialog()
 	_connect_signals()
-	_bind_settings_overlay_signals()
 	_apply_theme()
 	_configure_action_groups()
 	_prepare_dashboard_layout()
@@ -290,7 +288,6 @@ func _connect_signals() -> void:
 	botao_banco_perguntas.pressed.connect(_on_navigation_pressed.bind(VIEW_BANK))
 	botao_importar_pagina.pressed.connect(_on_navigation_pressed.bind(VIEW_IMPORT))
 	botao_gerar_ia_pagina.pressed.connect(_on_navigation_pressed.bind(VIEW_AI))
-	botao_configuracoes_menu.pressed.connect(_on_botao_configuracao_pressed)
 
 	seletor_salas.item_selected.connect(_on_seletor_salas_item_selected)
 	botao_atualizar_salas_header.pressed.connect(_on_botao_atualizar_salas_pressed)
@@ -332,23 +329,6 @@ func _prepare_dashboard_layout() -> void:
 func _load_initial_data() -> void:
 	await _fetch_rooms(true)
 	await _refresh_question_bank()
-
-func _bind_settings_overlay_signals() -> void:
-	# Vinculo global e feito uma unica vez por instancia do painel.
-	if settings_overlay_bound:
-		return
-	var overlay = SettingsManager.overlay
-	# O overlay pode ainda nao ter sido instanciado pelo SettingsManager.
-	if overlay == null or not is_instance_valid(overlay):
-		call_deferred("_bind_settings_overlay_signals")
-		return
-	# Abertura ativa o destaque do item Configuracoes na sidebar.
-	if overlay.has_signal("menu_opened") and not overlay.menu_opened.is_connected(_on_settings_overlay_opened):
-		overlay.menu_opened.connect(_on_settings_overlay_opened)
-	# Fechamento restaura o destaque da pagina corrente.
-	if overlay.has_signal("menu_closed") and not overlay.menu_closed.is_connected(_on_settings_overlay_closed):
-		overlay.menu_closed.connect(_on_settings_overlay_closed)
-	settings_overlay_bound = true
 
 func _apply_theme() -> void:
 	UITheme.apply_font_tree(self)
@@ -508,7 +488,8 @@ func _update_responsive_layout() -> void:
 
 	safe_area.add_theme_constant_override("margin_left", 16 if compact else 24)
 	safe_area.add_theme_constant_override("margin_top", 16 if viewport_size.y < 760.0 else 24)
-	safe_area.add_theme_constant_override("margin_right", 16 if compact else 24)
+	# Mantem uma faixa livre para a engrenagem flutuante, inclusive ao rolar o painel.
+	safe_area.add_theme_constant_override("margin_right", roundi(SettingsButtonLayout.CONTENT_SAFE_MARGIN))
 	safe_area.add_theme_constant_override("margin_bottom", 16 if viewport_size.y < 760.0 else 24)
 	shell.add_theme_constant_override("separation", 16 if compact else 22)
 	content_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -608,12 +589,6 @@ func _apply_sidebar_styles() -> void:
 		label.visible = sidebar_expanded
 		label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		_apply_sidebar_button_style(button, label, icon, view_name == current_view)
-
-	var settings_label: Label = botao_configuracoes_menu.get_node("Layout/Label") as Label
-	var settings_icon: TextureRect = botao_configuracoes_menu.get_node("Layout/Icon") as TextureRect
-	settings_label.visible = sidebar_expanded
-	settings_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_apply_sidebar_button_style(botao_configuracoes_menu, settings_label, settings_icon, _is_settings_overlay_open())
 
 func _apply_sidebar_button_style(button: Button, label: Label, icon: TextureRect, active: bool) -> void:
 	var background := _tint_color(COLOR_SIDEBAR, 0.025)
@@ -2606,29 +2581,6 @@ func _on_botao_sair_pressed() -> void:
 	_stop_dashboard_auto_refresh()
 	ProfessorSession.clear_session()
 	get_tree().change_scene_to_file("res://scene/acesso_professor.tscn")
-
-# Solicita ao gerenciador global a abertura das configuracoes.
-func _on_botao_configuracao_pressed() -> void:
-	SettingsManager.open_menu()
-
-# Reaplica o estilo lateral para refletir visualmente a configuracao aberta.
-func _on_settings_overlay_opened() -> void:
-	_apply_sidebar_styles()
-
-# Reaplica o estilo lateral para refletir visualmente a configuracao fechada.
-func _on_settings_overlay_closed() -> void:
-	_apply_sidebar_styles()
-
-# Consulta com seguranca se o painel global de configuracoes esta aberto.
-func _is_settings_overlay_open() -> bool:
-	var overlay = SettingsManager.overlay
-	# Considera fechado quando o controle ainda nao existe ou ja foi liberado da arvore.
-	if overlay == null or not is_instance_valid(overlay):
-		return false
-	# Usa o metodo publico apenas quando a implementacao atual do overlay o oferece.
-	if overlay.has_method("is_open"):
-		return overlay.is_open()
-	return false
 
 # Cria um campo de texto curto com rotulo e conecta seu evento ao modelo correspondente.
 func _create_labeled_line_edit(label_text: String, value: String, callback: Callable) -> VBoxContainer:

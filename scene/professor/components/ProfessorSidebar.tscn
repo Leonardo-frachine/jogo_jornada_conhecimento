@@ -6,7 +6,6 @@
 [ext_resource type="Texture2D" path="res://imagens/icons/professor_sidebar/banco_perguntas.png" id="4"]
 [ext_resource type="Texture2D" path="res://imagens/icons/professor_sidebar/importar.png" id="5"]
 [ext_resource type="Texture2D" path="res://imagens/icons/perfil_professor.png" id="6"]
-[ext_resource type="Texture2D" path="res://imagens/icons/professor_sidebar/configuracoes.png" id="7"]
 [ext_resource type="Texture2D" path="res://imagens/icons/professor_sidebar/gerenciar_sala.png" id="8"]
 [ext_resource type="Texture2D" path="res://imagens/icons/professor_sidebar/gerar_ia.png" id="9"]
 
@@ -271,40 +270,6 @@ layout_mode = 2
 mouse_filter = 2
 size_flags_horizontal = 3
 text = "Gerar com IA"
-
-[node name="BotaoConfiguracoes" type="Button" parent="Margin/VBox/NavList"]
-custom_minimum_size = Vector2(0, 58)
-layout_mode = 2
-size_flags_horizontal = 3
-text = ""
-
-[node name="Layout" type="HBoxContainer" parent="Margin/VBox/NavList/BotaoConfiguracoes"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-offset_left = 14.0
-offset_top = 14.0
-offset_right = -14.0
-offset_bottom = -14.0
-mouse_filter = 2
-theme_override_constants/separation = 12
-
-[node name="Icon" type="TextureRect" parent="Margin/VBox/NavList/BotaoConfiguracoes/Layout"]
-custom_minimum_size = Vector2(28, 28)
-layout_mode = 2
-mouse_filter = 2
-texture = ExtResource("7")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="Label" type="Label" parent="Margin/VBox/NavList/BotaoConfiguracoes/Layout"]
-layout_mode = 2
-mouse_filter = 2
-size_flags_horizontal = 3
-text = "Configurações"
 
 [node name="Spacer" type="Control" parent="Margin/VBox"]
 layout_mode = 2

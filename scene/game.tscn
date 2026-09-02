@@ -11,9 +11,8 @@
 [ext_resource type="Texture2D" uid="uid://cqw2od8y8ev4" path="res://imagens/chao/token_hexagon_3d_white.png" id="7_ym5sv"]
 [ext_resource type="Texture2D" uid="uid://c3esur46a71up" path="res://imagens/chao/token_hexagon_3d_red.png" id="8_sng2h"]
 [ext_resource type="Texture2D" uid="uid://b17x576082u88" path="res://imagens/Fundo/fundogame.png" id="12_5g16k"]
-[ext_resource type="Texture2D" path="res://imagens/icons/professor_sidebar/configuracoes_ui.png" id="18_ux4dc"]
+[ext_resource type="PackedScene" path="res://ui/settings/SettingsButton.tscn" id="18_ux4dc"]
 [ext_resource type="Script" uid="uid://crxkgvki2ihn4" path="res://scripts/game.gd" id="19_game"]
-[ext_resource type="Script" uid="uid://duof54ijw6wym" path="res://ui/settings/SettingsButton.gd" id="20_settings_button"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_33cqm"]
 size = Vector2(65, 55)
@@ -355,21 +354,7 @@ texture = ExtResource("4_yq8tf")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=661387975]
 
-[node name="BotaoConfiguracao" type="TextureButton" parent="CanvasLayer" unique_id=1787448071]
-custom_minimum_size = Vector2(84, 84)
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -102.0
-offset_top = 18.0
-offset_right = -18.0
-offset_bottom = 102.0
-grow_horizontal = 0
-grow_vertical = 1
-texture_normal = ExtResource("18_ux4dc")
-ignore_texture_size = true
-stretch_mode = 0
-script = ExtResource("20_settings_button")
+[node name="BotaoConfiguracao" parent="CanvasLayer" unique_id=1787448071 instance=ExtResource("18_ux4dc")]
 
 [node name="DialogBackdrop" type="ColorRect" parent="CanvasLayer" unique_id=2146682398]
 visible = false

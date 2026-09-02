@@ -11,6 +11,7 @@ const ACCESS_SCENE_PATH := "res://scene/selecao_perfil.tscn"
 const ALLOWED_OVERLAY_SCENES := {
 	"res://scene/selecao_perfil.tscn": true,
 	"res://scene/tela_inicial.tscn": true,
+	"res://scene/loading_screen.tscn": true,
 	"res://scene/game.tscn": true,
 	"res://scene/acesso_professor.tscn": true,
 	"res://scene/painel_professor.tscn": true,

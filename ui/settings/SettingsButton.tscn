@@ -1,0 +1,25 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://imagens/icons/professor_sidebar/configuracoes_ui.png" id="1_icon"]
+[ext_resource type="Script" uid="uid://duof54ijw6wym" path="res://ui/settings/SettingsButton.gd" id="2_script"]
+
+[node name="SettingsButton" type="TextureButton"]
+custom_minimum_size = Vector2(84, 84)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -108.0
+offset_top = -108.0
+offset_right = -24.0
+offset_bottom = -24.0
+grow_horizontal = 0
+grow_vertical = 0
+mouse_default_cursor_shape = 2
+tooltip_text = "Abrir configurações"
+texture_normal = ExtResource("1_icon")
+ignore_texture_size = true
+stretch_mode = 0
+script = ExtResource("2_script")

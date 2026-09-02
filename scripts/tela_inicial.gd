@@ -2,6 +2,7 @@ extends Control
 
 # Entrada do aluno: coleta identidade, codigo da sala e personagem antes do loading.
 const UITheme := preload("res://scripts/UITheme.gd")
+const SettingsButtonLayout := preload("res://ui/settings/SettingsButtonLayout.gd")
 
 @onready var painel_central: Panel = $PainelCentral
 @onready var titulo: Label = $PainelCentral/MarginContainer/VBoxContainer/Titulo
@@ -20,7 +21,6 @@ const UITheme := preload("res://scripts/UITheme.gd")
 ]
 @onready var botao_jogar: Button = $PainelCentral/MarginContainer/VBoxContainer/BotoesAcao/BotaoJogar
 @onready var botao_voltar: Button = $PainelCentral/MarginContainer/VBoxContainer/BotoesAcao/BotaoVoltar
-@onready var botao_configuracao: TextureButton = $BotaoConfiguracao
 
 var nome_aluno: String = ""
 var codigo_sala: String = ""
@@ -40,7 +40,6 @@ func _ready() -> void:
 	_preparar_botoes_personagem()
 	botao_jogar.pressed.connect(_on_botao_jogar_pressed)
 	botao_voltar.pressed.connect(_on_botao_voltar_pressed)
-	botao_configuracao.pressed.connect(_on_botao_configuracao_pressed)
 	input_nome.text_submitted.connect(_on_input_nome_submitted)
 	input_codigo.text_submitted.connect(_on_input_codigo_submitted)
 	input_nome.grab_focus()
@@ -76,7 +75,9 @@ func _update_responsive_layout() -> void:
 	# O painel usa quase todo o viewport, mas respeita dimensoes adequadas para desktop.
 	var viewport_size := get_viewport_rect().size
 	var font_scale := SettingsManager.font_scale
-	var panel_width := minf(viewport_size.x - 32.0, 1120.0 + 100.0 * (font_scale - 1.0))
+	# Reserva a faixa da engrenagem e uma margem visual sem duplicar suas medidas.
+	var desired_width := 1120.0 + 100.0 * (font_scale - 1.0)
+	var panel_width := SettingsButtonLayout.fit_centered_content_width(viewport_size.x, desired_width)
 	var panel_height := minf(viewport_size.y - 24.0, 540.0 + 100.0 * (font_scale - 1.0))
 	painel_central.offset_left = -panel_width * 0.5
 	painel_central.offset_right = panel_width * 0.5
@@ -129,9 +130,6 @@ func _on_input_nome_submitted(_texto: String) -> void:
 
 func _on_input_codigo_submitted(_texto: String) -> void:
 	_on_botao_jogar_pressed()
-
-func _on_botao_configuracao_pressed() -> void:
-	SettingsManager.open_menu()
 
 func _on_botao_voltar_pressed() -> void:
 	get_tree().change_scene_to_file("res://scene/selecao_perfil.tscn")

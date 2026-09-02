@@ -3,8 +3,7 @@
 [ext_resource type="Script" uid="uid://44tcukxiqfns" path="res://scripts/end_game_screen.gd" id="1"]
 [ext_resource type="Texture2D" uid="uid://3ljo201dpbbx" path="res://imagens/fundo_tabuleiro/fundo_embacado.png" id="2"]
 [ext_resource type="Texture2D" path="res://imagens/personagens_animais/cachorro.png" id="4"]
-[ext_resource type="Texture2D" path="res://imagens/icons/professor_sidebar/configuracoes_ui.png" id="5"]
-[ext_resource type="Script" uid="uid://duof54ijw6wym" path="res://ui/settings/SettingsButton.gd" id="6_settings_button"]
+[ext_resource type="PackedScene" path="res://ui/settings/SettingsButton.tscn" id="5"]
 
 [sub_resource type="StyleBoxFlat" id="10"]
 bg_color = Color(1, 0.647059, 0.121569, 0.16)
@@ -614,19 +613,5 @@ theme_override_styles/pressed = SubResource("7")
 theme_override_styles/hover = SubResource("7")
 text = "VOLTAR AO MENU"
 
-[node name="BotaoConfiguracao" type="TextureButton" parent="." unique_id=1407949206]
-custom_minimum_size = Vector2(84, 84)
+[node name="BotaoConfiguracao" parent="." unique_id=1407949206 instance=ExtResource("5")]
 layout_mode = 1
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -102.0
-offset_top = 18.0
-offset_right = -18.0
-offset_bottom = 102.0
-grow_horizontal = 0
-grow_vertical = 1
-texture_normal = ExtResource("5")
-ignore_texture_size = true
-stretch_mode = 0
-script = ExtResource("6_settings_button")

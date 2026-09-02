@@ -2,6 +2,7 @@ extends Control
 
 # Tela de encerramento: resume a tentativa atual e consulta o ranking final da sala.
 const UITheme := preload("res://scripts/UITheme.gd")
+const SettingsButtonLayout := preload("res://ui/settings/SettingsButtonLayout.gd")
 const ACCESS_SCENE_PATH := "res://scene/selecao_perfil.tscn"
 const LOADING_SCENE_PATH := "res://scene/loading_screen.tscn"
 const SCORE_ANIMATION_DURATION := 0.9
@@ -39,7 +40,6 @@ const RANKING_SCORE_WIDTH := 88.0
 @onready var wrong_value: Label = $PainelCentral/MarginContainer/MainVBox/MetricsRow/DetailErros/MarginErros/VBoxErros/WrongValue
 @onready var botao_jogar_novamente: Button = $PainelCentral/MarginContainer/MainVBox/ButtonsRow/BotaoJogarNovamente
 @onready var botao_menu_principal: Button = $PainelCentral/MarginContainer/MainVBox/ButtonsRow/BotaoMenuPrincipal
-@onready var botao_configuracao: TextureButton = $BotaoConfiguracao
 
 var _final_score := 0
 var _final_accuracy := 0
@@ -95,7 +95,8 @@ func _update_responsive_layout() -> void:
 	# Ajusta margens e altura dos cards para viewport e escala de fonte atuais.
 	var viewport_size := get_viewport_rect().size
 	var font_scale := SettingsManager.font_scale
-	var panel_width := minf(viewport_size.x - 40.0, 1180.0)
+	# O painel central termina antes da area reservada ao botao de configuracoes.
+	var panel_width := SettingsButtonLayout.fit_centered_content_width(viewport_size.x, 1180.0)
 	var panel_height := minf(viewport_size.y - 24.0, 780.0)
 	painel_central.custom_minimum_size = Vector2(panel_width, panel_height)
 	painel_central.offset_left = -panel_width * 0.5
@@ -313,9 +314,6 @@ func _connect_buttons() -> void:
 	# Botao principal retorna ao seletor de perfil.
 	if not botao_menu_principal.pressed.is_connected(_on_main_menu_pressed):
 		botao_menu_principal.pressed.connect(_on_main_menu_pressed)
-	# Engrenagem abre o overlay global de preferencias.
-	if not botao_configuracao.pressed.is_connected(_on_settings_pressed):
-		botao_configuracao.pressed.connect(_on_settings_pressed)
 
 func _prepare_intro_state() -> void:
 	painel_central.modulate = Color(1, 1, 1, 0)
@@ -418,6 +416,3 @@ func _on_main_menu_pressed() -> void:
 	SettingsManager.close_menu()
 	GameState.reset_run_stats()
 	get_tree().change_scene_to_file(ACCESS_SCENE_PATH)
-
-func _on_settings_pressed() -> void:
-	SettingsManager.open_menu()
