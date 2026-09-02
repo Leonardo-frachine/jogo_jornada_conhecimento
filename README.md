@@ -269,7 +269,9 @@ Para hospedar a API em uma VPS Ubuntu com Node.js, systemd e Nginx, consulte o g
 
 ## Download e materiais
 
-- [Baixar a versão atual do jogo](https://bit.ly/4emHDlo)
+- [Acessar o site oficial do Jornada do Conhecimento](https://nathanmariotto.com.br/jornada/)
+- [Baixar a versão mais recente pelo GitHub Releases](https://github.com/Leonardo-frachine/jogo_jornada_conhecimento/releases/latest)
+- [Ver todas as versões publicadas](https://github.com/Leonardo-frachine/jogo_jornada_conhecimento/releases)
 - [Apresentação on-line do projeto](https://docs.google.com/presentation/d/1prNslQZFVxaU26V2HwXLBW-e2A2WvyqLVdEKv4Kgrfg/edit?usp=sharing)
 - [Apresentação armazenada no repositório](documents/Jornada-do-Conhecimento.pptx)
 - [Diagrama de casos de uso](documents/Diagrama%20de%20Caso%20de%20Uso.pdf)
