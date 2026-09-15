@@ -276,6 +276,8 @@ Para hospedar a API em uma VPS Ubuntu com Node.js, systemd e Nginx, consulte o g
 - [Apresentação armazenada no repositório](documents/Jornada-do-Conhecimento.pptx)
 - [Diagrama de casos de uso](documents/Diagrama%20de%20Caso%20de%20Uso.pdf)
 - [Diagrama de classes UML](documents/Diagrama%20de%20Classes%20UML.pdf)
+- [Diagrama de atividades UML](documents/Diagrama%20de%20Atividades%20UML.pdf)
+- [Fontes editáveis dos diagramas UML](documents/uml/README.md)
 - [Backlog do projeto](docs/BACKLOG.md)
 
 ## Status

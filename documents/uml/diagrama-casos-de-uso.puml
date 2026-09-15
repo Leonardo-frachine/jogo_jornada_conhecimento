@@ -1,0 +1,216 @@
+@startuml Casos_de_Uso_Professor
+
+title Jornada do Conhecimento\nDiagrama de Casos de Uso - Professor
+caption Atualizado em 15/09/2026 - escopo: cliente Godot e API NestJS
+
+left to right direction
+
+skinparam backgroundColor #FBFCFE
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #52677A
+skinparam ArrowThickness 1.2
+skinparam ActorBorderColor #244C66
+skinparam ActorFontColor #1B2B3A
+skinparam ActorBackgroundColor #FFF4D6
+skinparam UsecaseBorderColor #2D6478
+skinparam UsecaseFontColor #172433
+skinparam UsecaseBackgroundColor #F4FAFC
+skinparam RectangleBorderColor #8CA4B2
+skinparam RectangleFontColor #172433
+skinparam RectangleBackgroundColor #FFFFFF
+skinparam PackageBorderColor #B2C2CB
+skinparam PackageFontColor #244C66
+skinparam PackageBackgroundColor #F8FBFC
+skinparam LegendBorderColor #B2C2CB
+skinparam LegendBackgroundColor #FFFFFF
+skinparam nodesep 30
+skinparam ranksep 38
+
+actor Professor
+actor "Google Gemini" as Gemini <<sistema externo>>
+
+rectangle "Jornada do Conhecimento" {
+  package "Conta e preferências" {
+    usecase "Selecionar perfil" as P_Perfil
+    usecase "Cadastrar-se" as P_Cadastro
+    usecase "Fazer login" as P_Login
+    usecase "Encerrar sessão" as P_Logout
+    usecase "Ajustar áudio e\nacessibilidade" as P_Configuracoes
+  }
+
+  package "Salas" {
+    usecase "Gerenciar salas" as P_GerenciarSalas
+    usecase "Criar sala" as P_CriarSala
+    usecase "Listar e selecionar sala" as P_SelecionarSala
+    usecase "Excluir sala" as P_ExcluirSala
+  }
+
+  package "Banco de perguntas" {
+    usecase "Gerenciar banco\nde perguntas" as P_GerenciarPerguntas
+    usecase "Consultar, buscar\ne filtrar perguntas" as P_ConsultarPerguntas
+    usecase "Cadastrar pergunta\n(via API)" as P_CadastrarPergunta
+    usecase "Editar pergunta" as P_EditarPergunta
+    usecase "Excluir pergunta(s)\nlogicamente" as P_ExcluirPergunta
+    usecase "Importar perguntas\nCSV/XLSX" as P_ImportarPerguntas
+    usecase "Baixar modelo CSV" as P_BaixarModelo
+    usecase "Gerar sugestões\ncom IA" as P_GerarIA
+    usecase "Revisar, editar, aprovar\nou rejeitar sugestões" as P_RevisarIA
+    usecase "Salvar perguntas\naprovadas" as P_SalvarIA
+  }
+
+  package "Acompanhamento e relatórios" {
+    usecase "Acompanhar turma" as P_AcompanharTurma
+    usecase "Visualizar dashboard" as P_Dashboard
+    usecase "Acompanhar alunos,\nrespostas e posições" as P_AcompanharAlunos
+    usecase "Consultar ranking" as P_Ranking
+
+    usecase "Exportar resultados" as P_ExportarResultados
+    usecase "Gerar PDF individual" as P_PdfIndividual
+    usecase "Gerar PDF da turma" as P_PdfTurma
+    usecase "Exportar respostas CSV" as P_CsvRespostas
+  }
+}
+
+Professor -right- P_Perfil
+Professor -right- P_Cadastro
+Professor -right- P_Login
+Professor -right- P_Logout
+Professor -right- P_Configuracoes
+Professor -right- P_GerenciarSalas
+Professor -right- P_GerenciarPerguntas
+Professor -right- P_AcompanharTurma
+Professor -right- P_ExportarResultados
+
+P_CriarSala -|> P_GerenciarSalas
+P_SelecionarSala -|> P_GerenciarSalas
+P_ExcluirSala -|> P_GerenciarSalas
+
+P_ConsultarPerguntas -|> P_GerenciarPerguntas
+P_CadastrarPergunta -|> P_GerenciarPerguntas
+P_EditarPergunta -|> P_GerenciarPerguntas
+P_ExcluirPergunta -|> P_GerenciarPerguntas
+P_ImportarPerguntas -|> P_GerenciarPerguntas
+P_BaixarModelo -|> P_GerenciarPerguntas
+P_GerarIA -|> P_GerenciarPerguntas
+P_RevisarIA ..> P_GerarIA : <<extend>>\n[geração concluída]
+P_SalvarIA ..> P_RevisarIA : <<extend>>\n[ao menos uma aprovada]
+P_GerarIA -right- Gemini
+
+P_AcompanharTurma ..> P_Dashboard : <<include>>
+P_AcompanharTurma ..> P_AcompanharAlunos : <<include>>
+P_AcompanharTurma ..> P_Ranking : <<include>>
+
+P_PdfIndividual -|> P_ExportarResultados
+P_PdfTurma -|> P_ExportarResultados
+P_CsvRespostas -|> P_ExportarResultados
+
+legend bottom
+  |= Relação |= Leitura |
+  | associação simples | participação do ator |
+  | <<include>> | comportamento obrigatório do caso base |
+  | <<extend>> | comportamento condicionado ao texto entre colchetes |
+  | generalização | operação especializada de um caso mais amplo |
+endlegend
+
+@enduml
+
+@startuml Casos_de_Uso_Aluno
+
+title Jornada do Conhecimento\nDiagrama de Casos de Uso - Aluno
+caption Atualizado em 15/09/2026 - escopo: cliente Godot e API NestJS
+
+left to right direction
+
+skinparam backgroundColor #FBFCFE
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #52677A
+skinparam ArrowThickness 1.2
+skinparam ActorBorderColor #244C66
+skinparam ActorFontColor #1B2B3A
+skinparam ActorBackgroundColor #FFF4D6
+skinparam UsecaseBorderColor #2D6478
+skinparam UsecaseFontColor #172433
+skinparam UsecaseBackgroundColor #F4FAFC
+skinparam RectangleBorderColor #8CA4B2
+skinparam RectangleFontColor #172433
+skinparam RectangleBackgroundColor #FFFFFF
+skinparam PackageBorderColor #B2C2CB
+skinparam PackageFontColor #244C66
+skinparam PackageBackgroundColor #F8FBFC
+skinparam LegendBorderColor #B2C2CB
+skinparam LegendBackgroundColor #FFFFFF
+skinparam nodesep 34
+skinparam ranksep 42
+
+actor Aluno
+
+rectangle "Jornada do Conhecimento" {
+  package "Acesso e preferências" {
+    usecase "Selecionar perfil" as A_Perfil
+    usecase "Ajustar áudio e\nacessibilidade" as A_Configuracoes
+    usecase "Entrar na sala" as A_EntrarSala
+    usecase "Informar nome e\ncódigo da sala" as A_Identificar
+    usecase "Escolher personagem" as A_Personagem
+    usecase "Validar sala e\ncarregar perguntas" as A_Preparar
+    usecase "Criar ou recuperar\njogador" as A_CriarJogador
+  }
+
+  package "Partida" {
+    usecase "Jogar partida" as A_Jogar
+    usecase "Rolar dado" as A_Rolar
+    usecase "Responder pergunta\ncom tempo limite" as A_Responder
+    usecase "Registrar progresso\ne pontuação" as A_RegistrarProgresso
+    usecase "Avançar no tabuleiro" as A_Avancar
+    usecase "Tratar tempo esgotado" as A_Timeout
+    usecase "Resolver casa-desafio" as A_Desafio
+    usecase "Visualizar outros\nparticipantes" as A_Participantes
+  }
+
+  package "Encerramento" {
+    usecase "Concluir partida" as A_Concluir
+    usecase "Registrar finalização" as A_Finalizar
+    usecase "Visualizar resultado final" as A_Resultado
+    usecase "Visualizar ranking final" as A_Ranking
+    usecase "Jogar novamente" as A_Rejogar
+  }
+}
+
+Aluno -right- A_Perfil
+Aluno -right- A_Configuracoes
+Aluno -right- A_EntrarSala
+Aluno -right- A_Jogar
+Aluno -right- A_Resultado
+Aluno -right- A_Rejogar
+
+A_EntrarSala ..> A_Identificar : <<include>>
+A_EntrarSala ..> A_Personagem : <<include>>
+A_EntrarSala ..> A_Preparar : <<include>>
+A_Preparar ..> A_CriarJogador : <<include>>
+
+A_Jogar ..> A_Rolar : <<include>>
+A_Jogar ..> A_Responder : <<include>>
+A_Jogar ..> A_Participantes : <<include>>
+A_Responder ..> A_RegistrarProgresso : <<include>>
+A_Avancar ..> A_Responder : <<extend>>\n[resposta correta]
+A_Timeout ..> A_Responder : <<extend>>\n[contador zerado]
+A_Desafio ..> A_Jogar : <<extend>>\n[casas 5, 10, 15, 20 ou 25]
+A_Concluir ..> A_Jogar : <<extend>>\n[casa 28]
+A_Concluir ..> A_Finalizar : <<include>>
+A_Concluir ..> A_Resultado : <<include>>
+A_Resultado ..> A_Ranking : <<include>>
+A_Rejogar ..> A_Resultado : <<extend>>
+
+legend bottom
+  |= Relação |= Leitura |
+  | associação simples | participação do ator |
+  | <<include>> | comportamento obrigatório do caso base |
+  | <<extend>> | comportamento condicionado ao texto entre colchetes |
+endlegend
+
+@enduml

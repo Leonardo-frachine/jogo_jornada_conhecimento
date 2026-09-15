@@ -1,0 +1,139 @@
+@startuml Diagrama_de_Classes_UML
+
+title Jornada do Conhecimento\nDiagrama de Classes UML - Modelo Persistido da API
+caption Atualizado em 15/09/2026 - entidades TypeORM implementadas em jornada-api/src
+
+left to right direction
+
+skinparam backgroundColor #FBFCFE
+skinparam shadowing false
+skinparam roundcorner 10
+skinparam defaultFontName Arial
+skinparam defaultFontSize 13
+skinparam ArrowColor #52677A
+skinparam ArrowThickness 1.2
+skinparam ClassBorderColor #2D6478
+skinparam ClassFontColor #172433
+skinparam ClassBackgroundColor #FFFFFF
+skinparam ClassHeaderBackgroundColor #E9F3F6
+skinparam ClassAttributeFontColor #253746
+skinparam classAttributeIconSize 0
+skinparam EnumBorderColor #B87716
+skinparam EnumFontColor #432D0B
+skinparam EnumBackgroundColor #FFF4D6
+skinparam PackageBorderColor #9DB1BC
+skinparam PackageFontColor #244C66
+skinparam PackageBackgroundColor #F7FAFC
+skinparam NoteBorderColor #D2A44C
+skinparam NoteBackgroundColor #FFF9E8
+skinparam NoteFontColor #3A3428
+skinparam LegendBorderColor #B2C2CB
+skinparam LegendBackgroundColor #FFFFFF
+skinparam nodesep 55
+skinparam ranksep 58
+
+hide empty methods
+hide circle
+
+package "Domínio persistido (NestJS + TypeORM)" {
+  class Professor <<entity>> {
+    - id: number
+    - nome: string
+    - email: string {unique}
+    - senhaHash: string
+    - criadoEm: Date
+    - atualizadoEm: Date
+  }
+
+  class Sala <<entity>> {
+    - id: number
+    - professorId: number
+    - nome: string
+    - codigo: string {unique}
+    - ativa: boolean = true
+    - criadoEm: Date
+  }
+
+  class Jogador <<entity>> {
+    - id: number
+    - nome: string
+    - nomeNormalizado: string [0..1]
+    - pontuacao: number = 0
+    - faseAtual: number = 1
+    - salaId: number [0..1]
+    - casaAtual: number = 1
+    - statusPartida: PartidaStatus
+    - finalizadoEm: Date [0..1]
+    - criadoEm: Date
+    -- restrição --
+    {unique} salaId + nomeNormalizado
+  }
+
+  class Pergunta <<entity>> {
+    - id: number
+    - salaId: number [0..1]
+    - titulo: string [0..1]
+    - enunciado: string
+    - alternativaA: string
+    - alternativaB: string
+    - alternativaC: string
+    - alternativaD: string
+    - respostaCorreta: string {A, B, C ou D}
+    - materia: string [0..1]
+    - dificuldade: string [0..1]
+    - pontuacao: number = 100
+    - tempoLimite: number [0..1]
+    - ativa: boolean = true
+    - criadoEm: Date
+  }
+
+  class Progresso <<entity>> {
+    - id: number
+    - jogadorId: number
+    - perguntaId: number
+    - salaId: number [0..1]
+    - acertou: boolean
+    - respostaEscolhida: string [0..1]
+    - respostaEscolhidaTexto: string [0..1]
+    - respostaCorretaSnapshot: string [0..1]
+    - respostaCorretaTextoSnapshot: string [0..1]
+    - perguntaTituloSnapshot: string [0..1]
+    - perguntaEnunciadoSnapshot: string [0..1]
+    - materiaSnapshot: string [0..1]
+    - dificuldadeSnapshot: string [0..1]
+    - pontuacaoBaseSnapshot: number [0..1]
+    - fase: number
+    - casaAtual: number = 1
+    - statusPartida: PartidaStatus
+    - pontuacaoGanha: number = 0
+    - criadoEm: Date
+  }
+
+  enum PartidaStatus <<enumeration>> {
+    iniciado
+    jogando
+    finalizado
+  }
+}
+
+Professor "1" *-- "0..*" Sala : possui
+Sala "0..1" -- "0..*" Jogador : vincula
+Sala "0..1" *-- "0..*" Pergunta : contém
+Sala "0..1" o-- "0..*" Progresso : contextualiza
+Jogador "1" -- "0..*" Progresso : registra
+Pergunta "1" -- "0..*" Progresso : é respondida em
+
+Jogador --> PartidaStatus : statusPartida
+Progresso --> PartidaStatus : statusPartida
+
+legend bottom
+  **Decisões do modelo atual**
+  * <b>Jogador</b> concentra o estado corrente da partida: fase, casa, pontuação, status e término.
+  * Cada <b>Progresso</b> é uma resposta histórica; seus snapshots preservam o conteúdo original.
+  * Partida, Tabuleiro, Casa e Resultados não são entidades persistidas.
+  * Dashboard, ranking e relatórios são projeções calculadas pelos serviços.
+  * A multiplicidade <b>0..1</b> em sala mantém compatibilidade com dados legados;
+    os fluxos atuais exigem sala para jogadores, perguntas e respostas novas.
+endlegend
+
+@enduml

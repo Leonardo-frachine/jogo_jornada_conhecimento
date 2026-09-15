@@ -1,0 +1,651 @@
+@startuml Atividades_Professor_01_Acesso
+!include tema-atividades.iuml
+
+title Jornada do Conhecimento\nProfessor 1/6 - Acesso e inicialização do painel
+caption Fluxo AS-IS revisado em 15/09/2026 - cliente Godot e API NestJS
+
+|#FFF4D6|Professor|
+start
+:Selecionar o perfil Professor;
+
+repeat
+  :Escolher login ou cadastro;
+  :Preencher os campos do modo escolhido;
+  |#EAF5F8|Cliente Godot|
+  :Validar nome no cadastro,\ne-mail e senha;
+  if (Campos válidos?) then (sim)
+    :Bloquear o formulário\ne enviar a solicitação;
+    |#EDF4FA|API NestJS / TypeORM|
+    if (Novo cadastro?) then (sim)
+      :Normalizar e-mail\ne verificar unicidade;
+      :Gerar salt e hash da senha;\nsalvar o professor;
+    else (login)
+      :Localizar o professor\ne conferir o hash;
+    endif
+    :Retornar dados públicos\nou mensagem de erro;
+    |Cliente Godot|
+    if (Resposta de acesso válida?) then (sim)
+      #EAF7EF:Criar ProfessorSession\nem memória;
+    else (não)
+      #FDECEC:Reabilitar o formulário\ne exibir o erro;
+    endif
+  else (não)
+    #FDECEC:Exibir o erro e focar\no campo inválido;
+  endif
+  |Professor|
+repeat while (Sessão local criada?) is (não) not (sim)
+
+|Cliente Godot|
+:Abrir o painel;
+:Validar professor_id\nda sessão local;
+if (Sessão local válida?) then (sim)
+  :Montar a interface e iniciar\no temporizador do dashboard;
+else (não)
+  #FDECEC:Voltar à tela de acesso;
+  stop
+endif
+
+:Solicitar as salas do professor;
+|API NestJS / TypeORM|
+:Verificar se o professor existe\ne listar suas salas;
+|Cliente Godot|
+if (Consulta concluída?) then (sim)
+  if (Há salas cadastradas?) then (sim)
+    :Preservar a sala anterior ou\nselecionar a primeira automaticamente;
+    :Carregar dashboard, respostas\ne banco da sala atual;
+  else (não)
+    :Manter o painel sem sala ativa\ne orientar a criação;
+  endif
+else (não)
+  #FDECEC:Limpar o contexto de sala\ne exibir o erro;
+endif
+
+note right
+  A sessão do professor existe apenas na memória
+  do cliente. A implementação atual não emite
+  token ou JWT após login/cadastro.
+end note
+
+#EAF7EF:Disponibilizar as funções do painel;
+stop
+
+@enduml
+
+@startuml Atividades_Professor_02_Salas
+!include tema-atividades.iuml
+
+title Jornada do Conhecimento\nProfessor 2/6 - Gerenciamento de salas
+caption Fluxo AS-IS revisado em 15/09/2026 - operações alternativas separadas
+
+|#FFF4D6|Professor|
+start
+:Abrir Gerenciar Sala;
+
+repeat
+  :Escolher uma operação;
+
+  if (Criar sala?) then (sim)
+    :Informar um nome opcional\ne solicitar a criação;
+    |#EAF5F8|Cliente Godot|
+    :Enviar professor_id e nome;
+    |#EDF4FA|API NestJS / TypeORM|
+    :Verificar o professor e gerar\num código único de seis caracteres;
+    :Usar o nome informado ou\n"Sala <código>" e persistir;
+    |Cliente Godot|
+    if (Criação confirmada?) then (sim)
+      #EAF7EF:Definir a nova sala como atual\ne recarregar a lista;
+    else (não)
+      #FDECEC:Exibir o erro e manter\no formulário disponível;
+    endif
+
+  elseif (Selecionar sala?) then (sim)
+    |Professor|
+    :Escolher uma sala da lista;
+    |Cliente Godot|
+    :Atualizar somente o contexto local;
+    :Recarregar dashboard, respostas\ne banco da sala selecionada;
+
+  elseif (Atualizar lista?) then (sim)
+    |Cliente Godot|
+    :Solicitar novamente as salas;
+    |API NestJS / TypeORM|
+    :Listar as salas do professor;
+    |Cliente Godot|
+    if (Consulta concluída?) then (sim)
+      :Preservar a seleção existente ou\nselecionar a primeira sala;
+    else (não)
+      #FDECEC:Limpar lista, sala atual\ne dados visíveis;
+    endif
+
+  else (excluir)
+    |Professor|
+    :Solicitar a exclusão da sala atual;
+    |Cliente Godot|
+    :Exibir confirmação destrutiva;
+    if (Exclusão confirmada?) then (sim)
+      :Enviar o ID da sala;
+      |API NestJS / TypeORM|
+      :Verificar a existência da sala;
+      :Excluir progressos e a sala;
+      note right
+        Efeito atual do banco:
+        * perguntas são excluídas por cascata;
+        * jogadores são mantidos sem sala.
+      end note
+      |Cliente Godot|
+      if (Exclusão concluída?) then (sim)
+        #EAF7EF:Limpar a sala atual e\nrecarregar as salas restantes;
+      else (não)
+        #FDECEC:Preservar o contexto\ne exibir o erro;
+      endif
+    else (não)
+      :Manter a sala sem alterações;
+    endif
+  endif
+
+  |Professor|
+repeat while (Gerenciar outra sala?) is (sim) not (não)
+stop
+
+@enduml
+
+@startuml Atividades_Professor_03_Banco
+!include tema-atividades.iuml
+
+title Jornada do Conhecimento\nProfessor 3/6 - Banco de perguntas
+caption Fluxo AS-IS revisado em 15/09/2026 - edição e exclusão lógica
+
+|#FFF4D6|Professor|
+start
+:Abrir Banco de Perguntas;
+|#EAF5F8|Cliente Godot|
+
+if (Existe sala atual?) then (sim)
+  :Solicitar perguntas da sala;
+  |#EDF4FA|API NestJS / TypeORM|
+  :Validar a sala e retornar\nsomente perguntas ativas;
+  |Cliente Godot|
+  if (Banco carregado?) then (sim)
+    :Montar cards e filtros locais;
+  else (não)
+    #FDECEC:Limpar o snapshot do banco\ne exibir o erro;
+    stop
+  endif
+else (não)
+  :Exibir orientação para\nselecionar uma sala;
+  stop
+endif
+
+repeat
+  |Professor|
+  :Escolher uma operação;
+
+  if (Buscar ou filtrar?) then (sim)
+    :Informar texto, matéria\ne/ou dificuldade;
+    |Cliente Godot|
+    :Filtrar localmente os cards carregados;
+
+  elseif (Editar pergunta?) then (sim)
+    |Professor|
+    :Alterar os campos e salvar;
+    |Cliente Godot|
+    :Validar enunciado, alternativas,\ngabarito, pontos e tempo;
+    |API NestJS / TypeORM|
+    :Confirmar ID + sala + estado ativo;\natualizar a pergunta;
+    |Cliente Godot|
+    if (Atualização concluída?) then (sim)
+      #EAF7EF:Recarregar o banco da sala;
+    else (não)
+      #FDECEC:Manter a edição visível\ne exibir o erro;
+    endif
+
+  else (eliminar)
+    |Professor|
+    :Escolher uma pergunta ou\ntodas as perguntas ativas;
+    |Cliente Godot|
+    :Solicitar confirmação explícita;
+    if (Eliminação confirmada?) then (sim)
+      |API NestJS / TypeORM|
+      :Definir ativa = false\npara uma ou todas da sala;
+      |Cliente Godot|
+      if (Eliminação concluída?) then (sim)
+        #EAF7EF:Recarregar banco e dashboard;
+      else (não)
+        #FDECEC:Preservar o snapshot\ne exibir o erro;
+      endif
+    else (não)
+      :Manter o banco sem alterações;
+    endif
+  endif
+
+  |Professor|
+repeat while (Realizar outra operação?) is (sim) not (não)
+
+stop
+
+legend bottom
+  <b>Regra de exclusão:</b> perguntas são desativadas logicamente;
+  o histórico de respostas permanece disponível.
+endlegend
+
+@enduml
+
+@startuml Atividades_Professor_04_Importacao
+!include tema-atividades.iuml
+
+title Jornada do Conhecimento\nProfessor 4/6 - Modelo e importação de perguntas
+caption Fluxo AS-IS revisado em 15/09/2026 - CSV e XLSX
+
+|#FFF4D6|Professor|
+start
+:Abrir Importar Perguntas;
+|#EAF5F8|Cliente Godot|
+if (Há sala disponível?) then (sim)
+  :Exibir o seletor de sala de destino;
+else (não)
+  :Desabilitar a importação\ne orientar a criação de uma sala;
+  stop
+endif
+
+|Professor|
+if (Baixar o modelo CSV?) then (sim)
+  :Escolher onde salvar o modelo;
+  |Cliente Godot|
+  if (Destino confirmado?) then (sim)
+    :Gerar cabeçalho + exemplo\ne gravar o arquivo local;
+    if (Gravação concluída?) then (sim)
+      #EAF7EF:Informar sucesso;
+    else (não)
+      #FDECEC:Informar falha de gravação;
+    endif
+  else (cancelar)
+    :Fechar o seletor sem alterações;
+  endif
+else (não)
+  :Selecionar a sala e um arquivo\nCSV ou XLSX;
+  |Cliente Godot|
+  :Fixar a sala de destino;
+  :Validar acesso/extensão, ler o arquivo\ne enviar o conteúdo em base64;
+  |#EDF4FA|API NestJS / TypeORM|
+  :Identificar o formato, decodificar\ne interpretar a planilha;
+  :Validar sala, cabeçalho e\ntodas as linhas antes de salvar;
+  if (Lote inteiro válido?) then (sim)
+    :Persistir todas as perguntas do lote;
+    |Cliente Godot|
+    #EAF7EF:Exibir a quantidade importada;
+    if (Destino ainda é a sala atual?) then (sim)
+      :Recarregar o banco visível;
+    else (não)
+      :Manter o banco da sala atual;
+    endif
+  else (não)
+    |Cliente Godot|
+    #FDECEC:Exibir o erro e preservar\no banco atualmente carregado;
+  endif
+endif
+stop
+
+@enduml
+
+@startuml Atividades_Professor_05_IA
+!include tema-atividades.iuml
+
+title Jornada do Conhecimento\nProfessor 5/6 - Geração e auditoria por IA
+caption Fluxo AS-IS revisado em 15/09/2026 - Gemini gera; professor decide o que salvar
+
+|#FFF4D6|Professor|
+start
+:Selecionar a sala e os\nparâmetros de geração;
+|#EAF5F8|Cliente Godot|
+:Validar os parâmetros;
+if (Parâmetros válidos?) then (sim)
+  :Solicitar sugestões;
+else (não)
+  #FDECEC:Exibir o erro e focar\no campo correspondente;
+  stop
+endif
+
+|#EDF4FA|API NestJS / TypeORM|
+:Validar sala, recurso habilitado\ne chave do provedor;
+if (Recurso disponível?) then (sim)
+  |#F2ECFA|Google Gemini|
+  :Gerar perguntas em JSON estruturado;
+  |API NestJS / TypeORM|
+  :Validar JSON, quantidade, campos,\ngabaritos e alternativas distintas;
+  if (Geração aceita pela API?) then (sim)
+    :Distribuir as posições corretas\ne devolver as sugestões;
+    |Cliente Godot|
+    :Substituir a prévia local e\nfixar sua sala de destino;
+  else (não)
+    |Cliente Godot|
+    #FDECEC:Exibir a falha e preservar\na prévia anterior, se houver;
+    stop
+  endif
+else (não)
+  |Cliente Godot|
+  #FDECEC:Exibir a falha e preservar\na prévia anterior, se houver;
+  stop
+endif
+
+repeat
+  |Professor|
+  :Revisar e editar sugestões\nindividualmente ou em lote;
+  :Marcar como pendente,\naprovada ou rejeitada;
+repeat while (Revisar outra sugestão?) is (sim) not (não)
+
+if (Salvar aprovadas?) then (sim)
+  |Cliente Godot|
+  :Selecionar apenas as aprovadas\ne validar o lote inteiro;
+  if (Há aprovada válida?) then (sim)
+    :Enviar o lote para a sala\nfixada na geração;
+    |API NestJS / TypeORM|
+    :Validar a sala e persistir\ntodas as aprovadas;
+    |Cliente Godot|
+    if (Salvamento concluído?) then (sim)
+      #EAF7EF:Limpar toda a prévia;
+      if (Destino é a sala atual?) then (sim)
+        :Recarregar o banco visível;
+      else (não)
+        :Manter o banco da sala atual;
+      endif
+    else (não)
+      #FDECEC:Preservar a prévia\ne exibir o erro;
+    endif
+  else (não)
+    #FDECEC:Manter a prévia para correção\nou nova decisão de auditoria;
+  endif
+else (não)
+  :Manter a prévia local;
+endif
+stop
+
+@enduml
+
+@startuml Atividades_Professor_06_Acompanhamento
+!include tema-atividades.iuml
+
+title Jornada do Conhecimento\nProfessor 6/6 - Acompanhamento, relatórios e saída
+caption Fluxo AS-IS revisado em 15/09/2026 - atualização automática em todo o painel
+
+|#EAF5F8|Cliente Godot|
+start
+:Manter um temporizador em segundo plano;
+note right
+  O temporizador existe em todo o painel,
+  independentemente da página aberta.
+end note
+
+:A cada 5 segundos, verificar\nas guardas da atualização;
+if (Há sala e nenhuma consulta concorrente?) then (sim)
+  :Solicitar dashboard;
+  |#EDF4FA|API NestJS / TypeORM|
+  :Calcular indicadores, desempenhos\ne ranking da sala;
+  |Cliente Godot|
+  :Solicitar respostas e alunos;
+  |API NestJS / TypeORM|
+  :Retornar histórico e estado\natual dos jogadores;
+  |Cliente Godot|
+  if (Dashboard disponível?) then (sim)
+    if (Respostas disponíveis?) then (sim)
+      :Atualizar métricas, atividades,\nalunos e ranking;
+    else (não)
+      :Atualizar os agregados e preservar\no último detalhe carregado;
+    endif
+  else (não)
+    :Ignorar a atualização automática falha;
+  endif
+else (não)
+  :Pular este ciclo do temporizador;
+endif
+note right
+  Este ciclo continua enquanto o painel está aberto
+  e ocorre em paralelo às escolhas do professor.
+end note
+
+|#FFF4D6|Professor|
+if (Há sala atual?) then (sim)
+  :Analisar Dashboard ou Acompanhamento;
+  if (Exportar relatório?) then (sim)
+    :Escolher PDF individual, PDF da turma\nou CSV de respostas;
+    |Cliente Godot|
+    :Enviar sala, professor e,\nno individual, jogador;
+    |API NestJS / TypeORM|
+    :Validar propriedade da sala\ne vínculo do jogador quando aplicável;
+    :Gerar o arquivo solicitado;
+    |Cliente Godot|
+    if (Arquivo válido recebido?) then (sim)
+      :Abrir o seletor de destino;
+      if (Destino confirmado e gravável?) then (sim)
+        #EAF7EF:Salvar o relatório localmente;
+      else (não)
+        :Cancelar ou informar\nfalha de gravação;
+      endif
+    else (não)
+      #FDECEC:Exibir o erro de exportação;
+    endif
+  endif
+else (não)
+  |Cliente Godot|
+  :Exibir estado sem sala e\ndesabilitar exportações;
+endif
+
+|Professor|
+:Encerrar a sessão;
+|Cliente Godot|
+:Parar o temporizador, limpar\nProfessorSession e voltar ao acesso;
+stop
+
+@enduml
+
+@startuml Atividades_Aluno_01_Preparacao
+!include tema-atividades.iuml
+
+title Jornada do Conhecimento\nAluno 1/3 - Entrada e preparação da sessão
+caption Fluxo AS-IS revisado em 15/09/2026 - sala, jogador e perguntas são obrigatórios
+
+|#FFF4D6|Aluno|
+start
+:Selecionar o perfil Aluno;
+
+repeat
+  :Informar nome e código da sala;
+  :Escolher um personagem ou\nmanter o primeiro como padrão;
+  |#EAF5F8|Cliente Godot|
+  :Remover espaços e validar\nnome e código obrigatórios;
+  if (Campos locais válidos?) then (sim)
+    :Iniciar o GameState local\ne abrir a tela de carregamento;
+    :Solicitar a sala pelo código;
+    |#EDF4FA|API NestJS / TypeORM|
+    :Normalizar o código\ne buscar a sala;
+    |Cliente Godot|
+    if (Sala encontrada?) then (sim)
+      :Solicitar criação/recuperação\ndo jogador na sala;
+      |API NestJS / TypeORM|
+      :Normalizar o nome por sala;
+      if (Jogador já existe?) then (sim)
+        :Reutilizar o jogador e reiniciar\ncasa, fase, status e finalização;
+        note right
+          A pontuação remota não é zerada.
+        end note
+      else (não)
+        :Criar jogador na casa 1\ncom pontuação zero;
+      endif
+      |Cliente Godot|
+      if (Jogador retornado com ID?) then (sim)
+        :Solicitar perguntas da sala;
+        |API NestJS / TypeORM|
+        :Retornar somente perguntas ativas;
+        |Cliente Godot|
+        :Normalizar as perguntas e descartar\nalternativas/gabaritos não jogáveis;
+        if (Restou alguma pergunta?) then (sim)
+          #EAF7EF:Marcar a sessão como preparada;
+        else (não)
+          #FDECEC:Registrar falha de preparação;
+        endif
+      else (não)
+        #FDECEC:Registrar falha de preparação;
+      endif
+    else (não)
+      #FDECEC:Registrar falha de preparação;
+    endif
+  else (não)
+    #FDECEC:Exibir alerta e focar\no campo inválido;
+  endif
+
+  |Cliente Godot|
+  if (Preparação concluída?) then (sim)
+    :Completar o carregamento;
+  else (não)
+    :Exibir a falha e voltar\nà entrada do aluno;
+    |Aluno|
+    :Corrigir ou reinformar os dados;
+  endif
+repeat while (Preparação concluída?) is (não) not (sim)
+
+|Cliente Godot|
+#EAF7EF:Abrir o tabuleiro na casa 1;
+stop
+
+@enduml
+
+@startuml Atividades_Aluno_02_Turno
+!include tema-atividades.iuml
+
+title Jornada do Conhecimento\nAluno 2/3 - Ciclo de um turno da partida
+caption Fluxo AS-IS revisado em 15/09/2026 - o ciclo se repete até alcançar a casa 28
+
+|#EAF5F8|Cliente Godot|
+start
+:Exibir o tabuleiro e iniciar a consulta\ndos participantes da sala;
+note right
+  A consulta ocorre imediatamente e depois
+  a cada 3 segundos durante a partida.
+end note
+
+repeat
+  |#FFF4D6|Aluno|
+  :Rolar o dado;
+  |Cliente Godot|
+  :Sortear valor ponderado:\n1 = 50%; cada valor de 2 a 6 = 10%;
+  :Calcular destino =\nmínimo(casa + dado, 28);
+
+  if (Destino é 5, 10, 15, 20 ou 25?) then (sim)
+    :Mover o peão ao destino\nantes da pergunta;
+    :Priorizar pergunta do nível seguinte,\nlimitado ao nível 4;
+  else (não)
+    :Manter o peão na origem;
+    :Priorizar pergunta do nível\nda casa de destino;
+  endif
+
+  note right
+    Sem pergunta não usada na dificuldade desejada,
+    o cliente aceita outra dificuldade ainda não usada.
+    Quando o banco se esgota, permite reutilizar perguntas.
+  end note
+
+  :Embaralhar alternativas;
+  :Exibir pergunta e iniciar o contador\n(configurado se > 0; senão, 30 s);
+  |Aluno|
+  :Responder ou deixar\no tempo esgotar;
+  |Cliente Godot|
+  :Bloquear alternativas e\navaliar a resposta localmente;
+
+  if (Resposta local correta?) then (sim)
+    :Somar pontos integrais, acerto e XP;
+  else (erro ou timeout)
+    :Descontar metade dos pontos\ne registrar erro;
+    if (Casa-desafio?) then (sim)
+      :Retornar exatamente o valor do dado;
+    else (não)
+      :Permanecer na casa de origem;
+    endif
+  endif
+
+  |#EDF4FA|API NestJS / TypeORM|
+  :Validar jogador, sala e pergunta ativa;
+  :Conferir a alternativa com o gabarito\nquando uma letra A-D foi enviada;
+  :Em transação, registrar Progresso,\natualizar Jogador e somar a pontuação;
+  |Cliente Godot|
+  if (Sincronização confirmada?) then (sim)
+    :Adotar a pontuação total da API;
+  else (não)
+    #FDECEC:Restaurar somente a última pontuação\nconfirmada e registrar um aviso;
+  endif
+
+  if (Acerto em casa comum?) then (sim)
+    :Mover o peão até o destino;\natualizar casa e fase a cada passo;
+  else (não)
+    :Manter a posição definida\npela regra aplicada;
+  endif
+  :Atualizar HUD e participantes;
+
+repeat while (Casa atual menor que 28?) is (sim) not (não)
+
+#EAF7EF:Encaminhar para o encerramento;
+stop
+
+@enduml
+
+@startuml Atividades_Aluno_03_Encerramento
+!include tema-atividades.iuml
+
+title Jornada do Conhecimento\nAluno 3/3 - Conclusão, ranking e nova tentativa
+caption Fluxo AS-IS revisado em 15/09/2026 - resultado local não depende da finalização remota
+
+|#EAF5F8|Cliente Godot|
+start
+:Detectar a chegada à casa 28\ne marcar vitória local;
+|#EDF4FA|API NestJS / TypeORM|
+:Marcar jogador como finalizado,\npreservar maior casa e registrar a data;
+|Cliente Godot|
+if (Finalização confirmada?) then (sim)
+  :Prosseguir para o resultado;
+else (não)
+  #FDECEC:Registrar aviso e abrir\no resultado mesmo assim;
+  note right
+    Sem status remoto "finalizado", o aluno
+    pode não aparecer no ranking desta sala.
+  end note
+endif
+
+:Exibir pontuação total, nível e\nmétricas locais da tentativa;
+:Solicitar o ranking da sala;
+|API NestJS / TypeORM|
+:Classificar somente\njogadores finalizados por pontos\ne data de conclusão;
+|Cliente Godot|
+if (Ranking disponível?) then (sim)
+  :Exibir a classificação final;
+else (não)
+  :Exibir estado vazio ou\naviso de indisponibilidade;
+endif
+
+|#FFF4D6|Aluno|
+:Escolher jogar novamente\nou voltar ao menu;
+if (Jogar novamente?) then (sim)
+  |Cliente Godot|
+  :Preservar nome, sala e personagem;\nzerar métricas locais da tentativa;
+  :Voltar à preparação da sessão;
+  |API NestJS / TypeORM|
+  :Na preparação, reutilizar o jogador\ne reiniciar casa, fase e status;
+  note right
+    A pontuação e o histórico remotos continuam
+    acumulados. Durante a nova partida, o status
+    deixa de ser finalizado até nova conclusão.
+  end note
+  stop
+else (não)
+  |Cliente Godot|
+  :Zerar apenas as métricas da tentativa\ne voltar à seleção de perfil;
+  note right
+    Identidade, sala e parte do contexto remoto
+    permanecem no GameState até outra sessão.
+  end note
+  stop
+endif
+
+legend bottom
+  <b>Saída antecipada atual:</b> voltar pela tela de configurações não finaliza
+  a partida remota nem limpa integralmente o GameState.
+endlegend
+
+@enduml
