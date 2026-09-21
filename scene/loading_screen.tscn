@@ -1,68 +1,66 @@
 [gd_scene format=3 uid="uid://jjuset0c7n1b"]
 
-[ext_resource type="Script" uid="uid://bfwsvfskpw02o" path="res://scripts/loading_screen.gd" id="1"]
-[ext_resource type="Texture2D" uid="uid://3ljo201dpbbx" path="res://imagens/fundo_tabuleiro/fundo_embacado.png" id="2"]
-[ext_resource type="Texture2D" uid="uid://bv2xmb27g64al" path="res://imagens/logo_jogo/logo_jogo.png" id="3"]
-[ext_resource type="PackedScene" path="res://ui/settings/SettingsButton.tscn" id="5"]
+[ext_resource type="Script" path="res://scripts/loading_screen.gd" id="1"]
+[ext_resource type="Texture2D" path="res://imagens/fundo_tabuleiro/fundo_embacado.png" id="2"]
+[ext_resource type="Texture2D" path="res://imagens/logo_jogo/logo_jogo.png" id="3"]
+[ext_resource type="PackedScene" path="res://ui/settings/SettingsButton.tscn" id="4"]
+[ext_resource type="Texture2D" path="res://imagens/personagens_animais/cachorro.png" id="5"]
 
-[sub_resource type="StyleBoxFlat" id="1"]
-bg_color = Color(1, 0.64705884, 0, 0.97)
-border_width_left = 4
-border_width_top = 4
-border_width_right = 4
-border_width_bottom = 4
-border_color = Color(0, 0, 0, 1)
-corner_radius_top_left = 30
-corner_radius_top_right = 30
-corner_radius_bottom_right = 30
-corner_radius_bottom_left = 30
-shadow_color = Color(0, 0, 0, 0.3)
-shadow_size = 16
+[sub_resource type="StyleBoxFlat" id="CardStyle"]
+bg_color = Color(0.996, 0.984, 0.961, 1)
+corner_radius_top_left = 24
+corner_radius_top_right = 24
+corner_radius_bottom_right = 24
+corner_radius_bottom_left = 24
+shadow_color = Color(0.025, 0.04, 0.07, 0.3)
+shadow_size = 28
+shadow_offset = Vector2(0, 12)
 
-[sub_resource type="StyleBoxFlat" id="4"]
-bg_color = Color(0.15, 0.18, 0.28, 0.85)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.980392, 0.835294, 0.356863, 0.5)
-corner_radius_top_left = 12
-corner_radius_top_right = 12
-corner_radius_bottom_right = 12
-corner_radius_bottom_left = 12
-
-[sub_resource type="StyleBoxFlat" id="5"]
-bg_color = Color(0.4, 0.7, 1, 0.8)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
-
-[sub_resource type="StyleBoxFlat" id="3"]
-bg_color = Color(0.2, 0.25, 0.4, 0.9)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.980392, 0.835294, 0.356863, 0.7)
-corner_radius_top_left = 16
-corner_radius_top_right = 16
-corner_radius_bottom_right = 16
-corner_radius_bottom_left = 16
-
-[sub_resource type="StyleBoxFlat" id="2"]
-bg_color = Color(0.160784, 0.211765, 0.333333, 0.95)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.980392, 0.835294, 0.356863, 0.85)
+[sub_resource type="StyleBoxFlat" id="HeroStyle"]
+bg_color = Color(0.102, 0.157, 0.235, 1)
 corner_radius_top_left = 20
 corner_radius_top_right = 20
 corner_radius_bottom_right = 20
 corner_radius_bottom_left = 20
 
-[node name="LoadingScreen" type="Control" unique_id=1412677204]
+[sub_resource type="StyleBoxFlat" id="RoomStyle"]
+bg_color = Color(0.953, 0.925, 0.863, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+content_margin_left = 12.0
+content_margin_right = 12.0
+content_margin_top = 7.0
+content_margin_bottom = 7.0
+
+[sub_resource type="StyleBoxFlat" id="TrackStyle"]
+bg_color = Color(0.9, 0.89, 0.85, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="FillStyle"]
+bg_color = Color(0.929, 0.741, 0.322, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="Gradient" id="GlowGradient"]
+offsets = PackedFloat32Array(0, 0.65, 1)
+colors = PackedColorArray(0.94, 0.71, 0.28, 0.2, 0.94, 0.71, 0.28, 0.04, 0.94, 0.71, 0.28, 0)
+
+[sub_resource type="GradientTexture2D" id="GlowTexture"]
+gradient = SubResource("GlowGradient")
+width = 256
+height = 256
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[node name="LoadingScreen" type="Control"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -71,7 +69,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1")
 
-[node name="Background" type="TextureRect" parent="." unique_id=1150436727]
+[node name="Background" type="TextureRect" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -80,187 +78,259 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 texture = ExtResource("2")
+expand_mode = 1
 stretch_mode = 6
 
-[node name="PainelCentral" type="Panel" parent="." unique_id=1105695108]
-custom_minimum_size = Vector2(550, 480)
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -275.0
-offset_top = -240.0
-offset_right = 275.0
-offset_bottom = 240.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_styles/panel = SubResource("1")
-
-[node name="MarginContainer" type="MarginContainer" parent="PainelCentral" unique_id=498970778]
+[node name="Backdrop" type="ColorRect" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 30
+mouse_filter = 2
+color = Color(0.06, 0.1, 0.17, 0.78)
+
+[node name="SafeArea" type="MarginContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 40
+theme_override_constants/margin_top = 32
+theme_override_constants/margin_right = 40
+theme_override_constants/margin_bottom = 32
+
+[node name="Scroll" type="ScrollContainer" parent="SafeArea"]
+unique_name_in_owner = true
+layout_mode = 2
+horizontal_scroll_mode = 0
+follow_focus = true
+
+[node name="Center" type="CenterContainer" parent="SafeArea/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Card" type="PanelContainer" parent="SafeArea/Scroll/Center"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(1100, 0)
+layout_mode = 2
+theme_override_styles/panel = SubResource("CardStyle")
+
+[node name="Frame" type="MarginContainer" parent="SafeArea/Scroll/Center/Card"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="Columns" type="BoxContainer" parent="SafeArea/Scroll/Center/Card/Frame"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="HeroPanel" type="PanelContainer" parent="SafeArea/Scroll/Center/Card/Frame/Columns"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(340, 0)
+layout_mode = 2
+theme_override_styles/panel = SubResource("HeroStyle")
+
+[node name="HeroMargin" type="MarginContainer" parent="SafeArea/Scroll/Center/Card/Frame/Columns/HeroPanel"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/margin_left = 28
 theme_override_constants/margin_top = 28
-theme_override_constants/margin_right = 30
+theme_override_constants/margin_right = 28
 theme_override_constants/margin_bottom = 28
 
-[node name="VBoxContainer" type="VBoxContainer" parent="PainelCentral/MarginContainer" unique_id=1474337575]
+[node name="HeroContent" type="BoxContainer" parent="SafeArea/Scroll/Center/Card/Frame/Columns/HeroPanel/HeroMargin"]
+unique_name_in_owner = true
 layout_mode = 2
-theme_override_constants/separation = 16
+theme_override_constants/separation = 18
+vertical = true
 
-[node name="Logo" type="TextureRect" parent="PainelCentral/MarginContainer/VBoxContainer" unique_id=1119315110]
-custom_minimum_size = Vector2(320, 100)
+[node name="Logo" type="TextureRect" parent="SafeArea/Scroll/Center/Card/Frame/Columns/HeroPanel/HeroMargin/HeroContent"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 135)
 layout_mode = 2
-size_flags_horizontal = 4
 mouse_filter = 2
 texture = ExtResource("3")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Titulo" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer" unique_id=463761491]
-custom_minimum_size = Vector2(0, 40)
+[node name="AvatarStage" type="Control" parent="SafeArea/Scroll/Center/Card/Frame/Columns/HeroPanel/HeroMargin/HeroContent"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 256)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.1, 0.1, 0.15, 1)
-theme_override_font_sizes/font_size = 28
-text = "Preparando a Jornada"
-horizontal_alignment = 1
+size_flags_vertical = 3
+mouse_filter = 2
 
-[node name="Subtitle" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer" unique_id=1680765162]
+[node name="Glow" type="TextureRect" parent="SafeArea/Scroll/Center/Card/Frame/Columns/HeroPanel/HeroMargin/HeroContent/AvatarStage"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = SubResource("GlowTexture")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Character" type="TextureRect" parent="SafeArea/Scroll/Center/Card/Frame/Columns/HeroPanel/HeroMargin/HeroContent/AvatarStage"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("5")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="HeroCaption" type="VBoxContainer" parent="SafeArea/Scroll/Center/Card/Frame/Columns/HeroPanel/HeroMargin/HeroContent"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.8, 0.8, 0.9, 1)
-theme_override_font_sizes/font_size = 14
-text = "Conectando ao backend e organizando o tabuleiro."
+size_flags_horizontal = 3
+size_flags_vertical = 4
+theme_override_constants/separation = 10
+
+[node name="HeroTitle" type="Label" parent="SafeArea/Scroll/Center/Card/Frame/Columns/HeroPanel/HeroMargin/HeroContent/HeroCaption"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.961, 0.855, 1)
+theme_override_font_sizes/font_size = 25
+text = "Aprender é
+uma aventura."
 horizontal_alignment = 1
 autowrap_mode = 3
 
-[node name="ProgressSection" type="VBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer" unique_id=1800000001]
+[node name="CharacterName" type="Label" parent="SafeArea/Scroll/Center/Card/Frame/Columns/HeroPanel/HeroMargin/HeroContent/HeroCaption"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.78, 0.82, 0.88, 1)
+theme_override_font_sizes/font_size = 15
+text = "Seu personagem: Cachorro"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="ContentMargin" type="MarginContainer" parent="SafeArea/Scroll/Center/Card/Frame/Columns"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_left = 40
+theme_override_constants/margin_top = 40
+theme_override_constants/margin_right = 40
+theme_override_constants/margin_bottom = 40
+
+[node name="Content" type="VBoxContainer" parent="SafeArea/Scroll/Center/Card/Frame/Columns/ContentMargin"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="RoomBadge" type="PanelContainer" parent="SafeArea/Scroll/Center/Card/Frame/Columns/ContentMargin/Content"]
+layout_mode = 2
+size_flags_horizontal = 0
+theme_override_styles/panel = SubResource("RoomStyle")
+
+[node name="RoomText" type="Label" parent="SafeArea/Scroll/Center/Card/Frame/Columns/ContentMargin/Content/RoomBadge"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.38, 0.31, 0.18, 1)
+theme_override_font_sizes/font_size = 13
+text = "SUA SALA"
+
+[node name="Title" type="Label" parent="SafeArea/Scroll/Center/Card/Frame/Columns/ContentMargin/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.14, 0.2, 0.29, 1)
+theme_override_font_sizes/font_size = 38
+text = "Preparando
+sua jornada"
+autowrap_mode = 3
+
+[node name="PlayerText" type="Label" parent="SafeArea/Scroll/Center/Card/Frame/Columns/ContentMargin/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.35, 0.4, 0.48, 1)
+theme_override_font_sizes/font_size = 17
+text = "A aventura já vai começar."
+text_overrun_behavior = 3
+
+[node name="ProgressSection" type="VBoxContainer" parent="SafeArea/Scroll/Center/Card/Frame/Columns/ContentMargin/Content"]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="ProgressBar" type="ProgressBar" parent="PainelCentral/MarginContainer/VBoxContainer/ProgressSection" unique_id=1800000002]
-custom_minimum_size = Vector2(0, 24)
+[node name="StatusText" type="Label" parent="SafeArea/Scroll/Center/Card/Frame/Columns/ContentMargin/Content/ProgressSection"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 46)
 layout_mode = 2
-theme_override_styles/background = SubResource("4")
-theme_override_styles/fill = SubResource("5")
+theme_override_colors/font_color = Color(0.35, 0.4, 0.48, 1)
+theme_override_font_sizes/font_size = 17
+text = "Conferindo o código da sua sala…"
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="StageCounter" type="Label" parent="SafeArea/Scroll/Center/Card/Frame/Columns/ContentMargin/Content/ProgressSection"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.35, 0.4, 0.48, 1)
+theme_override_font_sizes/font_size = 12
+text = "ETAPA 1 DE 4"
+
+[node name="ProgressBar" type="ProgressBar" parent="SafeArea/Scroll/Center/Card/Frame/Columns/ContentMargin/Content/ProgressSection"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 8)
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/background = SubResource("TrackStyle")
+theme_override_styles/fill = SubResource("FillStyle")
 show_percentage = false
 
-[node name="StepsContainer" type="HBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer/ProgressSection" unique_id=1800000003]
-layout_mode = 2
-theme_override_constants/separation = 8
-alignment = 1
-
-[node name="Step1" type="Panel" parent="PainelCentral/MarginContainer/VBoxContainer/ProgressSection/StepsContainer" unique_id=1800000004]
-custom_minimum_size = Vector2(100, 50)
-layout_mode = 2
-theme_override_styles/panel = SubResource("3")
-
-[node name="Step1Label" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer/ProgressSection/StepsContainer/Step1" unique_id=1800000005]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_colors/font_color = Color(0.9, 0.9, 1, 0.7)
-theme_override_font_sizes/font_size = 12
-text = "🔌 Conectando"
-horizontal_alignment = 1
-vertical_alignment = 1
-autowrap_mode = 3
-
-[node name="Step2" type="Panel" parent="PainelCentral/MarginContainer/VBoxContainer/ProgressSection/StepsContainer" unique_id=1800000006]
-custom_minimum_size = Vector2(100, 50)
-layout_mode = 2
-theme_override_styles/panel = SubResource("3")
-
-[node name="Step2Label" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer/ProgressSection/StepsContainer/Step2" unique_id=1800000007]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_colors/font_color = Color(0.9, 0.9, 1, 0.7)
-theme_override_font_sizes/font_size = 12
-text = "✓ Validando"
-horizontal_alignment = 1
-vertical_alignment = 1
-autowrap_mode = 3
-
-[node name="Step3" type="Panel" parent="PainelCentral/MarginContainer/VBoxContainer/ProgressSection/StepsContainer" unique_id=1800000008]
-custom_minimum_size = Vector2(100, 50)
-layout_mode = 2
-theme_override_styles/panel = SubResource("3")
-
-[node name="Step3Label" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer/ProgressSection/StepsContainer/Step3" unique_id=1800000009]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_colors/font_color = Color(0.9, 0.9, 1, 0.7)
-theme_override_font_sizes/font_size = 12
-text = "📚 Carregando"
-horizontal_alignment = 1
-vertical_alignment = 1
-autowrap_mode = 3
-
-[node name="LoadingCard" type="Panel" parent="PainelCentral/MarginContainer/VBoxContainer" unique_id=896680368]
-custom_minimum_size = Vector2(0, 80)
-layout_mode = 2
-theme_override_styles/panel = SubResource("2")
-
-[node name="LoadingCenter" type="CenterContainer" parent="PainelCentral/MarginContainer/VBoxContainer/LoadingCard" unique_id=1994653222]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="LoadingRow" type="HBoxContainer" parent="PainelCentral/MarginContainer/VBoxContainer/LoadingCard/LoadingCenter" unique_id=707224393]
+[node name="Steps" type="VBoxContainer" parent="SafeArea/Scroll/Center/Card/Frame/Columns/ContentMargin/Content"]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_constants/separation = 4
-alignment = 1
 
-[node name="LoadingText" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer/LoadingCard/LoadingCenter/LoadingRow" unique_id=1344774070]
+[node name="Divider" type="ColorRect" parent="SafeArea/Scroll/Center/Card/Frame/Columns/ContentMargin/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 1)
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 28
-text = "CARREGANDO"
+mouse_filter = 2
+color = Color(0.87, 0.86, 0.83, 1)
 
-[node name="Dot1" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer/LoadingCard/LoadingCenter/LoadingRow" unique_id=1955478391]
+[node name="HintText" type="Label" parent="SafeArea/Scroll/Center/Card/Frame/Columns/ContentMargin/Content"]
+unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 32
-text = "."
-
-[node name="Dot2" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer/LoadingCard/LoadingCenter/LoadingRow" unique_id=873283940]
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 32
-text = "."
-
-[node name="Dot3" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer/LoadingCard/LoadingCenter/LoadingRow" unique_id=1482139516]
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 32
-text = "."
-
-[node name="HintText" type="Label" parent="PainelCentral/MarginContainer/VBoxContainer" unique_id=2002335547]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.85, 0.85, 0.95, 0.9)
-theme_override_font_sizes/font_size = 13
-text = "As perguntas e o progresso da partida estao sendo preparados."
-horizontal_alignment = 1
+theme_override_colors/font_color = Color(0.35, 0.4, 0.48, 1)
+theme_override_font_sizes/font_size = 14
+text = "Dica: leia cada pergunta com atenção antes de escolher sua resposta."
 autowrap_mode = 3
 
-[node name="BotaoConfiguracao" parent="." unique_id=1756371998 instance=ExtResource("5")]
+[node name="Actions" type="BoxContainer" parent="SafeArea/Scroll/Center/Card/Frame/Columns/ContentMargin/Content"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="RetryButton" type="Button" parent="SafeArea/Scroll/Center/Card/Frame/Columns/ContentMargin/Content/Actions"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_default_cursor_shape = 2
+text = "Tentar novamente"
+
+[node name="BackButton" type="Button" parent="SafeArea/Scroll/Center/Card/Frame/Columns/ContentMargin/Content/Actions"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_default_cursor_shape = 2
+text = "Voltar à sala"
+
+[node name="BotaoConfiguracao" parent="." instance=ExtResource("4")]
 layout_mode = 1
